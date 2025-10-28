@@ -99,7 +99,6 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
     }
     case "RESIZE_PANEL": {
       const index = state.panels.findIndex((panel) => panel.id === action.id);
-      console.log({ action, index });
       if (index === -1) return state;
       // TODO: 重なりを考慮して、他の要素を動かす
       return {

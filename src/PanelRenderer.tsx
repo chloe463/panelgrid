@@ -12,7 +12,6 @@ interface PanelRendererProps {
 export function PanelRenderer(props: PanelRendererProps) {
   const { itemRenderer } = props;
   const { panels, columnCount, gap } = usePanelState();
-  console.log({ panels });
   const { setBaseSize } = usePanelContrls();
 
   const ref = useRef<HTMLDivElement | null>(null);
