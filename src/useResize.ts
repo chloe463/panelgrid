@@ -5,6 +5,7 @@ import {
   usePanelContrls,
   type PanelId,
 } from "./PanelistProvider";
+import { pixelsToGridSize, gridToPixels } from "./helpers";
 
 interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -52,10 +53,8 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             ref.current.style.height = `${initialHeight + deltaY}px`;
             ref.current.style.zIndex = "calc(infinity)";
 
-            const nextW = Math.ceil((initialWidth + deltaX) / (baseSize + gap));
-            const nextH = Math.ceil(
-              (initialHeight + deltaY) / (baseSize + gap)
-            );
+            const nextW = pixelsToGridSize(initialWidth + deltaX, baseSize, gap);
+            const nextH = pixelsToGridSize(initialHeight + deltaY, baseSize, gap);
 
             resizingPanel(id, nextW, nextH);
           },
@@ -70,11 +69,11 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             if (ref.current) {
               const panel = ref.current;
               const rect = ref.current?.getBoundingClientRect();
-              const nextW = Math.ceil(rect.width / (baseSize + gap));
-              const nextH = Math.ceil(rect.height / (baseSize + gap));
+              const nextW = pixelsToGridSize(rect.width, baseSize, gap);
+              const nextH = pixelsToGridSize(rect.height, baseSize, gap);
 
-              const width = nextW * baseSize + Math.max(0, nextW - 1) * gap;
-              const height = nextH * baseSize + Math.max(0, nextH - 1) * gap;
+              const width = gridToPixels(nextW, baseSize, gap);
+              const height = gridToPixels(nextH, baseSize, gap);
 
               ref.current.style.width = `${width}px`;
               ref.current.style.height = `${height}px`;

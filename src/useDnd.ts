@@ -3,6 +3,7 @@ import type { MutableRefObject } from "react";
 
 import { usePanelState, usePanelContrls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
+import { pixelsToGridPosition, gridPositionToPixels } from "./helpers";
 
 interface UseDndOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -66,14 +67,8 @@ export function useDnd(options: UseDndOptions) {
           draggable.style.left = offsetX + deltaX + "px";
           draggable.style.top = offsetY + deltaY + "px";
 
-          const nextX = Math.max(
-            0,
-            Math.floor((offsetX + deltaX) / (baseSize + gap))
-          );
-          const nextY = Math.max(
-            0,
-            Math.floor((offsetY + deltaY) / (baseSize + gap))
-          );
+          const nextX = pixelsToGridPosition(offsetX + deltaX, baseSize, gap);
+          const nextY = pixelsToGridPosition(offsetY + deltaY, baseSize, gap);
 
           e.preventDefault(); // Prevent text selection during drag
           movingPanel(id, nextX, nextY);
@@ -86,11 +81,11 @@ export function useDnd(options: UseDndOptions) {
           const droppedLeft = Number(target.style.left.replace("px", ""));
           const droppedTop = Number(target.style.top.replace("px", ""));
 
-          const nextX = Math.max(0, Math.floor(droppedLeft / (baseSize + gap)));
-          const nextY = Math.max(0, Math.floor(droppedTop / (baseSize + gap)));
+          const nextX = pixelsToGridPosition(droppedLeft, baseSize, gap);
+          const nextY = pixelsToGridPosition(droppedTop, baseSize, gap);
 
-          const nextLeft = Math.max(0, nextX * (baseSize + gap));
-          const nextTop = Math.max(0, nextY * (baseSize + gap));
+          const nextLeft = gridPositionToPixels(nextX, baseSize, gap);
+          const nextTop = gridPositionToPixels(nextY, baseSize, gap);
 
           // Animation
           window.requestAnimationFrame(() => {
