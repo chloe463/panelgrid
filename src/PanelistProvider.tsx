@@ -11,11 +11,19 @@ interface PanelCoordinate {
   h: number;
 }
 
+interface GhostPanel {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
 interface Panelist {
   columnCount: number;
   gap: number;
   baseSize: number;
   panels: PanelCoordinate[];
+  ghostPanel: GhostPanel | null;
 }
 
 const PanelistStateContext = createContext<Panelist>({
@@ -23,6 +31,7 @@ const PanelistStateContext = createContext<Panelist>({
   gap: 8,
   baseSize: 80,
   panels: [],
+  ghostPanel: null,
 });
 
 interface PanelistControls {
@@ -30,6 +39,8 @@ interface PanelistControls {
   resizePanel: (id: PanelId, w: number, h: number) => void;
   movePanel: (id: PanelId, x: number, y: number) => void;
   removePanel: (id: PanelId) => void;
+  movingPanel: (id: PanelId, x: number, y: number) => void;
+  resizingPanel: (id: PanelId, w: number, h: number) => void;
   setBaseSize: (baseSize: number) => void;
 }
 
@@ -38,6 +49,8 @@ const PanelistControlContext = createContext<PanelistControls>({
   removePanel: (_id: PanelId) => void 0,
   resizePanel: (_id: PanelId, _w: number, _h: number) => void 0,
   movePanel: (_id: PanelId, _x: number, _y: number) => void 0,
+  movingPanel: (_id: PanelId, _x: number, _y: number) => void 0,
+  resizingPanel: (_id: PanelId, _w: number, _h: number) => void 0,
   setBaseSize: (_baseSize: number) => void 0,
 });
 
@@ -62,6 +75,18 @@ type Action =
       y: number;
     }
   | {
+      type: "MOVING_PANEL";
+      id: PanelId;
+      x: number;
+      y: number;
+    }
+  | {
+      type: "RESIZING_PANEL";
+      id: PanelId;
+      w: number;
+      h: number;
+    }
+  | {
       type: "SET_BASE_SIZE";
       baseSize: number;
     };
@@ -71,6 +96,7 @@ const INITIAL_STATE: Panelist = {
   gap: 8,
   baseSize: 80,
   panels: [],
+  ghostPanel: null,
 };
 
 function panelistReducer(state: Panelist, action: Action): Panelist {
@@ -108,6 +134,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
           w: action.w,
           h: action.h,
         }),
+        ghostPanel: null,
       };
     }
     case "MOVE_PANEL": {
@@ -121,6 +148,33 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
           x: action.x,
           y: action.y,
         }),
+        ghostPanel: null,
+      };
+    }
+    case "MOVING_PANEL": {
+      const movingPanel = state.panels.find((panel) => panel.id === action.id);
+      if (!movingPanel) return state;
+      return {
+        ...state,
+        ghostPanel: {
+          x: action.x,
+          y: action.y,
+          w: movingPanel.w,
+          h: movingPanel.h,
+        },
+      };
+    }
+    case "RESIZING_PANEL": {
+      const movingPanel = state.panels.find((panel) => panel.id === action.id);
+      if (!movingPanel) return state;
+      return {
+        ...state,
+        ghostPanel: {
+          x: movingPanel.x,
+          y: movingPanel.y,
+          w: action.w,
+          h: action.h,
+        },
       };
     }
     case "SET_BASE_SIZE": {
@@ -164,6 +218,17 @@ export function PanelistProvider(props: PanelistProviderProps) {
     []
   );
 
+  const movingPanel = useCallback(
+    (id: PanelId, x: number, y: number) =>
+      dispatch({ type: "MOVING_PANEL", id, x, y }),
+    []
+  );
+  const resizingPanel = useCallback(
+    (id: PanelId, w: number, h: number) =>
+      dispatch({ type: "RESIZING_PANEL", id, w, h }),
+    []
+  );
+
   const setBaseSize = useCallback(
     (baseSize: number) => dispatch({ type: "SET_BASE_SIZE", baseSize }),
     []
@@ -177,6 +242,8 @@ export function PanelistProvider(props: PanelistProviderProps) {
           removePanel,
           resizePanel,
           movePanel,
+          movingPanel,
+          resizingPanel,
           setBaseSize,
         }}
       >

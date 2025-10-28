@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
+import { Ghost } from "./Ghost";
 import { usePanelState, usePanelContrls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { Panel } from "./Panel";
@@ -67,6 +68,7 @@ export function PanelRenderer(props: PanelRendererProps) {
           {itemRenderer(panel.id)}
         </Panel>
       ))}
+      <Ghost />
     </div>
   );
 }

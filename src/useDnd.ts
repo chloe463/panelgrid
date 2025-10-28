@@ -13,7 +13,7 @@ export function useDnd(options: UseDndOptions) {
   const { panelId: id } = options;
   const ref = options.el;
   const { baseSize, gap } = usePanelState();
-  const { movePanel } = usePanelContrls();
+  const { movePanel, movingPanel } = usePanelContrls();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -66,7 +66,17 @@ export function useDnd(options: UseDndOptions) {
           draggable.style.left = offsetX + deltaX + "px";
           draggable.style.top = offsetY + deltaY + "px";
 
+          const nextX = Math.max(
+            0,
+            Math.floor((offsetX + deltaX) / (baseSize + gap))
+          );
+          const nextY = Math.max(
+            0,
+            Math.floor((offsetY + deltaY) / (baseSize + gap))
+          );
+
           e.preventDefault(); // Prevent text selection during drag
+          movingPanel(id, nextX, nextY);
         }
 
         function onMouseUp() {
@@ -115,7 +125,7 @@ export function useDnd(options: UseDndOptions) {
     return () => {
       mouseDownListenerCtrl.abort();
     };
-  }, [movePanel, baseSize, gap, ref, id]);
+  }, [movePanel, baseSize, gap, ref, id, movingPanel]);
 
   return ref;
 }

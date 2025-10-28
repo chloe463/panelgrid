@@ -17,7 +17,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(
   const ref = options.el;
   const id = options.panelId;
   const { baseSize, gap } = usePanelState();
-  const { resizePanel } = usePanelContrls();
+  const { resizePanel, resizingPanel } = usePanelContrls();
 
   useEffect(() => {
     if (!ref.current) return;
@@ -51,6 +51,13 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             ref.current.style.width = `${initialWidth + deltaX}px`;
             ref.current.style.height = `${initialHeight + deltaY}px`;
             ref.current.style.zIndex = "calc(infinity)";
+
+            const nextW = Math.ceil((initialWidth + deltaX) / (baseSize + gap));
+            const nextH = Math.ceil(
+              (initialHeight + deltaY) / (baseSize + gap)
+            );
+
+            resizingPanel(id, nextW, nextH);
           },
           {
             signal: mouseMoveController.signal,
@@ -100,7 +107,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(
     );
 
     return () => mouseDownController.abort();
-  }, [id, baseSize, gap, resizePanel, ref]);
+  }, [id, baseSize, gap, resizePanel, ref, resizingPanel]);
 
   return ref;
 }
