@@ -26,7 +26,7 @@ export function PanelRenderer(props: PanelRendererProps) {
       (rect.width - gap * (columnCount - 1)) / columnCount
     );
     setBaseSize(baseSize);
-  }, [columnCount, ref.current, setBaseSize]);
+  }, [columnCount, gap, setBaseSize]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -41,9 +41,9 @@ export function PanelRenderer(props: PanelRendererProps) {
     observer.observe(ref.current);
 
     return () => observer.disconnect();
-  }, []);
+  }, [columnCount, gap, setBaseSize]);
 
-  const count = 36;
+  const count = columnCount * columnCount;
   return (
     <div
       className="panelist-renderer"

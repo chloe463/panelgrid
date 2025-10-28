@@ -100,7 +100,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(
     );
 
     return () => mouseDownController.abort();
-  }, [id, baseSize, gap, resizePanel]);
+  }, [id, baseSize, gap, resizePanel, ref]);
 
   return ref;
 }

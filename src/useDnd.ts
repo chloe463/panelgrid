@@ -125,7 +125,7 @@ export function useDnd(options: UseDndOptions) {
     return () => {
       mouseDownListenerCtrl.abort();
     };
-  }, [movePanel, baseSize, gap]);
+  }, [movePanel, baseSize, gap, ref, id]);
 
   return ref;
 }
