@@ -102,16 +102,6 @@ export function useDnd(options: UseDndOptions) {
           draggable.style.top = `${nextTop}px`;
           draggable.style.boxShadow = shadow;
           draggable.style.zIndex = zIndex;
-          // console.log({
-          //   baseSize,
-          //   gap,
-          //   droppedTop,
-          //   droppedLeft,
-          //   nextY,
-          //   nextX,
-          //   nextTop,
-          //   nextLeft,
-          // });
 
           movePanel(id, nextX, nextY);
 
