@@ -16,9 +16,7 @@ interface Props extends PanelBaseProps {
 
 export function Panel(props: Props) {
   const { x, y, w, h } = props;
-  // const style = {};
   const style = usePanel({ x, y, w, h });
-  // if (props.panelId == 4) console.log(x, y, w, h, style);
 
   const ref = useRef<HTMLDivElement | null>(null);
   useResize<HTMLDivElement>({ panelId: props.panelId, el: ref });
