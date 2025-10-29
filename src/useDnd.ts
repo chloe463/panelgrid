@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { MutableRefObject } from "react";
 
 import { usePanelState, usePanelContrls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { pixelsToGridPosition, gridPositionToPixels } from "./helpers";
+import { throttleRAF } from "./throttle";
 
 interface UseDndOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -15,6 +16,12 @@ export function useDnd(options: UseDndOptions) {
   const ref = options.el;
   const { baseSize, gap } = usePanelState();
   const { movePanel, movingPanel } = usePanelContrls();
+
+  // Throttle movingPanel to reduce re-renders during drag
+  const throttledMovingPanel = useMemo(
+    () => throttleRAF(movingPanel),
+    [movingPanel]
+  );
 
   useEffect(() => {
     if (!ref.current) return;
@@ -71,7 +78,7 @@ export function useDnd(options: UseDndOptions) {
           const nextY = pixelsToGridPosition(offsetY + deltaY, baseSize, gap);
 
           e.preventDefault(); // Prevent text selection during drag
-          movingPanel(id, nextX, nextY);
+          throttledMovingPanel(id, nextX, nextY);
         }
 
         function onMouseUp() {
@@ -120,7 +127,7 @@ export function useDnd(options: UseDndOptions) {
     return () => {
       mouseDownListenerCtrl.abort();
     };
-  }, [movePanel, baseSize, gap, ref, id, movingPanel]);
+  }, [movePanel, baseSize, gap, ref, id, throttledMovingPanel]);
 
   return ref;
 }

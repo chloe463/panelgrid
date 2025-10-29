@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import type { MutableRefObject } from "react";
 import {
   usePanelState,
@@ -6,6 +6,7 @@ import {
   type PanelId,
 } from "./PanelistProvider";
 import { pixelsToGridSize, gridToPixels } from "./helpers";
+import { throttleRAF } from "./throttle";
 
 interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -19,6 +20,12 @@ export function useResize<E extends HTMLElement = HTMLElement>(
   const id = options.panelId;
   const { baseSize, gap } = usePanelState();
   const { resizePanel, resizingPanel } = usePanelContrls();
+
+  // Throttle resizingPanel to reduce re-renders during resize
+  const throttledResizingPanel = useMemo(
+    () => throttleRAF(resizingPanel),
+    [resizingPanel]
+  );
 
   useEffect(() => {
     if (!ref.current) return;
@@ -56,7 +63,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             const nextW = pixelsToGridSize(initialWidth + deltaX, baseSize, gap);
             const nextH = pixelsToGridSize(initialHeight + deltaY, baseSize, gap);
 
-            resizingPanel(id, nextW, nextH);
+            throttledResizingPanel(id, nextW, nextH);
           },
           {
             signal: mouseMoveController.signal,
@@ -106,7 +113,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(
     );
 
     return () => mouseDownController.abort();
-  }, [id, baseSize, gap, resizePanel, ref, resizingPanel]);
+  }, [id, baseSize, gap, resizePanel, ref, throttledResizingPanel]);
 
   return ref;
 }
