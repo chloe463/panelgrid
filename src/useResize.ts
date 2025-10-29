@@ -6,7 +6,7 @@ import {
   type PanelId,
 } from "./PanelistProvider";
 import { pixelsToGridSize, gridToPixels } from "./helpers";
-import { throttleRAF } from "./throttle";
+import { throttleRAF } from "./helpers/throttle";
 
 interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -60,8 +60,16 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             ref.current.style.height = `${initialHeight + deltaY}px`;
             ref.current.style.zIndex = "calc(infinity)";
 
-            const nextW = pixelsToGridSize(initialWidth + deltaX, baseSize, gap);
-            const nextH = pixelsToGridSize(initialHeight + deltaY, baseSize, gap);
+            const nextW = pixelsToGridSize(
+              initialWidth + deltaX,
+              baseSize,
+              gap
+            );
+            const nextH = pixelsToGridSize(
+              initialHeight + deltaY,
+              baseSize,
+              gap
+            );
 
             throttledResizingPanel(id, nextW, nextH);
           },
