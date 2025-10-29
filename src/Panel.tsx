@@ -14,7 +14,7 @@ interface Props extends PanelBaseProps {
   children: React.ReactNode;
 }
 
-export function Panel(props: Props) {
+function PanelComponent(props: Props) {
   const { x, y, w, h } = props;
   const style = usePanel({ x, y, w, h });
 
@@ -29,3 +29,15 @@ export function Panel(props: Props) {
     </div>
   );
 }
+
+// Memoize Panel component to prevent unnecessary re-renders
+// Only re-render when panel's own coordinates or size changes
+export const Panel = React.memo(PanelComponent, (prevProps, nextProps) => {
+  return (
+    prevProps.panelId === nextProps.panelId &&
+    prevProps.x === nextProps.x &&
+    prevProps.y === nextProps.y &&
+    prevProps.w === nextProps.w &&
+    prevProps.h === nextProps.h
+  );
+});
