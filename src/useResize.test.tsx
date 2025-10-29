@@ -7,7 +7,7 @@ import type { ReactNode } from "react";
 
 // Mock throttleRAF to execute immediately for testing
 vi.mock("./helpers/throttle", () => ({
-  throttleRAF: (fn: any) => fn,
+  throttleRAF: (fn: (...args: unknown[]) => void) => fn,
 }));
 
 describe("useResize", () => {
