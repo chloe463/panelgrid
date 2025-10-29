@@ -1,0 +1,47 @@
+.panelist-renderer {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--column-count, 6), 1fr);
+  width: 100%;
+  gap: var(--panel-gap, 8px);
+}
+
+.panel-placeholder {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1/1;
+  background-color: rgb(0 0 0 / 0.03);
+}
+
+.panel-ghost {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 4px;
+  outline: 1px dashed rgba(0, 0, 0, 0.2);
+  outline-offset: 2px;
+  z-index: -1;
+}
+
+.panel {
+  position: absolute;
+  box-sizing: border-box;
+  aspect-ratio: 1/1;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: inline-block;
+  width: 24px;
+  aspect-ratio: 1/1;
+  background-color: rgba(0, 0, 0, 0.12);
+  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+
+  &:hover {
+    cursor: nwse-resize;
+  }
+}
