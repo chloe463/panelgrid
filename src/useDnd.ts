@@ -4,7 +4,7 @@ import type { MutableRefObject } from "react";
 import { usePanelState, usePanelContrls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { pixelsToGridPosition, gridPositionToPixels } from "./helpers";
-import { throttleRAF } from "./throttle";
+import { throttleRAF } from "./helpers/throttle";
 
 interface UseDndOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;

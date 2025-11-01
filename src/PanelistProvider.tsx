@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
-import type { ReactElement } from "react";
+import type { ReactNode } from "react";
 
 export type PanelId = number | string;
 
@@ -190,7 +190,7 @@ interface PanelistProviderProps {
   columnCount: number;
   gap: number;
   panelCoordinates?: PanelCoordinate[];
-  children: ReactElement;
+  children: ReactNode;
 }
 
 export function PanelistProvider(props: PanelistProviderProps) {
