@@ -31,6 +31,10 @@
   border-radius: 4px;
 }
 
+.panel--with-transition {
+  transition: top 0.3s ease-out, left 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+}
+
 .resize-handle {
   position: absolute;
   right: 0;

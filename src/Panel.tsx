@@ -5,17 +5,18 @@ import { useResize } from "./useResize";
 
 import "./styles.css";
 import { usePanel } from "./usePanel";
-import type { PanelId } from "./PanelistProvider";
+import { type PanelId } from "./PanelistProvider";
 
 type PanelBaseProps = Parameters<typeof usePanel>[0];
 
 interface Props extends PanelBaseProps {
   panelId: PanelId;
+  isActive: boolean;
   children: React.ReactNode;
 }
 
 function PanelComponent(props: Props) {
-  const { x, y, w, h } = props;
+  const { x, y, w, h, isActive } = props;
   const style = usePanel({ x, y, w, h });
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -23,7 +24,11 @@ function PanelComponent(props: Props) {
   useDnd({ panelId: props.panelId, el: ref });
 
   return (
-    <div className="panel" ref={ref} style={style}>
+    <div
+      className={`panel ${isActive ? "" : "panel--with-transition"}`}
+      ref={ref}
+      style={style}
+    >
       {props.children}
       <span className="resize-handle"></span>
     </div>
@@ -35,6 +40,7 @@ function PanelComponent(props: Props) {
 export const Panel = React.memo(PanelComponent, (prevProps, nextProps) => {
   return (
     prevProps.panelId === nextProps.panelId &&
+    prevProps.isActive === nextProps.isActive &&
     prevProps.x === nextProps.x &&
     prevProps.y === nextProps.y &&
     prevProps.w === nextProps.w &&

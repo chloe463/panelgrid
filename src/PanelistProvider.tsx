@@ -25,6 +25,7 @@ interface Panelist {
   baseSize: number;
   panels: PanelCoordinate[];
   ghostPanel: GhostPanel | null;
+  activePanelId: PanelId | null;
 }
 
 const PanelistStateContext = createContext<Panelist>({
@@ -33,6 +34,7 @@ const PanelistStateContext = createContext<Panelist>({
   baseSize: 80,
   panels: [],
   ghostPanel: null,
+  activePanelId: null,
 });
 
 interface PanelistControls {
@@ -98,6 +100,7 @@ const INITIAL_STATE: Panelist = {
   baseSize: 80,
   panels: [],
   ghostPanel: null,
+  activePanelId: null,
 };
 
 function panelistReducer(state: Panelist, action: Action): Panelist {
@@ -146,6 +149,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
         ...state,
         panels: rearrangedPanels,
         ghostPanel: null,
+        activePanelId: null,
       };
     }
     case "MOVE_PANEL": {
@@ -170,6 +174,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
         ...state,
         panels: rearrangedPanels,
         ghostPanel: null,
+        activePanelId: null,
       };
     }
     case "MOVING_PANEL": {
@@ -177,6 +182,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       if (!movingPanel) return state;
       return {
         ...state,
+        activePanelId: action.id,
         ghostPanel: {
           x: action.x,
           y: action.y,
@@ -190,6 +196,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       if (!movingPanel) return state;
       return {
         ...state,
+        activePanelId: action.id,
         ghostPanel: {
           x: movingPanel.x,
           y: movingPanel.y,
