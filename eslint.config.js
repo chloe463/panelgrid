@@ -18,6 +18,7 @@ export default defineConfig([
     rules: {
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "react-refresh/only-export-components": "off",
+      "no-console": "error",
     },
     languageOptions: {
       ecmaVersion: 2020,
