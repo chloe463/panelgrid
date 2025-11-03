@@ -107,7 +107,6 @@ function calculatePushDistance(
 export function findNewPosition(
   panel: PanelCoordinate,
   pusher: PanelCoordinate,
-  panelMap: Map<PanelId, PanelCoordinate>,
   columnCount: number
 ): { x: number; y: number } {
   const pushInfo = calculatePushDistance(pusher, panel, columnCount);
@@ -191,7 +190,7 @@ export function rearrangePanels(
 
       // Find new position by pushing the colliding panel away
       // 衝突したパネルを押しのける方向に移動
-      const newPos = findNewPosition(colliding, current, panelMap, columnCount);
+      const newPos = findNewPosition(colliding, current, columnCount);
 
       // Update the panel's position
       // パネルの位置を更新
@@ -210,10 +209,7 @@ export function rearrangePanels(
 
   // Compact the layout by removing empty rows
   // 空行を削除してレイアウトを詰める
-  const compactedPanels = compactLayout(
-    Array.from(panelMap.values()),
-    columnCount
-  );
+  const compactedPanels = compactLayout(Array.from(panelMap.values()));
 
   // Return the rearranged and compacted panels
   // 再配置と圧縮後のパネルを返す
@@ -224,10 +220,7 @@ export function rearrangePanels(
  * Compact layout by removing empty rows and moving panels up
  * 空行を削除してパネルを上に詰める
  */
-export function compactLayout(
-  panels: PanelCoordinate[],
-  columnCount: number
-): PanelCoordinate[] {
+export function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[] {
   if (panels.length === 0) return [];
 
   // Find the maximum Y coordinate to determine the grid height
