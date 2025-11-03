@@ -1,18 +1,25 @@
 import { useMemo } from "react";
-import { usePanelState } from "./PanelistProvider";
+import { usePanelState, type PanelId } from "./PanelistProvider";
+import { useResize } from "./useResize";
+import { useDnd } from "./useDnd";
 
 interface UsePanelOptions {
+  panelId: PanelId;
   x: number;
   y: number;
   w: number;
   h: number;
+  ref: React.RefObject<HTMLDivElement | null>;
 }
 
 export function usePanel(options: UsePanelOptions) {
-  const { x, y, w, h } = options;
+  const { panelId, x, y, w, h, ref } = options;
   const { baseSize, gap } = usePanelState();
 
-  return useMemo(() => {
+  useResize<HTMLDivElement>({ panelId, el: ref });
+  useDnd({ panelId, el: ref });
+
+  const style = useMemo(() => {
     const width = baseSize * w + gap * Math.max(0, w - 1);
     const height = baseSize * h + gap * Math.max(0, h - 1);
 
@@ -26,4 +33,6 @@ export function usePanel(options: UsePanelOptions) {
       height: `${height}px`,
     };
   }, [x, y, w, h, baseSize, gap]);
+
+  return { style, ref };
 }
