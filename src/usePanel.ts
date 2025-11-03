@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { usePanelState, type PanelId } from "./PanelistProvider";
 import { useResize } from "./useResize";
 import { useDnd } from "./useDnd";
+import { gridToPixels, gridPositionToPixels } from "./helpers/gridCalculations";
 
 interface UsePanelOptions {
   panelId: PanelId;
@@ -20,11 +21,11 @@ export function usePanel(options: UsePanelOptions) {
   useDnd({ panelId, el: ref });
 
   const style = useMemo(() => {
-    const width = baseSize * w + gap * Math.max(0, w - 1);
-    const height = baseSize * h + gap * Math.max(0, h - 1);
+    const width = gridToPixels(w, baseSize, gap);
+    const height = gridToPixels(h, baseSize, gap);
 
-    const left = x * (baseSize + gap);
-    const top = y * (baseSize + gap);
+    const left = gridPositionToPixels(x, baseSize, gap);
+    const top = gridPositionToPixels(y, baseSize, gap);
 
     return {
       top: `${top}px`,
