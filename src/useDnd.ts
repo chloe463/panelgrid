@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import type { MutableRefObject } from "react";
 
-import { usePanelState, usePanelContrls } from "./PanelistProvider";
+import { usePanelState, usePanelControls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { pixelsToGridPosition, gridPositionToPixels } from "./helpers";
 import { throttleRAF } from "./helpers/throttle";
@@ -15,7 +15,7 @@ export function useDnd(options: UseDndOptions) {
   const { panelId: id } = options;
   const ref = options.ref;
   const { baseSize, gap } = usePanelState();
-  const { movePanel, movingPanel } = usePanelContrls();
+  const { movePanel, movingPanel } = usePanelControls();
 
   // Throttle movingPanel to reduce re-renders during drag
   const throttledMovingPanel = useMemo(() => throttleRAF(movingPanel), [movingPanel]);

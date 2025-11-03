@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
 import { Ghost } from "./Ghost";
-import { usePanelState, usePanelContrls } from "./PanelistProvider";
+import { usePanelState, usePanelControls } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { Panel } from "./Panel";
 
@@ -13,7 +13,7 @@ interface PanelRendererProps {
 export function PanelRenderer(props: PanelRendererProps) {
   const { itemRenderer } = props;
   const { panels, activePanelId, columnCount, gap } = usePanelState();
-  const { setBaseSize } = usePanelContrls();
+  const { setBaseSize } = usePanelControls();
 
   const ref = useRef<HTMLDivElement | null>(null);
 

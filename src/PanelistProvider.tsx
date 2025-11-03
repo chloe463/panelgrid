@@ -269,10 +269,10 @@ export function usePanelState() {
   return context;
 }
 
-export function usePanelContrls() {
+export function usePanelControls() {
   const context = useContext(PanelistControlContext);
   if (!context) {
-    throw new Error("usePanelState must be used in PanelistProvider");
+    throw new Error("usePanelControls must be used in PanelistProvider");
   }
 
   return context;
