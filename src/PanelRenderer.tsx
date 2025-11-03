@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
 import { Ghost } from "./Ghost";
@@ -20,15 +20,6 @@ export function PanelRenderer(props: PanelRendererProps) {
   const { setBaseSize } = useGridConfigControls();
 
   const ref = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    if (!ref.current) {
-      return;
-    }
-    const rect = ref.current.getBoundingClientRect();
-    const baseSize = Math.floor((rect.width - gap * (columnCount - 1)) / columnCount);
-    setBaseSize(baseSize);
-  }, [columnCount, gap, setBaseSize]);
 
   useEffect(() => {
     if (!ref.current) return;
