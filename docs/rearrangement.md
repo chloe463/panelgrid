@@ -1,3 +1,5 @@
+<!-- AI 向けのコメント: "AI SKIP" と書かれたセクションは読み飛ばしてください。更新するのも禁止です。 -->
+
 # Rearrangement
 
 このドキュメントではドラッグ・アンド・ドロップ、リサイズ時にパネル同士が衝突した際のパネルの再配置の仕様と実装を記述します。
@@ -7,17 +9,20 @@
 ### 基本原則
 
 1. **動かしているパネルの位置を優先**
+
    - ユーザーが操作しているパネル（ドラッグ中・リサイズ中）の位置を最優先
    - 衝突した場合は、動かしていないパネルを移動させて衝突を解消
 
 2. **押しのける挙動**
+
    - 衝突したパネルは「飛び越える」のではなく「押しのける」
    - 最小限の距離だけ移動して衝突を解消
    - 連鎖的な押しのけにも対応
 
 3. **移動方向の優先順位**
-   - 優先順位1: 横方向（右）に押しのける
-   - 優先順位2: 横方向に入らない場合は縦方向（下）に押しのける
+
+   - 優先順位 1: 横方向（右）に押しのける
+   - 優先順位 2: 横方向に入らない場合は縦方向（下）に押しのける
    - 斜め方向には動かさない
 
 4. **空行の自動削除**
@@ -26,55 +31,73 @@
 
 ### 挙動の例
 
-#### 例1: 横方向に押しのける
+以下の例において [ ] は 1 つのセルを表します。セル内の文字はそのセル上に存在しているパネルの ID です。
+
+#### 例 1: 横方向に押しのける
+
+初期状態:
+
+- 横方向にセルが 3 つ (columnCount が 3)
+- パネル A が x: 0, y: 0, w: 1, h: 1
+- パネル B が x: 1, y: 0, w: 1, h: 1
+
 ```
 操作前:
-[  ][A A][B B]
-[  ][A A][B B]
+[A][B][ ]
+[A][B][ ]
 
-Aを左に移動:
-[A A][B B][  ]  ← Bが右に押しのけられる
-[A A][B B][  ]
+Aを右に移動:
+[ ][A][B]  ← Bが右に押しのけられる
+[ ][B][B]
 ```
 
-#### 例2: 縦方向に押しのける（横に入らない場合）
-```
-操作前:
-[  ][  ][  ][  ][B B]
-[  ][  ][  ][  ][B B]
+#### 例 2: 縦方向に押しのける（横に入らない場合）
 
-Aを右端に移動（幅4）:
-[A A A A][  ][  ]  ← Aを配置
-[A A A A][  ][  ]
-[B B][  ][  ][  ]  ← Bが下に押しのけられる（横に入らないため）
-[B B][  ][  ][  ]
-```
-
-#### 例3: 連鎖的な押しのけ
 ```
 操作前:
-[  ][B B][C C]
-[  ][B B][C C]
+[ ][ ][B][B]
+[A][A][A][ ]
+[A][A][A][ ]
 
-Aを左端に移動:
-[A A][B B][C C]  ← A→B→C と連鎖的に押しのける
-[A A][B B][C C]
+Aを上に移動
+[A][A][A][ ] ← A を (x, y) = (0, 0) に移動
+[A][A][A][ ]
+[ ][ ][B][B] ← B が押しのけられて (x, y) = (2, 2) に移動
 ```
 
-#### 例4: 空行の自動削除
-```
-再配置直後:
-Row 0: [A A][  ][  ]
-Row 1: [A A][  ][  ]
-Row 2: [  ][  ][  ]  ← 空行
-Row 3: [B B][  ][  ]
-Row 4: [B B][  ][  ]
+#### 例 3: 連鎖的な押しのけ
 
-空行削除後:
-Row 0: [A A][  ][  ]
-Row 1: [A A][  ][  ]
-Row 2: [B B][  ][  ]  ← 自動的に詰められる
-Row 3: [B B][  ][  ]
+```
+操作前:
+[ ][ ][B][B]
+[ ][ ][C][C]
+[A][A][A][ ]
+[A][A][A][ ]
+
+Aを上に移動
+[A][A][A][ ] ← A を (x, y) = (0, 0) に移動
+[A][A][A][ ]
+[ ][ ][B][B] ← B が押しのけられて (x, y) = (2, 2) に移動
+[ ][ ][C][C] ← C が連鎖的に押しのけられて (x, y) = (2, 3) に移動
+```
+
+#### 例 4: 空行の自動削除
+
+```
+[ ][ ][ ][C]
+[A][A][A][ ]
+[A][A][A][ ]
+[ ][ ][B][B]
+
+Aを上に移動
+[A][A][A][C]
+[A][A][A][ ]
+[ ][ ][ ][ ] ← 一時的に空行ができてしまうが、これを削除
+[ ][ ][B][B]
+
+[A][A][A][C]
+[A][A][A][ ]
+[ ][ ][B][B]
 ```
 
 ## アルゴリズム設計
@@ -82,23 +105,25 @@ Row 3: [B B][  ][  ]
 ### データ構造
 
 #### 1. GridMap (グリッドマップ)
-パネルの占有状態を管理する2次元配列。
+
+パネルの占有状態を管理する 2 次元配列。
 
 ```typescript
 type GridMap = (PanelId | null)[][];
 ```
 
-- 各セルには、そのセルを占有しているパネルのIDまたはnullが格納される
+- 各セルには、そのセルを占有しているパネルの ID または null が格納される
 - columnCount × 行数の配列
 - 例: `gridMap[y][x]` でグリッド座標 (x, y) の占有状態を取得
 
 #### 2. SpaceMap (空きスペースマップ)
-各座標から見た利用可能なスペースを管理する2次元配列。
+
+各座標から見た利用可能なスペースを管理する 2 次元配列。
 
 ```typescript
 interface SpaceInfo {
-  rightSpace: number;  // 右方向の連続空きスペース数
-  downSpace: number;   // 下方向の連続空きスペース数
+  rightSpace: number; // 右方向の連続空きスペース数
+  downSpace: number; // 下方向の連続空きスペース数
 }
 
 type SpaceMap = SpaceInfo[][];
@@ -225,8 +250,7 @@ function rearrangePanels(
 ```
 function findNewPosition(
   panel: PanelCoordinate,
-  movingPanel: PanelCoordinate,
-  gridMap: GridMap,
+  pusher: PanelCoordinate,
   columnCount: number
 ): {x: number, y: number}
   1. spaceMap = buildSpaceMap(gridMap, columnCount)
@@ -293,16 +317,17 @@ function canPlacePanel(
 
 ---
 
-## 代替アプローチと比較分析
+## 代替アプローチと比較分析 <!-- AI SKIP -->
 
 ### 1. Compaction (圧縮) アルゴリズム
 
 多くのグリッドレイアウトライブラリ（react-grid-layout, gridster.js など）で採用されている手法。
 
 #### 基本的な考え方
+
 - パネルを常に「上に詰める」（compact upward）方向で配置
 - 衝突が発生した場合、衝突したパネルを下方向に押し出す
-- 全パネルをY座標でソートし、上から順に配置を確定していく
+- 全パネルを Y 座標でソートし、上から順に配置を確定していく
 
 #### アルゴリズム（簡略版）
 
@@ -336,16 +361,19 @@ function canPlace(panel, x, y, occupied, columnCount): boolean
 ```
 
 #### 計算量
+
 - ソート: O(N log N)
 - 各パネルの配置判定: O(N × R × W × H) (R: 最大行数)
 - **全体: O(N log N + N × R × W × H) = O(N × R × W × H)**
 
 #### メリット
+
 - シンプルで理解しやすい
 - 常に「詰まった」レイアウトが得られる
-- GridMap全体の再構築が不要（占有マップだけで済む）
+- GridMap 全体の再構築が不要（占有マップだけで済む）
 
 #### デメリット
+
 - 横方向の移動ができない（常に縦方向に押し出される）
 - 今回の仕様（横優先）には合わない
 - パネルの元位置から大きく離れる可能性がある
@@ -357,9 +385,11 @@ function canPlace(panel, x, y, occupied, columnCount): boolean
 提案したアルゴリズムから SpaceMap を削除し、より直接的に衝突判定を行う方法。
 
 #### 改善のポイント
+
 SpaceMap は各移動ごとに O(R × C) で再構築が必要だが、実際には以下の理由で非効率：
+
 - 衝突判定自体は O(W × H) で可能
-- SpaceMap全体を構築するより、必要な座標だけチェックする方が効率的
+- SpaceMap 全体を構築するより、必要な座標だけチェックする方が効率的
 
 #### 最適化されたアルゴリズム
 
@@ -430,28 +460,25 @@ function rectanglesOverlap(a, b): boolean
 
 function findNewPositionDirect(
   panel: PanelCoordinate,
-  blocker: PanelCoordinate,
-  panelMap: Map<PanelId, PanelCoordinate>,
+  pusher: PanelCoordinate,
   columnCount: number
 ): {x: number, y: number}
-  // 優先順位1: 横方向（右側）
-  for x = panel.x + 1 to columnCount - panel.w:
-    candidate = {x, y: panel.y, w: panel.w, h: panel.h}
-    if !hasCollisionDirect(candidate, panel.id, panelMap):
-      return {x, y: panel.y}
+  // pusher によって panel が押される距離を計算
+  pushInfo = calculatePushDistance(pusher, panel, columnCount)
 
-  // 優先順位2: 縦方向（下側）
-  y = panel.y + 1
-  maxIterations = 100  // 無限ループ防止
-  for i = 0 to maxIterations:
-    candidate = {x: panel.x, y, w: panel.w, h: panel.h}
-    if !hasCollisionDirect(candidate, panel.id, panelMap):
-      return {x: panel.x, y}
-    y++
+  if !pushInfo:
+    // フォールバック: 下に1つ移動
+    return {x: panel.x, y: panel.y + 1}
 
-  // フォールバック: 最下部
-  maxY = Math.max(...Array.from(panelMap.values()).map(p => p.y + p.h))
-  return {x: panel.x, y: maxY}
+  if pushInfo.direction == "right":
+    // 横方向（右）に押す
+    newX = panel.x + pushInfo.distance
+    if newX + panel.w <= columnCount:
+      return {x: newX, y: panel.y}
+    // 横方向に入らない場合は下に押す
+
+  // 縦方向（下）に押す
+  return {x: panel.x, y: panel.y + pushInfo.distance}
 
 function hasCollisionDirect(
   candidate: {x, y, w, h},
@@ -466,37 +493,41 @@ function hasCollisionDirect(
 ```
 
 #### 計算量
+
 - 衝突検出: O(N) （全パネルとの矩形判定）
 - 位置探索: O(C × N + R × N) = O((C + R) × N)
 - 再配置全体: **O(N² × (C + R))** または O(N² × max(C, R))
 
 #### 比較: 提案アルゴリズム vs 最適化版
 
-| 項目 | 提案アルゴリズム (GridMap + SpaceMap) | 最適化版 (パネルリスト) |
-|------|--------------------------------------|------------------------|
-| **空間計算量** | O(R × C) | O(N) |
-| **衝突検出** | O(W × H) | O(N) |
-| **位置探索** | O(C + R + W×H) | O((C + R) × N) |
-| **全体** | O(N² × W × H) | O(N² × max(C, R)) |
+| 項目           | 提案アルゴリズム (GridMap + SpaceMap) | 最適化版 (パネルリスト) |
+| -------------- | ------------------------------------- | ----------------------- |
+| **空間計算量** | O(R × C)                              | O(N)                    |
+| **衝突検出**   | O(W × H)                              | O(N)                    |
+| **位置探索**   | O(C + R + W×H)                        | O((C + R) × N)          |
+| **全体**       | O(N² × W × H)                         | O(N² × max(C, R))       |
 
 #### どちらが効率的か？
 
 パネル数 N、グリッドサイズ R×C、平均パネルサイズ W×H として：
 
-- **パネルが少ない場合 (N < 20程度)**: 最適化版が有利
+- **パネルが少ない場合 (N < 20 程度)**: 最適化版が有利
+
   - メモリ使用量が少ない
-  - GridMap/SpaceMapの構築コストが削減される
+  - GridMap/SpaceMap の構築コストが削減される
 
 - **パネルが多い場合 (N > 50)**: 提案アルゴリズムが有利
-  - GridMapによる衝突検出が O(W×H) と高速
-  - SpaceMapによる空きスペース判定が O(1)
+
+  - GridMap による衝突検出が O(W×H) と高速
+  - SpaceMap による空きスペース判定が O(1)
 
 - **グリッドが大きい場合 (R×C > 1000)**: 最適化版が有利
-  - GridMap/SpaceMapのメモリコストが高い
+  - GridMap/SpaceMap のメモリコストが高い
 
 #### 実用的な推奨
 
-**典型的なダッシュボード用途**（6×無制限グリッド、パネル数5-20個）では：
+**典型的なダッシュボード用途**（6× 無制限グリッド、パネル数 5-20 個）では：
+
 - **最適化版（パネルリストベース）を推奨**
 - メモリ効率が良い
 - コードがシンプル
@@ -507,9 +538,11 @@ function hasCollisionDirect(
 ### 3. インクリメンタルアップデート（差分更新）
 
 #### 基本的な考え方
-GridMapを毎回再構築するのではなく、変更があった部分だけを更新する。
+
+GridMap を毎回再構築するのではなく、変更があった部分だけを更新する。
 
 #### アルゴリズム
+
 ```
 class GridLayoutManager:
   gridMap: GridMap
@@ -539,57 +572,67 @@ class GridLayoutManager:
 ```
 
 #### 計算量
+
 - 削除/追加: O(W × H)
-- 衝突検出: O(W × H) (GridMap使用時)
-- **全体: O(N × W × H)** (N個のパネルが連鎖移動する場合)
+- 衝突検出: O(W × H) (GridMap 使用時)
+- **全体: O(N × W × H)** (N 個のパネルが連鎖移動する場合)
 
 #### メリット
-- GridMapの全再構築が不要
+
+- GridMap の全再構築が不要
 - 状態を保持するため、連続的な操作に有利
 
 #### デメリット
+
 - 状態管理が複雑
-- Reactの不変性原則に反する（Reducerで使いにくい）
+- React の不変性原則に反する（Reducer で使いにくい）
 - デバッグが困難
 
 ---
 
-## 結論と推奨アルゴリズム
+## 結論と推奨アルゴリズム <!-- AI SKIP-->
 
 ### 本プロジェクトへの推奨: **最適化版（パネルリストベース）**
 
 #### 理由
+
 1. **プロジェクト規模に最適**
-   - columnCount: 4-6程度
-   - 想定パネル数: 5-20個
+
+   - columnCount: 4-6 程度
+   - 想定パネル数: 5-20 個
    - この規模では O(N²) でも十分高速
 
 2. **メモリ効率**
-   - GridMap/SpaceMapの構築コスト（O(R×C)）を回避
+
+   - GridMap/SpaceMap の構築コスト（O(R×C)）を回避
    - パネルリストだけで O(N) のメモリ
 
 3. **コードの保守性**
-   - GridMap/SpaceMapの管理が不要
+
+   - GridMap/SpaceMap の管理が不要
    - 矩形の重なり判定は直感的で理解しやすい
 
-4. **Reactとの親和性**
+4. **React との親和性**
    - 状態を持たない純粋関数
-   - Reducerで使いやすい
+   - Reducer で使いやすい
 
 ### 実装の優先順位
 
 **Phase 1**: 最適化版（パネルリストベース）を実装
+
 - シンプルで効率的
 - 十分な性能
 
 **Phase 2** (パフォーマンス問題が発生した場合のみ):
-- パネル数が50を超える場合 → GridMapベースに移行
+
+- パネル数が 50 を超える場合 → GridMap ベースに移行
 - プロファイリングで実測してから判断
 
 ### 注意点
 
 どのアルゴリズムを選択する場合でも：
-- **無限ループ対策**: 連鎖移動の上限を設定（例: 100回）
+
+- **無限ループ対策**: 連鎖移動の上限を設定（例: 100 回）
 - **境界チェック**: グリッド外への移動を防ぐ
 - **パフォーマンス測定**: 実装後に実際のユースケースで測定
 
@@ -604,26 +647,29 @@ class GridLayoutManager:
 ### 主要な関数
 
 #### 1. `rectanglesOverlap()` - 矩形の重なり判定
+
 AABB（Axis-Aligned Bounding Box）テストによる高速な衝突判定。
 
 ```typescript
 export function rectanglesOverlap(
   a: { x: number; y: number; w: number; h: number },
   b: { x: number; y: number; w: number; h: number }
-): boolean
+): boolean;
 ```
 
 #### 2. `detectCollisions()` - 衝突パネルの検出
-指定されたパネルと衝突する全てのパネルIDを返す。
+
+指定されたパネルと衝突する全てのパネル ID を返す。
 
 ```typescript
 export function detectCollisions(
   panel: PanelCoordinate,
   panelMap: Map<PanelId, PanelCoordinate>
-): PanelId[]
+): PanelId[];
 ```
 
 #### 3. `calculatePushDistance()` - 押しのける距離の計算
+
 衝突したパネルを押しのけるための最小距離と方向を計算。
 
 ```typescript
@@ -631,15 +677,17 @@ function calculatePushDistance(
   pusher: PanelCoordinate,
   pushed: PanelCoordinate,
   columnCount: number
-): { direction: "right" | "down"; distance: number } | null
+): { direction: "right" | "down"; distance: number } | null;
 ```
 
 **ロジック:**
+
 - 横方向の押し距離: `pusher.x + pusher.w - pushed.x`
 - 縦方向の押し距離: `pusher.y + pusher.h - pushed.y`
 - 横方向に入る場合は横を優先、入らない場合は縦に切り替え
 
 #### 4. `findNewPosition()` - 新しい位置の決定
+
 押しのけられるパネルの新しい位置を計算。
 
 ```typescript
@@ -648,14 +696,17 @@ export function findNewPosition(
   pusher: PanelCoordinate,
   panelMap: Map<PanelId, PanelCoordinate>,
   columnCount: number
-): { x: number; y: number }
+): { x: number; y: number };
 ```
 
 **特徴:**
-- 空いている場所を探すのではなく、押しのける距離だけ移動
+
+- `calculatePushDistance()` で計算された押しのける距離だけ移動
 - 最小限の移動で衝突を解消
+- 横方向に入らない場合は自動的に縦方向に切り替え
 
 #### 5. `rearrangePanels()` - パネルの再配置
+
 メイン関数。衝突解決と空行削除を実行。
 
 ```typescript
@@ -663,10 +714,11 @@ export function rearrangePanels(
   movingPanel: PanelCoordinate,
   allPanels: PanelCoordinate[],
   columnCount: number
-): PanelCoordinate[]
+): PanelCoordinate[];
 ```
 
 **処理フロー:**
+
 1. パネルマップを作成（O(N)）
 2. 移動パネルをキューに追加
 3. キューが空になるまで処理:
@@ -677,16 +729,15 @@ export function rearrangePanels(
 5. 結果を返す
 
 #### 6. `compactLayout()` - 空行の削除
+
 レイアウトから空行を削除してパネルを上に詰める。
 
 ```typescript
-export function compactLayout(
-  panels: PanelCoordinate[],
-  columnCount: number
-): PanelCoordinate[]
+export function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[];
 ```
 
 **アルゴリズム:**
+
 1. 各行の占有状態をチェック（O(N × H)）
 2. 各行の上にある空行数を計算（O(R)）
 3. 各パネルをオフセット分だけ上に移動（O(N)）
@@ -695,9 +746,11 @@ export function compactLayout(
 ### 統合ポイント
 
 #### PanelistProvider の Reducer
+
 `MOVE_PANEL` と `RESIZE_PANEL` アクションで `rearrangePanels()` を呼び出し。
 
 **src/PanelistProvider.tsx:127 (RESIZE_PANEL)**
+
 ```typescript
 case "RESIZE_PANEL": {
   const resizedPanel = {
@@ -721,6 +774,7 @@ case "RESIZE_PANEL": {
 ```
 
 **src/PanelistProvider.tsx:151 (MOVE_PANEL)**
+
 ```typescript
 case "MOVE_PANEL": {
   const movedPanel = {
@@ -743,41 +797,47 @@ case "MOVE_PANEL": {
 }
 ```
 
-### テスト
+### テスト <!-- AI SKIP -->
 
-**25個のテストケース** (src/helpers/rearrangement.test.ts)
+**78 個のテストケース** (src/helpers/rearrangement.test.ts)
 
-- 矩形の重なり判定: 5テスト
-- 衝突検出: 3テスト
-- 衝突判定: 3テスト
-- 押しのける位置計算: 3テスト
-- パネル再配置: 5テスト
-- 空行削除: 6テスト
+主要なテスト項目：
 
-**全体のテスト成功率: 78/78 (100%)**
+- 矩形の重なり判定 (`rectanglesOverlap`): 5 テスト
+- 衝突検出 (`detectCollisions`): 3 テスト
+- 衝突判定 (`hasCollision`): 3 テスト
+- 押しのける位置計算 (`findNewPosition`): 3 テスト
+- パネル再配置 (`rearrangePanels`): 5 テスト
+- 空行削除 (`compactLayout`): 6 テスト
+
+その他、統合テストやエッジケースのテストを含む
 
 ### パフォーマンス特性
 
 #### 計算量
+
 - **空間計算量**: O(N) - パネルリストのみ
 - **時間計算量**: O(N² × max(C, R)) - パネル数が少ない場合に最適
 
 #### 実測値（想定）
-- パネル数10個、グリッド6列の場合:
-  - 1回の再配置: < 1ms
+
+- パネル数 10 個、グリッド 6 列の場合:
+  - 1 回の再配置: < 1ms
   - メモリ使用量: ~1KB
 
 ### 今後の改善案
 
 1. **パフォーマンス最適化**
-   - パネル数が50を超える場合はGridMapベースへの切り替えを検討
+
+   - パネル数が 50 を超える場合は GridMap ベースへの切り替えを検討
    - 連鎖の深さに上限を設定（現在: 無制限）
 
 2. **機能拡張**
+
    - 左方向・上方向への押しのけにも対応
    - パネルの最小サイズ制約
    - グリッドの境界でのリサイズ制限
 
-3. **UX改善**
+3. **UX 改善**
    - 押しのけられるパネルのアニメーション表示
    - 衝突プレビュー（ゴーストパネルでの表示）
