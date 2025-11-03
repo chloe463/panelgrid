@@ -197,12 +197,7 @@ describe("findNewPosition", () => {
       h: 2,
     };
 
-    const panelMap = new Map<string, PanelCoordinate>([
-      ["pusher", pusher],
-      ["pushed", pushed],
-    ]);
-
-    const newPos = findNewPosition(pushed, pusher, panelMap, 6);
+    const newPos = findNewPosition(pushed, pusher, 6);
     // pusher occupies x:0-1, so pushed should be pushed to x:2
     // pushRight = pusher.x + pusher.w - pushed.x = 0 + 2 - 1 = 1
     // newX = pushed.x + pushRight = 1 + 1 = 2
@@ -226,12 +221,7 @@ describe("findNewPosition", () => {
       h: 2,
     };
 
-    const panelMap = new Map<string, PanelCoordinate>([
-      ["pusher", pusher],
-      ["pushed", pushed],
-    ]);
-
-    const newPos = findNewPosition(pushed, pusher, panelMap, 6);
+    const newPos = findNewPosition(pushed, pusher, 6);
     // pusher occupies x:0-2, pushed is at x:2-4
     // pushRight = 0 + 3 - 2 = 1, newX would be 3, but 3 + 3 = 6 which fits
     // So it should push horizontally
@@ -255,12 +245,7 @@ describe("findNewPosition", () => {
       h: 2,
     };
 
-    const panelMap = new Map<string, PanelCoordinate>([
-      ["pusher", pusher],
-      ["pushed", pushed],
-    ]);
-
-    const newPos = findNewPosition(pushed, pusher, panelMap, 6);
+    const newPos = findNewPosition(pushed, pusher, 6);
     // pusher occupies x:0-3, pushed is at x:3-5
     // pushRight = 0 + 4 - 3 = 1, newX would be 4, but 4 + 3 = 7 > 6
     // Cannot fit horizontally, should push down
@@ -478,7 +463,7 @@ describe("rearrangePanels", () => {
 
 describe("compactLayout", () => {
   it("should return empty array for empty panels", () => {
-    const result = compactLayout([], 6);
+    const result = compactLayout([]);
     expect(result).toEqual([]);
   });
 
@@ -489,7 +474,7 @@ describe("compactLayout", () => {
       { id: "panel-3", x: 0, y: 2, w: 2, h: 1 },
     ];
 
-    const result = compactLayout(panels, 6);
+    const result = compactLayout(panels);
 
     expect(result).toHaveLength(3);
     expect(result.find((p) => p.id === "panel-1")).toEqual({
@@ -522,7 +507,7 @@ describe("compactLayout", () => {
       { id: "panel-2", x: 0, y: 2, w: 2, h: 1 },
     ];
 
-    const result = compactLayout(panels, 6);
+    const result = compactLayout(panels);
 
     expect(result).toHaveLength(2);
     expect(result.find((p) => p.id === "panel-1")).toEqual({
@@ -549,7 +534,7 @@ describe("compactLayout", () => {
       { id: "panel-2", x: 0, y: 4, w: 2, h: 1 },
     ];
 
-    const result = compactLayout(panels, 6);
+    const result = compactLayout(panels);
 
     expect(result).toHaveLength(2);
     expect(result.find((p) => p.id === "panel-1")).toEqual({
@@ -576,7 +561,7 @@ describe("compactLayout", () => {
       { id: "panel-2", x: 0, y: 3, w: 2, h: 2 }, // occupies rows 3-4
     ];
 
-    const result = compactLayout(panels, 6);
+    const result = compactLayout(panels);
 
     expect(result).toHaveLength(2);
     expect(result.find((p) => p.id === "panel-1")).toEqual({
@@ -605,7 +590,7 @@ describe("compactLayout", () => {
       { id: "panel-3", x: 0, y: 4, w: 2, h: 1 }, // row 4
     ];
 
-    const result = compactLayout(panels, 6);
+    const result = compactLayout(panels);
 
     expect(result).toHaveLength(3);
     expect(result.find((p) => p.id === "panel-1")?.y).toBe(0); // no change
