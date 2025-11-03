@@ -32,7 +32,10 @@
 }
 
 .panel--with-transition {
-  transition: top 0.15s ease-out, left 0.15s ease-out, width 0.1s ease-out,
+  transition:
+    top 0.15s ease-out,
+    left 0.15s ease-out,
+    width 0.1s ease-out,
     height 0.1s ease-out;
 }
 

@@ -24,11 +24,7 @@ function PanelComponent(props: Props) {
   useDnd({ panelId: props.panelId, el: ref });
 
   return (
-    <div
-      className={`panel ${isActive ? "" : "panel--with-transition"}`}
-      ref={ref}
-      style={style}
-    >
+    <div className={`panel ${isActive ? "" : "panel--with-transition"}`} ref={ref} style={style}>
       {props.children}
       <span className="resize-handle"></span>
     </div>

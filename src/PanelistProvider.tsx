@@ -139,11 +139,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       };
 
       // Rearrange panels to resolve any collisions
-      const rearrangedPanels = rearrangePanels(
-        resizedPanel,
-        state.panels,
-        state.columnCount
-      );
+      const rearrangedPanels = rearrangePanels(resizedPanel, state.panels, state.columnCount);
 
       return {
         ...state,
@@ -164,11 +160,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       };
 
       // Rearrange panels to resolve any collisions
-      const rearrangedPanels = rearrangePanels(
-        movedPanel,
-        state.panels,
-        state.columnCount
-      );
+      const rearrangedPanels = rearrangePanels(movedPanel, state.panels, state.columnCount);
 
       return {
         ...state,
@@ -231,36 +223,23 @@ export function PanelistProvider(props: PanelistProviderProps) {
   const [state, dispatch] = useReducer(panelistReducer, initialState);
 
   const addPanel = useCallback(() => dispatch({ type: "ADD_PANEL" }), []);
-  const removePanel = useCallback(
-    (id: PanelId) => dispatch({ type: "REMOVE_PANEL", id }),
-    []
-  );
+  const removePanel = useCallback((id: PanelId) => dispatch({ type: "REMOVE_PANEL", id }), []);
   const resizePanel = useCallback(
-    (id: PanelId, w: number, h: number) =>
-      dispatch({ type: "RESIZE_PANEL", id, w, h }),
+    (id: PanelId, w: number, h: number) => dispatch({ type: "RESIZE_PANEL", id, w, h }),
     []
   );
-  const movePanel = useCallback(
-    (id: PanelId, x: number, y: number) =>
-      dispatch({ type: "MOVE_PANEL", id, x, y }),
-    []
-  );
+  const movePanel = useCallback((id: PanelId, x: number, y: number) => dispatch({ type: "MOVE_PANEL", id, x, y }), []);
 
   const movingPanel = useCallback(
-    (id: PanelId, x: number, y: number) =>
-      dispatch({ type: "MOVING_PANEL", id, x, y }),
+    (id: PanelId, x: number, y: number) => dispatch({ type: "MOVING_PANEL", id, x, y }),
     []
   );
   const resizingPanel = useCallback(
-    (id: PanelId, w: number, h: number) =>
-      dispatch({ type: "RESIZING_PANEL", id, w, h }),
+    (id: PanelId, w: number, h: number) => dispatch({ type: "RESIZING_PANEL", id, w, h }),
     []
   );
 
-  const setBaseSize = useCallback(
-    (baseSize: number) => dispatch({ type: "SET_BASE_SIZE", baseSize }),
-    []
-  );
+  const setBaseSize = useCallback((baseSize: number) => dispatch({ type: "SET_BASE_SIZE", baseSize }), []);
 
   return (
     <PanelistStateContext.Provider value={state}>

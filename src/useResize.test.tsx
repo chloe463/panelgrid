@@ -41,11 +41,7 @@ describe("useResize", () => {
 
   const createWrapper = (panelId: string | number = "test-panel") => {
     return ({ children }: { children: ReactNode }) => (
-      <PanelistProvider
-        columnCount={4}
-        gap={8}
-        panelCoordinates={[{ id: panelId, x: 0, y: 0, w: 2, h: 2 }]}
-      >
+      <PanelistProvider columnCount={4} gap={8} panelCoordinates={[{ id: panelId, x: 0, y: 0, w: 2, h: 2 }]}>
         {children}
       </PanelistProvider>
     );
@@ -267,10 +263,9 @@ describe("useResize", () => {
     // Spy on AbortController to verify cleanup is called
     const abortSpy = vi.spyOn(AbortController.prototype, "abort");
 
-    const { unmount } = renderHook(
-      () => useResize({ panelId: "test-panel", el: ref }),
-      { wrapper: createWrapper("test-panel") }
-    );
+    const { unmount } = renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+      wrapper: createWrapper("test-panel"),
+    });
 
     // Verify that abort wasn't called yet
     expect(abortSpy).not.toHaveBeenCalled();
@@ -301,11 +296,7 @@ describe("useResize", () => {
     }));
 
     const customWrapper = ({ children }: { children: ReactNode }) => (
-      <PanelistProvider
-        columnCount={4}
-        gap={10}
-        panelCoordinates={[{ id: "test-panel", x: 0, y: 0, w: 2, h: 2 }]}
-      >
+      <PanelistProvider columnCount={4} gap={10} panelCoordinates={[{ id: "test-panel", x: 0, y: 0, w: 2, h: 2 }]}>
         {children}
       </PanelistProvider>
     );

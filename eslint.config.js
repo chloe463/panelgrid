@@ -16,10 +16,7 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     rules: {
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_" },
-      ],
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
       "react-refresh/only-export-components": "off",
     },
     languageOptions: {

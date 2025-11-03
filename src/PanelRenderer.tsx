@@ -22,9 +22,7 @@ export function PanelRenderer(props: PanelRendererProps) {
       return;
     }
     const rect = ref.current.getBoundingClientRect();
-    const baseSize = Math.floor(
-      (rect.width - gap * (columnCount - 1)) / columnCount
-    );
+    const baseSize = Math.floor((rect.width - gap * (columnCount - 1)) / columnCount);
     setBaseSize(baseSize);
   }, [columnCount, gap, setBaseSize]);
 
@@ -33,9 +31,7 @@ export function PanelRenderer(props: PanelRendererProps) {
     const observer = new ResizeObserver((entries) => {
       const [entry] = entries;
       const rect = entry.contentRect;
-      const baseSize = Math.floor(
-        (rect.width - gap * (columnCount - 1)) / columnCount
-      );
+      const baseSize = Math.floor((rect.width - gap * (columnCount - 1)) / columnCount);
       setBaseSize(baseSize);
     });
     observer.observe(ref.current);

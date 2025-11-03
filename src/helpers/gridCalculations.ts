@@ -4,11 +4,7 @@
  *
  * ピクセル値をグリッド単位に変換します。セルサイズ (baseSize + gap) で割り、小数点は切り上げて整数にします。
  */
-export function pixelsToGridSize(
-  pixels: number,
-  baseSize: number,
-  gap: number
-): number {
+export function pixelsToGridSize(pixels: number, baseSize: number, gap: number): number {
   return Math.ceil(pixels / (baseSize + gap));
 }
 
@@ -19,11 +15,7 @@ export function pixelsToGridSize(
  * ピクセル座標をグリッド座標に変換します。セルサイズで割り、小数点は切り捨てて整数にします。
  * 結果が負にならないようにします。
  */
-export function pixelsToGridPosition(
-  pixels: number,
-  baseSize: number,
-  gap: number
-): number {
+export function pixelsToGridPosition(pixels: number, baseSize: number, gap: number): number {
   return Math.max(0, Math.floor(pixels / (baseSize + gap)));
 }
 
@@ -36,11 +28,7 @@ export function pixelsToGridPosition(
  * 計算式: gridUnits * baseSize + max(0, gridUnits - 1) * gap
  * グリッドセル間の gap を考慮しますが、最後のセルの後には gap を含めません。
  */
-export function gridToPixels(
-  gridUnits: number,
-  baseSize: number,
-  gap: number
-): number {
+export function gridToPixels(gridUnits: number, baseSize: number, gap: number): number {
   return gridUnits * baseSize + Math.max(0, gridUnits - 1) * gap;
 }
 
@@ -53,11 +41,7 @@ export function gridToPixels(
  * 計算式: max(0, gridCoord * (baseSize + gap))
  * 各セルの後に gap を含めて、グリッド内での適切な位置決めを行います。
  */
-export function gridPositionToPixels(
-  gridCoord: number,
-  baseSize: number,
-  gap: number
-): number {
+export function gridPositionToPixels(gridCoord: number, baseSize: number, gap: number): number {
   return Math.max(0, gridCoord * (baseSize + gap));
 }
 
@@ -68,11 +52,7 @@ export function gridPositionToPixels(
  * ピクセル値を最も近いグリッド位置にスナップします。
  * ドラッグ・リサイズ操作後に要素をグリッドに整列させる際に利用する。
  */
-export function snapToGrid(
-  pixels: number,
-  baseSize: number,
-  gap: number
-): number {
+export function snapToGrid(pixels: number, baseSize: number, gap: number): number {
   const gridPosition = pixelsToGridPosition(pixels, baseSize, gap);
   return gridPositionToPixels(gridPosition, baseSize, gap);
 }
