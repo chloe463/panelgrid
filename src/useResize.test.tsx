@@ -53,7 +53,7 @@ describe("useResize", () => {
 
     const addEventListenerSpy = vi.spyOn(resizeHandle, "addEventListener");
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -73,7 +73,7 @@ describe("useResize", () => {
     });
 
     expect(() => {
-      renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+      renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
         wrapper: createWrapper("test-panel"),
       });
     }).toThrow("No handle found!");
@@ -83,7 +83,7 @@ describe("useResize", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: panel, writable: true });
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -137,7 +137,7 @@ describe("useResize", () => {
       return rafCallbacks.length;
     });
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -198,7 +198,7 @@ describe("useResize", () => {
       toJSON: () => ({}),
     }));
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -238,7 +238,7 @@ describe("useResize", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: panel, writable: true });
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -263,7 +263,7 @@ describe("useResize", () => {
     // Spy on AbortController to verify cleanup is called
     const abortSpy = vi.spyOn(AbortController.prototype, "abort");
 
-    const { unmount } = renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    const { unmount } = renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -301,7 +301,7 @@ describe("useResize", () => {
       </PanelistProvider>
     );
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: customWrapper,
     });
 
@@ -330,7 +330,7 @@ describe("useResize", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: panel, writable: true });
 
-    renderHook(() => useResize({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useResize({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 

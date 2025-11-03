@@ -1,23 +1,31 @@
 import { useMemo } from "react";
-import { usePanelState } from "./PanelistProvider";
+import { usePanelState, type PanelId } from "./PanelistProvider";
+import { useResize } from "./useResize";
+import { useDnd } from "./useDnd";
+import { gridToPixels, gridPositionToPixels } from "./helpers/gridCalculations";
 
 interface UsePanelOptions {
+  panelId: PanelId;
   x: number;
   y: number;
   w: number;
   h: number;
+  ref: React.RefObject<HTMLDivElement | null>;
 }
 
 export function usePanel(options: UsePanelOptions) {
-  const { x, y, w, h } = options;
+  const { panelId, x, y, w, h, ref } = options;
   const { baseSize, gap } = usePanelState();
 
-  return useMemo(() => {
-    const width = baseSize * w + gap * Math.max(0, w - 1);
-    const height = baseSize * h + gap * Math.max(0, h - 1);
+  useResize<HTMLDivElement>({ panelId, ref: ref });
+  useDnd({ panelId, ref: ref });
 
-    const left = x * (baseSize + gap);
-    const top = y * (baseSize + gap);
+  const style = useMemo(() => {
+    const width = gridToPixels(w, baseSize, gap);
+    const height = gridToPixels(h, baseSize, gap);
+
+    const left = gridPositionToPixels(x, baseSize, gap);
+    const top = gridPositionToPixels(y, baseSize, gap);
 
     return {
       top: `${top}px`,
@@ -26,4 +34,6 @@ export function usePanel(options: UsePanelOptions) {
       height: `${height}px`,
     };
   }, [x, y, w, h, baseSize, gap]);
+
+  return { style, ref };
 }

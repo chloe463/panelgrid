@@ -54,7 +54,7 @@ describe("useDnd", () => {
 
     const addEventListenerSpy = vi.spyOn(draggable, "addEventListener");
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -69,7 +69,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -92,7 +92,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -135,7 +135,7 @@ describe("useDnd", () => {
       return rafCallbacks.length;
     });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -186,7 +186,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -225,7 +225,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -260,7 +260,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -288,7 +288,7 @@ describe("useDnd", () => {
     // Spy on AbortController to verify cleanup is called
     const abortSpy = vi.spyOn(AbortController.prototype, "abort");
 
-    const { unmount } = renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    const { unmount } = renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -314,7 +314,7 @@ describe("useDnd", () => {
       </PanelistProvider>
     );
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: customWrapper,
     });
 
@@ -361,7 +361,7 @@ describe("useDnd", () => {
       return rafCallbacks.length;
     });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 
@@ -417,7 +417,7 @@ describe("useDnd", () => {
     const ref = createRef<HTMLDivElement>();
     Object.defineProperty(ref, "current", { value: draggable, writable: true });
 
-    renderHook(() => useDnd({ panelId: "test-panel", el: ref }), {
+    renderHook(() => useDnd({ panelId: "test-panel", ref: ref }), {
       wrapper: createWrapper("test-panel"),
     });
 

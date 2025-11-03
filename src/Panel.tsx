@@ -1,13 +1,10 @@
 import React, { useRef } from "react";
 
-import { useDnd } from "./useDnd";
-import { useResize } from "./useResize";
-
 import "./styles.css";
 import { usePanel } from "./usePanel";
 import { type PanelId } from "./PanelistProvider";
 
-type PanelBaseProps = Parameters<typeof usePanel>[0];
+type PanelBaseProps = Omit<Parameters<typeof usePanel>[0], "ref">;
 
 interface Props extends PanelBaseProps {
   panelId: PanelId;
@@ -16,12 +13,10 @@ interface Props extends PanelBaseProps {
 }
 
 function PanelComponent(props: Props) {
-  const { x, y, w, h, isActive } = props;
-  const style = usePanel({ x, y, w, h });
+  const { panelId, x, y, w, h, isActive } = props;
 
   const ref = useRef<HTMLDivElement | null>(null);
-  useResize<HTMLDivElement>({ panelId: props.panelId, el: ref });
-  useDnd({ panelId: props.panelId, el: ref });
+  const { style } = usePanel({ panelId, x, y, w, h, ref });
 
   return (
     <div className={`panel ${isActive ? "" : "panel--with-transition"}`} ref={ref} style={style}>
