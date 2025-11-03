@@ -3,7 +3,7 @@
   display: grid;
   grid-template-columns: repeat(var(--column-count, 6), 1fr);
   width: 100%;
-  gap: var(--panel-gap, 8px);
+  gap: var(--gap, 8px);
 }
 
 .panel-placeholder {

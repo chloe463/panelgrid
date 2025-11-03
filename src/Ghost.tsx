@@ -1,16 +1,19 @@
 import { type CSSProperties, useMemo } from "react";
 
-import { usePanelState } from "./PanelistProvider";
+import { useDragState } from "./contexts/DragStateContext";
+import { useGridConfig } from "./contexts/GridConfigContext";
+import { gridToPixels, gridPositionToPixels } from "./helpers/gridCalculations";
 
 export function Ghost() {
-  const { ghostPanel, baseSize, gap } = usePanelState();
+  const { ghostPanel } = useDragState();
+  const { baseSize, gap } = useGridConfig();
   const style: CSSProperties = useMemo(() => {
     if (!ghostPanel) return {};
     return {
-      left: ghostPanel.x * (baseSize + gap),
-      top: ghostPanel.y * (baseSize + gap),
-      width: ghostPanel.w * baseSize + (ghostPanel.w - 1) * gap,
-      height: ghostPanel.h * baseSize + (ghostPanel.h - 1) * gap,
+      left: gridPositionToPixels(ghostPanel.x, baseSize, gap),
+      top: gridPositionToPixels(ghostPanel.y, baseSize, gap),
+      width: gridToPixels(ghostPanel.w, baseSize, gap),
+      height: gridToPixels(ghostPanel.h, baseSize, gap),
     };
   }, [ghostPanel, baseSize, gap]);
 

@@ -1,8 +1,9 @@
 import { useMemo } from "react";
-import { usePanelState, type PanelId } from "./PanelistProvider";
+import type { PanelId } from "./PanelistProvider";
 import { useResize } from "./useResize";
 import { useDnd } from "./useDnd";
 import { gridToPixels, gridPositionToPixels } from "./helpers/gridCalculations";
+import { useGridConfig } from "./contexts/GridConfigContext";
 
 interface UsePanelOptions {
   panelId: PanelId;
@@ -15,7 +16,7 @@ interface UsePanelOptions {
 
 export function usePanel(options: UsePanelOptions) {
   const { panelId, x, y, w, h, ref } = options;
-  const { baseSize, gap } = usePanelState();
+  const { baseSize, gap } = useGridConfig();
 
   useResize<HTMLDivElement>({ panelId, ref: ref });
   useDnd({ panelId, ref: ref });

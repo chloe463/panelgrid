@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { rearrangePanels } from "./helpers/rearrangement";
+import { GridConfigProvider, useGridConfig } from "./contexts/GridConfigContext";
+import { DragStateProvider, useDragStateControls } from "./contexts/DragStateContext";
 
 export type PanelId = number | string;
 
@@ -12,29 +14,12 @@ interface PanelCoordinate {
   h: number;
 }
 
-interface GhostPanel {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-interface Panelist {
-  columnCount: number;
-  gap: number;
-  baseSize: number;
+interface PanelsState {
   panels: PanelCoordinate[];
-  ghostPanel: GhostPanel | null;
-  activePanelId: PanelId | null;
 }
 
-const PanelistStateContext = createContext<Panelist>({
-  columnCount: 4,
-  gap: 8,
-  baseSize: 80,
+const PanelsStateContext = createContext<PanelsState>({
   panels: [],
-  ghostPanel: null,
-  activePanelId: null,
 });
 
 interface PanelistControls {
@@ -44,7 +29,6 @@ interface PanelistControls {
   removePanel: (id: PanelId) => void;
   movingPanel: (id: PanelId, x: number, y: number) => void;
   resizingPanel: (id: PanelId, w: number, h: number) => void;
-  setBaseSize: (baseSize: number) => void;
 }
 
 const PanelistControlContext = createContext<PanelistControls>({
@@ -54,7 +38,6 @@ const PanelistControlContext = createContext<PanelistControls>({
   movePanel: (_id: PanelId, _x: number, _y: number) => void 0,
   movingPanel: (_id: PanelId, _x: number, _y: number) => void 0,
   resizingPanel: (_id: PanelId, _w: number, _h: number) => void 0,
-  setBaseSize: (_baseSize: number) => void 0,
 });
 
 type Action =
@@ -70,40 +53,17 @@ type Action =
       id: PanelId;
       w: number;
       h: number;
+      columnCount: number;
     }
   | {
       type: "MOVE_PANEL";
       id: PanelId;
       x: number;
       y: number;
-    }
-  | {
-      type: "MOVING_PANEL";
-      id: PanelId;
-      x: number;
-      y: number;
-    }
-  | {
-      type: "RESIZING_PANEL";
-      id: PanelId;
-      w: number;
-      h: number;
-    }
-  | {
-      type: "SET_BASE_SIZE";
-      baseSize: number;
+      columnCount: number;
     };
 
-const INITIAL_STATE: Panelist = {
-  columnCount: 4,
-  gap: 8,
-  baseSize: 80,
-  panels: [],
-  ghostPanel: null,
-  activePanelId: null,
-};
-
-function panelistReducer(state: Panelist, action: Action): Panelist {
+function panelsReducer(state: PanelsState, action: Action): PanelsState {
   switch (action.type) {
     case "ADD_PANEL": {
       // TODO: 追加するパネルのポジションを計算する
@@ -139,13 +99,11 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       };
 
       // Rearrange panels to resolve any collisions
-      const rearrangedPanels = rearrangePanels(resizedPanel, state.panels, state.columnCount);
+      const rearrangedPanels = rearrangePanels(resizedPanel, state.panels, action.columnCount);
 
       return {
         ...state,
         panels: rearrangedPanels,
-        ghostPanel: null,
-        activePanelId: null,
       };
     }
     case "MOVE_PANEL": {
@@ -160,47 +118,11 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       };
 
       // Rearrange panels to resolve any collisions
-      const rearrangedPanels = rearrangePanels(movedPanel, state.panels, state.columnCount);
+      const rearrangedPanels = rearrangePanels(movedPanel, state.panels, action.columnCount);
 
       return {
         ...state,
         panels: rearrangedPanels,
-        ghostPanel: null,
-        activePanelId: null,
-      };
-    }
-    case "MOVING_PANEL": {
-      const movingPanel = state.panels.find((panel) => panel.id === action.id);
-      if (!movingPanel) return state;
-      return {
-        ...state,
-        activePanelId: action.id,
-        ghostPanel: {
-          x: action.x,
-          y: action.y,
-          w: movingPanel.w,
-          h: movingPanel.h,
-        },
-      };
-    }
-    case "RESIZING_PANEL": {
-      const movingPanel = state.panels.find((panel) => panel.id === action.id);
-      if (!movingPanel) return state;
-      return {
-        ...state,
-        activePanelId: action.id,
-        ghostPanel: {
-          x: movingPanel.x,
-          y: movingPanel.y,
-          w: action.w,
-          h: action.h,
-        },
-      };
-    }
-    case "SET_BASE_SIZE": {
-      return {
-        ...state,
-        baseSize: action.baseSize,
       };
     }
   }
@@ -209,40 +131,58 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
 interface PanelistProviderProps {
   columnCount: number;
   gap: number;
+  baseSize?: number;
   panelCoordinates?: PanelCoordinate[];
   children: ReactNode;
 }
 
-export function PanelistProvider(props: PanelistProviderProps) {
-  const initialState: typeof INITIAL_STATE = {
-    ...INITIAL_STATE,
-    columnCount: props.columnCount,
-    gap: props.gap,
+function PanelsProvider(props: { panelCoordinates?: PanelCoordinate[]; children: ReactNode }) {
+  const initialState: PanelsState = {
     panels: props.panelCoordinates || [],
   };
-  const [state, dispatch] = useReducer(panelistReducer, initialState);
+  const [state, dispatch] = useReducer(panelsReducer, initialState);
+  const { columnCount } = useGridConfig();
+  const { setGhostPanel, clearGhostPanel } = useDragStateControls();
 
   const addPanel = useCallback(() => dispatch({ type: "ADD_PANEL" }), []);
   const removePanel = useCallback((id: PanelId) => dispatch({ type: "REMOVE_PANEL", id }), []);
   const resizePanel = useCallback(
-    (id: PanelId, w: number, h: number) => dispatch({ type: "RESIZE_PANEL", id, w, h }),
-    []
+    (id: PanelId, w: number, h: number) => {
+      dispatch({ type: "RESIZE_PANEL", id, w, h, columnCount });
+      clearGhostPanel();
+    },
+    [columnCount, clearGhostPanel]
   );
-  const movePanel = useCallback((id: PanelId, x: number, y: number) => dispatch({ type: "MOVE_PANEL", id, x, y }), []);
+  const movePanel = useCallback(
+    (id: PanelId, x: number, y: number) => {
+      dispatch({ type: "MOVE_PANEL", id, x, y, columnCount });
+      clearGhostPanel();
+    },
+    [columnCount, clearGhostPanel]
+  );
 
   const movingPanel = useCallback(
-    (id: PanelId, x: number, y: number) => dispatch({ type: "MOVING_PANEL", id, x, y }),
-    []
-  );
-  const resizingPanel = useCallback(
-    (id: PanelId, w: number, h: number) => dispatch({ type: "RESIZING_PANEL", id, w, h }),
-    []
+    (id: PanelId, x: number, y: number) => {
+      const panel = state.panels.find((p) => p.id === id);
+      if (panel) {
+        setGhostPanel(id, x, y, panel.w, panel.h);
+      }
+    },
+    [state.panels, setGhostPanel]
   );
 
-  const setBaseSize = useCallback((baseSize: number) => dispatch({ type: "SET_BASE_SIZE", baseSize }), []);
+  const resizingPanel = useCallback(
+    (id: PanelId, w: number, h: number) => {
+      const panel = state.panels.find((p) => p.id === id);
+      if (panel) {
+        setGhostPanel(id, panel.x, panel.y, w, h);
+      }
+    },
+    [state.panels, setGhostPanel]
+  );
 
   return (
-    <PanelistStateContext.Provider value={state}>
+    <PanelsStateContext.Provider value={state}>
       <PanelistControlContext.Provider
         value={{
           addPanel,
@@ -251,19 +191,28 @@ export function PanelistProvider(props: PanelistProviderProps) {
           movePanel,
           movingPanel,
           resizingPanel,
-          setBaseSize,
         }}
       >
         {props.children}
       </PanelistControlContext.Provider>
-    </PanelistStateContext.Provider>
+    </PanelsStateContext.Provider>
   );
 }
 
-export function usePanelState() {
-  const context = useContext(PanelistStateContext);
+export function PanelistProvider(props: PanelistProviderProps) {
+  return (
+    <GridConfigProvider columnCount={props.columnCount} gap={props.gap} baseSize={props.baseSize}>
+      <DragStateProvider>
+        <PanelsProvider panelCoordinates={props.panelCoordinates}>{props.children}</PanelsProvider>
+      </DragStateProvider>
+    </GridConfigProvider>
+  );
+}
+
+export function usePanelsState() {
+  const context = useContext(PanelsStateContext);
   if (!context) {
-    throw new Error("usePanelState must be used in PanelistProvider");
+    throw new Error("usePanelsState must be used in PanelistProvider");
   }
 
   return context;
