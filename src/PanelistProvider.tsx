@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
+import { rearrangePanels } from "./helpers/rearrangement";
 
 export type PanelId = number | string;
 
@@ -24,6 +25,7 @@ interface Panelist {
   baseSize: number;
   panels: PanelCoordinate[];
   ghostPanel: GhostPanel | null;
+  activePanelId: PanelId | null;
 }
 
 const PanelistStateContext = createContext<Panelist>({
@@ -32,6 +34,7 @@ const PanelistStateContext = createContext<Panelist>({
   baseSize: 80,
   panels: [],
   ghostPanel: null,
+  activePanelId: null,
 });
 
 interface PanelistControls {
@@ -97,6 +100,7 @@ const INITIAL_STATE: Panelist = {
   baseSize: 80,
   panels: [],
   ghostPanel: null,
+  activePanelId: null,
 };
 
 function panelistReducer(state: Panelist, action: Action): Panelist {
@@ -126,29 +130,51 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
     case "RESIZE_PANEL": {
       const index = state.panels.findIndex((panel) => panel.id === action.id);
       if (index === -1) return state;
-      // TODO: 重なりを考慮して、他の要素を動かす
+
+      // Create the resized panel
+      const resizedPanel = {
+        ...state.panels[index],
+        w: action.w,
+        h: action.h,
+      };
+
+      // Rearrange panels to resolve any collisions
+      const rearrangedPanels = rearrangePanels(
+        resizedPanel,
+        state.panels,
+        state.columnCount
+      );
+
       return {
         ...state,
-        panels: state.panels.with(index, {
-          ...state.panels[index],
-          w: action.w,
-          h: action.h,
-        }),
+        panels: rearrangedPanels,
         ghostPanel: null,
+        activePanelId: null,
       };
     }
     case "MOVE_PANEL": {
       const index = state.panels.findIndex((panel) => panel.id === action.id);
       if (index === -1) return state;
-      // TODO: 重なりを考慮して、他の要素を動かす
+
+      // Create the moved panel
+      const movedPanel = {
+        ...state.panels[index],
+        x: action.x,
+        y: action.y,
+      };
+
+      // Rearrange panels to resolve any collisions
+      const rearrangedPanels = rearrangePanels(
+        movedPanel,
+        state.panels,
+        state.columnCount
+      );
+
       return {
         ...state,
-        panels: state.panels.with(index, {
-          ...state.panels[index],
-          x: action.x,
-          y: action.y,
-        }),
+        panels: rearrangedPanels,
         ghostPanel: null,
+        activePanelId: null,
       };
     }
     case "MOVING_PANEL": {
@@ -156,6 +182,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       if (!movingPanel) return state;
       return {
         ...state,
+        activePanelId: action.id,
         ghostPanel: {
           x: action.x,
           y: action.y,
@@ -169,6 +196,7 @@ function panelistReducer(state: Panelist, action: Action): Panelist {
       if (!movingPanel) return state;
       return {
         ...state,
+        activePanelId: action.id,
         ghostPanel: {
           x: movingPanel.x,
           y: movingPanel.y,

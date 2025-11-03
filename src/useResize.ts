@@ -100,10 +100,6 @@ export function useResize<E extends HTMLElement = HTMLElement>(
                 window.requestAnimationFrame(() => {
                   panel.style.width = `${width}px`;
                   panel.style.height = `${height}px`;
-                  panel.style.transition = `all 100ms ease-in`;
-                  window.requestAnimationFrame(() => {
-                    panel.style.transition = "";
-                  });
                 });
               });
               resizePanel(id, nextW, nextH);

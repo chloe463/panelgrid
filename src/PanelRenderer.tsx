@@ -12,7 +12,7 @@ interface PanelRendererProps {
 
 export function PanelRenderer(props: PanelRendererProps) {
   const { itemRenderer } = props;
-  const { panels, columnCount, gap } = usePanelState();
+  const { panels, activePanelId, columnCount, gap } = usePanelState();
   const { setBaseSize } = usePanelContrls();
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -60,6 +60,7 @@ export function PanelRenderer(props: PanelRendererProps) {
         <Panel
           key={panel.id}
           panelId={panel.id}
+          isActive={activePanelId === panel.id}
           x={panel.x}
           y={panel.y}
           w={panel.w}

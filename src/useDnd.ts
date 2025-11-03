@@ -100,13 +100,9 @@ export function useDnd(options: UseDndOptions) {
             const deltaY = droppedTop - nextTop;
 
             draggable.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
-            draggable.style.transition = "transform 0s";
 
             window.requestAnimationFrame(() => {
               draggable.style.transform = "translate3D(0, 0, 0)";
-              draggable.style.transitionProperty = "transform";
-              draggable.style.transitionDuration = "100ms";
-              draggable.style.transitionTimingFunction = "ease-in";
             });
           });
 
