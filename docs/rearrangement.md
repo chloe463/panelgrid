@@ -104,213 +104,228 @@ Aを上に移動
 
 ### データ構造
 
-#### 1. GridMap (グリッドマップ)
+実装では以下のデータ構造を使用しています：
 
-パネルの占有状態を管理する 2 次元配列。
+#### PanelMap (パネルマップ)
 
-```typescript
-type GridMap = (PanelId | null)[][];
-```
-
-- 各セルには、そのセルを占有しているパネルの ID または null が格納される
-- columnCount × 行数の配列
-- 例: `gridMap[y][x]` でグリッド座標 (x, y) の占有状態を取得
-
-#### 2. SpaceMap (空きスペースマップ)
-
-各座標から見た利用可能なスペースを管理する 2 次元配列。
+パネルIDからパネル座標への高速マッピング。
 
 ```typescript
-interface SpaceInfo {
-  rightSpace: number; // 右方向の連続空きスペース数
-  downSpace: number; // 下方向の連続空きスペース数
-}
-
-type SpaceMap = SpaceInfo[][];
+type PanelMap = Map<PanelId, PanelCoordinate>;
 ```
+
+- キー: パネルID
+- 値: パネルの座標情報 (x, y, w, h)
+- O(1) でパネルの検索・更新が可能
 
 ### 主要なアルゴリズム
 
-#### 1. GridMap と SpaceMap の構築
+#### 1. 矩形の重なり判定 (`rectanglesOverlap`)
 
-```
-function buildGridMap(panels: PanelCoordinate[], columnCount: number): GridMap
-  1. 全パネルの最大Y座標を計算して必要な行数を決定
-  2. columnCount × rowCount の2次元配列を null で初期化
-  3. 各パネルについて:
-     - パネルが占有する範囲 (x ~ x+w-1, y ~ y+h-1) の全セルに panel.id を設定
-  4. GridMap を返す
+AABB (Axis-Aligned Bounding Box) テストを使用して2つのパネルが重なっているか判定します。
 
-function buildSpaceMap(gridMap: GridMap, columnCount: number): SpaceMap
-  1. gridMap と同じサイズの SpaceMap を初期化
-  2. 右下から左上に向かってループ (逆順):
-     for y = rowCount-1 to 0:
-       for x = columnCount-1 to 0:
-         if gridMap[y][x] が null:
-           // 右方向のスペースを計算
-           if x == columnCount-1:
-             rightSpace = 1
-           else:
-             rightSpace = spaceMap[y][x+1].rightSpace + 1
-
-           // 下方向のスペースを計算
-           if y == rowCount-1:
-             downSpace = 1
-           else:
-             downSpace = spaceMap[y+1][x].downSpace + 1
-         else:
-           rightSpace = 0
-           downSpace = 0
-
-         spaceMap[y][x] = { rightSpace, downSpace }
-  3. SpaceMap を返す
+```typescript
+function rectanglesOverlap(
+  a: { x: number; y: number; w: number; h: number },
+  b: { x: number; y: number; w: number; h: number }
+): boolean
+  // 2つの矩形が重ならない条件（以下のいずれか）:
+  // - a が b の左側にある: a.x + a.w <= b.x
+  // - b が a の左側にある: b.x + b.w <= a.x
+  // - a が b の上側にある: a.y + a.h <= b.y
+  // - b が a の上側にある: b.y + b.h <= a.y
+  // これらの条件がすべて false なら重なっている
+  return !(
+    a.x + a.w <= b.x ||
+    b.x + b.w <= a.x ||
+    a.y + a.h <= b.y ||
+    b.y + b.h <= a.y
+  )
 ```
 
-#### 2. 衝突検出
+#### 2. 衝突検出 (`detectCollisions`)
 
-```
+指定されたパネルと衝突する全てのパネルIDを返します。
+
+```typescript
 function detectCollisions(
-  movingPanel: PanelCoordinate,
-  gridMap: GridMap,
-  columnCount: number
+  panel: PanelCoordinate,
+  panelMap: Map<PanelId, PanelCoordinate>
 ): PanelId[]
-  1. 衝突したパネルIDを格納するSet を作成
-  2. movingPanel が占有する範囲をループ:
-     for y = movingPanel.y to movingPanel.y + movingPanel.h - 1:
-       for x = movingPanel.x to movingPanel.x + movingPanel.w - 1:
-         if x >= columnCount or y < 0:
-           continue  // グリッド外は無視
+  1. 衝突したパネルIDを格納する Set を作成
+  2. panelMap 内の全パネルをループ:
+     for each [id, other] of panelMap:
+       if id == panel.id:
+         continue  // 自分自身はスキップ
 
-         occupyingPanelId = gridMap[y][x]
-         if occupyingPanelId != null and occupyingPanelId != movingPanel.id:
-           Set に occupyingPanelId を追加
+       if rectanglesOverlap(panel, other):
+         Set に id を追加
+
   3. Set を配列に変換して返す
 ```
 
-#### 3. パネルの再配置（衝突回避）
+#### 3. 押しのける距離の計算 (`calculatePushDistance`)
 
+衝突したパネルを押しのけるための最小距離と方向を計算します。
+
+```typescript
+function calculatePushDistance(
+  pusher: PanelCoordinate,
+  pushed: PanelCoordinate,
+  columnCount: number
+): { direction: "right" | "down"; distance: number } | null
+  1. 横方向の押し距離を計算:
+     pushRight = pusher.x + pusher.w - pushed.x
+     canPushRight = pushed.x + pushed.w + pushRight <= columnCount
+
+  2. 縦方向の押し距離を計算:
+     pushDown = pusher.y + pusher.h - pushed.y
+
+  3. 優先順位1: 横方向に押せる場合は横を選択
+     if canPushRight and pushRight > 0:
+       return { direction: "right", distance: pushRight }
+
+  4. 優先順位2: 縦方向に押す
+     if pushDown > 0:
+       return { direction: "down", distance: pushDown }
+
+  5. 押す必要がない場合:
+     return null
 ```
+
+#### 4. 新しい位置の決定 (`findNewPosition`)
+
+押しのけられるパネルの新しい位置を計算します。
+
+```typescript
+function findNewPosition(
+  panel: PanelCoordinate,
+  pusher: PanelCoordinate,
+  columnCount: number
+): { x: number; y: number }
+  1. pushInfo = calculatePushDistance(pusher, panel, columnCount)
+
+  2. pushInfo が null の場合（押す必要がない場合のフォールバック）:
+     return { x: panel.x, y: panel.y + 1 }
+
+  3. 横方向に押す場合:
+     if pushInfo.direction == "right":
+       newX = panel.x + pushInfo.distance
+       if newX + panel.w <= columnCount:
+         return { x: newX, y: panel.y }
+       // 横方向に入らない場合は次のステップへ
+
+  4. 縦方向に押す:
+     return { x: panel.x, y: panel.y + pushInfo.distance }
+```
+
+#### 5. パネルの再配置 (`rearrangePanels`)
+
+パネルの移動・リサイズ時に衝突を解決するようにパネルを再配置します。
+
+```typescript
 function rearrangePanels(
   movingPanel: PanelCoordinate,
   allPanels: PanelCoordinate[],
   columnCount: number
 ): PanelCoordinate[]
-  1. gridMap = buildGridMap(allPanels without movingPanel, columnCount)
-  2. 処理待ちキュー: queue = [movingPanel]
-  3. 処理済みパネルID: processed = new Set()
-  4. 新しいパネル配置: newPanels = [...allPanels]
+  1. パネルIDから座標への高速マップを作成:
+     panelMap = new Map<PanelId, PanelCoordinate>()
+     for each panel in allPanels:
+       panelMap.set(panel.id, {...panel})
 
-  5. while queue が空でない:
-       currentPanel = queue.shift()
+  2. 移動中のパネルの位置をマップに反映:
+     panelMap.set(movingPanel.id, {...movingPanel})
 
-       if processed.has(currentPanel.id):
+  3. 処理待ちキュー: queue = [movingPanel]
+     処理済みパネルID: processed = new Set()
+
+  4. 衝突がなくなるまでパネルを処理:
+     while queue.length > 0:
+       current = queue.shift()
+
+       if processed.has(current.id):
          continue
-       processed.add(currentPanel.id)
+       processed.add(current.id)
 
-       // currentPanel が占有したい領域に衝突があるか確認
-       collidingIds = detectCollisions(currentPanel, gridMap, columnCount)
+       // 現在のパネル位置での衝突を検出
+       collidingIds = detectCollisions(current, panelMap)
 
        if collidingIds が空:
-         // 衝突なし: currentPanel の位置を gridMap に反映
-         updateGridMap(gridMap, currentPanel)
-         newPanels で currentPanel を更新
+         // 衝突なし、現在の位置を維持
+         panelMap.set(current.id, current)
          continue
 
-       // 衝突あり: 衝突したパネルを移動
+       // 衝突解決: 衝突したパネルを押しのける
        for each collidingId in collidingIds:
-         collidingPanel = newPanels.find(p => p.id == collidingId)
+         colliding = panelMap.get(collidingId)
+         if !colliding: continue
 
-         // gridMap から collidingPanel を削除
-         removeFromGridMap(gridMap, collidingPanel)
+         // 衝突したパネルを押しのける方向に移動
+         newPos = findNewPosition(colliding, current, columnCount)
 
-         // 移動先を探す
-         newPosition = findNewPosition(
-           collidingPanel,
-           currentPanel,
-           gridMap,
-           columnCount
-         )
+         // パネルの位置を更新
+         updated = {...colliding, x: newPos.x, y: newPos.y}
+         panelMap.set(collidingId, updated)
 
-         // collidingPanel の位置を更新
-         collidingPanel の座標を newPosition に更新
-         newPanels で collidingPanel を更新
+         // 再度衝突チェックのためキューに追加
+         queue.push(updated)
 
-         // 移動したパネルをキューに追加（再度衝突チェックが必要）
-         queue.push(collidingPanel)
+       // 現在のパネルの位置を確定
+       panelMap.set(current.id, current)
 
-       // currentPanel の位置を gridMap に反映
-       updateGridMap(gridMap, currentPanel)
-       newPanels で currentPanel を更新
+  5. 空行を削除してレイアウトを詰める:
+     compactedPanels = compactLayout(Array.from(panelMap.values()))
 
-  6. newPanels を返す
+  6. 再配置と圧縮後のパネルを返す:
+     return compactedPanels
 ```
 
-#### 4. 新しい位置の探索
+#### 6. 空行の削除 (`compactLayout`)
 
-```
-function findNewPosition(
-  panel: PanelCoordinate,
-  pusher: PanelCoordinate,
-  columnCount: number
-): {x: number, y: number}
-  1. spaceMap = buildSpaceMap(gridMap, columnCount)
+レイアウトから空行を削除してパネルを上に詰めます。
 
-  2. 優先順位1: 横方向（右方向）に空きスペースを探す
-     for x = panel.x + 1 to columnCount - panel.w:
-       y = panel.y
-       if canPlacePanel(panel, x, y, spaceMap):
-         return {x, y}
+```typescript
+function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[]
+  1. パネルが空の場合は空配列を返す:
+     if panels.length == 0: return []
 
-  3. 優先順位2: 縦方向（下方向）に空きスペースを探す
-     for y = panel.y + 1 to infinity:
-       x = panel.x
-       if canPlacePanel(panel, x, y, spaceMap):
-         return {x, y}
+  2. 最大Y座標を見つけてグリッドの高さを決定:
+     maxY = Math.max(...panels.map(p => p.y + p.h))
 
-       // 行が存在しない場合はグリッドを拡張
-       if y >= spaceMap.length:
-         return {x, y}
+  3. どの行にパネルがあるかのマップを構築:
+     rowOccupancy = new Array(maxY).fill(false)
+     for each panel in panels:
+       for y = panel.y to panel.y + panel.h - 1:
+         rowOccupancy[y] = true
 
-  4. 見つからない場合のフォールバック:
-     // グリッドの最下部に配置
-     return {x: panel.x, y: gridMap.length}
+  4. 各行のオフセット（その上にある空行の数）を計算:
+     rowOffsets = new Array(maxY).fill(0)
+     emptyRowCount = 0
+     for y = 0 to maxY - 1:
+       rowOffsets[y] = emptyRowCount
+       if !rowOccupancy[y]:
+         emptyRowCount++
 
-function canPlacePanel(
-  panel: PanelCoordinate,
-  x: number,
-  y: number,
-  spaceMap: SpaceMap
-): boolean
-  // 座標 (x, y) にサイズ (panel.w, panel.h) のパネルを配置できるか
-
-  1. if x + panel.w > columnCount:
-       return false  // 横幅オーバー
-
-  2. if y >= spaceMap.length:
-       return true  // グリッド拡張が必要だが配置可能
-
-  3. パネルの占有範囲をチェック:
-     for py = y to y + panel.h - 1:
-       for px = x to x + panel.w - 1:
-         if py >= spaceMap.length:
-           continue  // この行は存在しないが拡張可能
-
-         if spaceMap[py][px].rightSpace == 0:
-           return false  // このセルは既に占有されている
-
-     return true  // すべてのセルが空いている
+  5. パネルを行オフセット分だけ上に移動:
+     return panels.map(panel => ({
+       ...panel,
+       y: panel.y - rowOffsets[panel.y]
+     }))
 ```
 
 ### アルゴリズムの特徴
 
 1. **段階的な衝突解決**: キューを使用して、移動によって発生する連鎖的な衝突を順次解決
-2. **横優先の移動**: 仕様通り、まず横方向に空きスペースを探し、なければ縦方向に移動
-3. **グリッドの動的拡張**: 縦方向にスペースが足りない場合は、グリッドを下方向に拡張
-4. **効率的な空きスペース判定**: SpaceMap により、各座標から利用可能なスペースを O(1) で参照可能
+2. **押しのける挙動**: `calculatePushDistance` により最小限の距離だけパネルを移動
+3. **横優先の移動**: 横方向に入る場合は横を優先、入らない場合は縦方向に切り替え
+4. **空行の自動削除**: `compactLayout` により、再配置後の空行を自動的に削除
 
 ### 計算量
 
-- GridMap 構築: O(N × W × H) (N: パネル数, W/H: 平均幅/高さ)
-- SpaceMap 構築: O(R × C) (R: 行数, C: 列数)
-- 衝突検出: O(W × H) (移動パネルのサイズ)
-- 再配置全体: O(N² × W × H) (最悪ケース: 全パネルが連鎖的に移動)
+- **矩形の重なり判定**: O(1)
+- **衝突検出**: O(N) (全パネルとの判定)
+- **押しのける距離計算**: O(1)
+- **パネル再配置**: O(N²) (最悪ケース: 全パネルが連鎖的に移動)
+- **空行削除**: O(N × H + R) (H: 平均パネル高さ, R: 行数)
+- **全体**: O(N²) (パネル数が少ない場合に最適)
