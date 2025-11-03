@@ -8,12 +8,12 @@ import { throttleRAF } from "./helpers/throttle";
 
 interface UseDndOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
-  el: MutableRefObject<T | null>;
+  ref: MutableRefObject<T | null>;
 }
 
 export function useDnd(options: UseDndOptions) {
   const { panelId: id } = options;
-  const ref = options.el;
+  const ref = options.ref;
   const { baseSize, gap } = usePanelState();
   const { movePanel, movingPanel } = usePanelContrls();
 

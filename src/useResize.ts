@@ -6,11 +6,11 @@ import { throttleRAF } from "./helpers/throttle";
 
 interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
-  el: MutableRefObject<T | null>;
+  ref: MutableRefObject<T | null>;
 }
 
 export function useResize<E extends HTMLElement = HTMLElement>(options: UseResizeOptions<E>) {
-  const ref = options.el;
+  const ref = options.ref;
   const id = options.panelId;
   const { baseSize, gap } = usePanelState();
   const { resizePanel, resizingPanel } = usePanelContrls();

@@ -17,8 +17,8 @@ export function usePanel(options: UsePanelOptions) {
   const { panelId, x, y, w, h, ref } = options;
   const { baseSize, gap } = usePanelState();
 
-  useResize<HTMLDivElement>({ panelId, el: ref });
-  useDnd({ panelId, el: ref });
+  useResize<HTMLDivElement>({ panelId, ref: ref });
+  useDnd({ panelId, ref: ref });
 
   const style = useMemo(() => {
     const width = gridToPixels(w, baseSize, gap);
