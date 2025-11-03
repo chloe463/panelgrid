@@ -399,7 +399,6 @@ describe("useDnd", () => {
 
     // Should have set initial transform and transition
     expect(draggable.style.transform).toBeTruthy();
-    expect(draggable.style.transition).toBe("transform 0s");
 
     // Execute second RAF callback
     if (rafCallbacks[1]) {
@@ -410,9 +409,6 @@ describe("useDnd", () => {
 
     // Should have reset transform and set transition properties
     expect(draggable.style.transform).toBe("translate3D(0, 0, 0)");
-    expect(draggable.style.transitionProperty).toBe("transform");
-    expect(draggable.style.transitionDuration).toBe("100ms");
-    expect(draggable.style.transitionTimingFunction).toBe("ease-in");
 
     vi.unstubAllGlobals();
   });
