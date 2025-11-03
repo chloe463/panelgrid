@@ -18,10 +18,7 @@ export function useDnd(options: UseDndOptions) {
   const { movePanel, movingPanel } = usePanelContrls();
 
   // Throttle movingPanel to reduce re-renders during drag
-  const throttledMovingPanel = useMemo(
-    () => throttleRAF(movingPanel),
-    [movingPanel]
-  );
+  const throttledMovingPanel = useMemo(() => throttleRAF(movingPanel), [movingPanel]);
 
   useEffect(() => {
     if (!ref.current) return;

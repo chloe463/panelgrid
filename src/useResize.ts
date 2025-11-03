@@ -1,10 +1,6 @@
 import { useEffect, useMemo } from "react";
 import type { MutableRefObject } from "react";
-import {
-  usePanelState,
-  usePanelContrls,
-  type PanelId,
-} from "./PanelistProvider";
+import { usePanelState, usePanelContrls, type PanelId } from "./PanelistProvider";
 import { pixelsToGridSize, gridToPixels } from "./helpers";
 import { throttleRAF } from "./helpers/throttle";
 
@@ -13,19 +9,14 @@ interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   el: MutableRefObject<T | null>;
 }
 
-export function useResize<E extends HTMLElement = HTMLElement>(
-  options: UseResizeOptions<E>
-) {
+export function useResize<E extends HTMLElement = HTMLElement>(options: UseResizeOptions<E>) {
   const ref = options.el;
   const id = options.panelId;
   const { baseSize, gap } = usePanelState();
   const { resizePanel, resizingPanel } = usePanelContrls();
 
   // Throttle resizingPanel to reduce re-renders during resize
-  const throttledResizingPanel = useMemo(
-    () => throttleRAF(resizingPanel),
-    [resizingPanel]
-  );
+  const throttledResizingPanel = useMemo(() => throttleRAF(resizingPanel), [resizingPanel]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -60,16 +51,8 @@ export function useResize<E extends HTMLElement = HTMLElement>(
             ref.current.style.height = `${initialHeight + deltaY}px`;
             ref.current.style.zIndex = "calc(infinity)";
 
-            const nextW = pixelsToGridSize(
-              initialWidth + deltaX,
-              baseSize,
-              gap
-            );
-            const nextH = pixelsToGridSize(
-              initialHeight + deltaY,
-              baseSize,
-              gap
-            );
+            const nextW = pixelsToGridSize(initialWidth + deltaX, baseSize, gap);
+            const nextH = pixelsToGridSize(initialHeight + deltaY, baseSize, gap);
 
             throttledResizingPanel(id, nextW, nextH);
           },

@@ -30,10 +30,7 @@ export function rectanglesOverlap(
  * Detect all panels that collide with the given panel
  * 指定されたパネルと衝突する全てのパネルを検出
  */
-export function detectCollisions(
-  panel: PanelCoordinate,
-  panelMap: Map<PanelId, PanelCoordinate>
-): PanelId[] {
+export function detectCollisions(panel: PanelCoordinate, panelMap: Map<PanelId, PanelCoordinate>): PanelId[] {
   const collisions = new Set<PanelId>();
 
   for (const [id, other] of panelMap) {
