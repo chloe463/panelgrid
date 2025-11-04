@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from "react";
 import type { MutableRefObject } from "react";
-import { usePanelState, usePanelControls, type PanelId } from "./PanelistProvider";
+import { usePanelControls, type PanelId } from "./PanelistProvider";
 import { pixelsToGridSize, gridToPixels } from "./helpers";
 import { throttleRAF } from "./helpers/throttle";
+import { useGridConfig } from "./contexts/GridConfigContext";
 
 interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
   panelId: PanelId;
@@ -12,7 +13,7 @@ interface UseResizeOptions<T extends HTMLElement = HTMLDivElement> {
 export function useResize<E extends HTMLElement = HTMLElement>(options: UseResizeOptions<E>) {
   const ref = options.ref;
   const id = options.panelId;
-  const { baseSize, gap } = usePanelState();
+  const { baseSize, gap } = useGridConfig();
   const { resizePanel, resizingPanel } = usePanelControls();
 
   // Throttle resizingPanel to reduce re-renders during resize

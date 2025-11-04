@@ -13,10 +13,10 @@ interface Props extends PanelBaseProps {
 }
 
 function PanelComponent(props: Props) {
-  const { panelId, x, y, w, h, isActive } = props;
+  const { panelId, x, y, w, h, baseSize, gap, isActive } = props;
 
   const ref = useRef<HTMLDivElement | null>(null);
-  const { style } = usePanel({ panelId, x, y, w, h, ref });
+  const { style } = usePanel({ panelId, x, y, w, h, baseSize, gap, ref });
 
   return (
     <div className={`panel ${isActive ? "" : "panel--with-transition"}`} ref={ref} style={style}>
@@ -35,6 +35,8 @@ export const Panel = React.memo(PanelComponent, (prevProps, nextProps) => {
     prevProps.x === nextProps.x &&
     prevProps.y === nextProps.y &&
     prevProps.w === nextProps.w &&
-    prevProps.h === nextProps.h
+    prevProps.h === nextProps.h &&
+    prevProps.baseSize === nextProps.baseSize &&
+    prevProps.gap === nextProps.gap
   );
 });
