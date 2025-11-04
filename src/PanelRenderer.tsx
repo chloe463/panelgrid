@@ -16,7 +16,7 @@ export function PanelRenderer(props: PanelRendererProps) {
   const { itemRenderer } = props;
   const { panels } = usePanelsState();
   const { activePanelId } = useDragState();
-  const { columnCount, gap } = useGridConfig();
+  const { columnCount, baseSize, gap } = useGridConfig();
   const { setBaseSize } = useGridConfigControls();
 
   const ref = useRef<HTMLDivElement | null>(null);
@@ -56,6 +56,8 @@ export function PanelRenderer(props: PanelRendererProps) {
           y={panel.y}
           w={panel.w}
           h={panel.h}
+          baseSize={baseSize}
+          gap={gap}
         >
           {itemRenderer(panel.id)}
         </Panel>

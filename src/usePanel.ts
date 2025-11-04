@@ -3,7 +3,6 @@ import type { PanelId } from "./PanelistProvider";
 import { useResize } from "./useResize";
 import { useDnd } from "./useDnd";
 import { gridToPixels, gridPositionToPixels } from "./helpers/gridCalculations";
-import { useGridConfig } from "./contexts/GridConfigContext";
 
 interface UsePanelOptions {
   panelId: PanelId;
@@ -11,12 +10,13 @@ interface UsePanelOptions {
   y: number;
   w: number;
   h: number;
+  baseSize: number;
+  gap: number;
   ref: React.RefObject<HTMLDivElement | null>;
 }
 
 export function usePanel(options: UsePanelOptions) {
-  const { panelId, x, y, w, h, ref } = options;
-  const { baseSize, gap } = useGridConfig();
+  const { panelId, x, y, w, h, baseSize, gap, ref } = options;
 
   useResize<HTMLDivElement>({ panelId, ref: ref });
   useDnd({ panelId, ref: ref });
