@@ -124,6 +124,7 @@ function panelsReducer(state: PanelsState, action: Action): PanelsState {
       return {
         ...state,
         panels: rearrangedPanels,
+        activePanelId: null,
       };
     }
     case "START_MOVING_PANEL": {
@@ -149,6 +150,7 @@ function panelsReducer(state: PanelsState, action: Action): PanelsState {
       return {
         ...state,
         panels: rearrangedPanels,
+        activePanelId: null,
       };
     }
   }

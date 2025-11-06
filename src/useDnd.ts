@@ -95,16 +95,18 @@ export function useDnd(options: UseDndOptions) {
           const nextTop = gridPositionToPixels(nextY, baseSize, gap);
 
           // Animation
-          // window.requestAnimationFrame(() => {
-          //   const deltaX = droppedLeft - nextLeft;
-          //   const deltaY = droppedTop - nextTop;
+          window.requestAnimationFrame(() => {
+            const deltaX = droppedLeft - nextLeft;
+            const deltaY = droppedTop - nextTop;
 
-          //   draggable.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
+            draggable.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
+            draggable.style.transition = "";
 
-          //   window.requestAnimationFrame(() => {
-          //     draggable.style.transform = "translate3D(0, 0, 0)";
-          //   });
-          // });
+            window.requestAnimationFrame(() => {
+              draggable.style.transform = "translate3D(0, 0, 0)";
+              draggable.style.transition = "transform 0.1s ease-out";
+            });
+          });
 
           draggable.style.left = `${nextLeft}px`;
           draggable.style.top = `${nextTop}px`;
@@ -123,7 +125,7 @@ export function useDnd(options: UseDndOptions) {
     return () => {
       mouseDownListenerCtrl.abort();
     };
-  }, [movePanel, baseSize, gap, ref, id, throttledMovingPanel]);
+  }, [movePanel, baseSize, gap, ref, id, throttledMovingPanel, startMovingPanel]);
 
   return ref;
 }
