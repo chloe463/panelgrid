@@ -23,6 +23,14 @@ export function useDnd(options: UseDndOptions) {
 
   useEffect(() => {
     if (!ref.current) return;
+    ref.current.addEventListener("transitionend", () => {
+      if (!ref.current) return;
+      ref.current.style.transition = "";
+    });
+  }, [ref]);
+
+  useEffect(() => {
+    if (!ref.current) return;
     const draggable = ref.current;
     let isDragging = false;
     let initialX = 0;

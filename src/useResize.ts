@@ -21,6 +21,14 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
 
   useEffect(() => {
     if (!ref.current) return;
+    ref.current.addEventListener("animationend", () => {
+      if (!ref.current) return;
+      ref.current.style.transition = "";
+    });
+  }, [ref]);
+
+  useEffect(() => {
+    if (!ref.current) return;
 
     const handle = ref.current.querySelector(".resize-handle");
     if (!handle) throw new Error("No handle found!");
@@ -89,9 +97,6 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
                   panel.style.width = `${width}px`;
                   panel.style.height = `${height}px`;
                   panel.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
-                  window.requestAnimationFrame(() => {
-                    panel.style.transition = "";
-                  });
                 });
               });
               resizePanel(id, nextW, nextH);
@@ -109,7 +114,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
     );
 
     return () => mouseDownController.abort();
-  }, [id, baseSize, gap, resizePanel, ref, throttledResizingPanel]);
+  }, [id, baseSize, gap, resizePanel, ref, throttledResizingPanel, startResizingPanel]);
 
   return ref;
 }
