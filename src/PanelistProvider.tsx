@@ -16,15 +16,19 @@ interface PanelCoordinate {
 
 interface PanelsState {
   panels: PanelCoordinate[];
+  activePanelId: PanelId | null;
 }
 
 const PanelsStateContext = createContext<PanelsState>({
   panels: [],
+  activePanelId: null,
 });
 
 interface PanelistControls {
   addPanel: () => void;
+  startResizingPanel: (id: PanelId) => void;
   resizePanel: (id: PanelId, w: number, h: number) => void;
+  startMovingPanel: (id: PanelId) => void;
   movePanel: (id: PanelId, x: number, y: number) => void;
   removePanel: (id: PanelId) => void;
   movingPanel: (id: PanelId, x: number, y: number) => void;
@@ -34,7 +38,9 @@ interface PanelistControls {
 const PanelistControlContext = createContext<PanelistControls>({
   addPanel: () => void 0,
   removePanel: (_id: PanelId) => void 0,
+  startResizingPanel: (_id: PanelId) => void 0,
   resizePanel: (_id: PanelId, _w: number, _h: number) => void 0,
+  startMovingPanel: (_id: PanelId) => void 0,
   movePanel: (_id: PanelId, _x: number, _y: number) => void 0,
   movingPanel: (_id: PanelId, _x: number, _y: number) => void 0,
   resizingPanel: (_id: PanelId, _w: number, _h: number) => void 0,
@@ -49,11 +55,19 @@ type Action =
       id: PanelId;
     }
   | {
+      type: "START_RESIZING_PANEL";
+      id: PanelId;
+    }
+  | {
       type: "RESIZE_PANEL";
       id: PanelId;
       w: number;
       h: number;
       columnCount: number;
+    }
+  | {
+      type: "START_MOVING_PANEL";
+      id: PanelId;
     }
   | {
       type: "MOVE_PANEL";
@@ -87,6 +101,12 @@ function panelsReducer(state: PanelsState, action: Action): PanelsState {
         panels: state.panels.filter((panel) => panel.id !== action.id),
       };
     }
+    case "START_RESIZING_PANEL": {
+      return {
+        ...state,
+        activePanelId: action.id,
+      };
+    }
     case "RESIZE_PANEL": {
       const index = state.panels.findIndex((panel) => panel.id === action.id);
       if (index === -1) return state;
@@ -104,6 +124,13 @@ function panelsReducer(state: PanelsState, action: Action): PanelsState {
       return {
         ...state,
         panels: rearrangedPanels,
+        activePanelId: null,
+      };
+    }
+    case "START_MOVING_PANEL": {
+      return {
+        ...state,
+        activePanelId: action.id,
       };
     }
     case "MOVE_PANEL": {
@@ -123,6 +150,7 @@ function panelsReducer(state: PanelsState, action: Action): PanelsState {
       return {
         ...state,
         panels: rearrangedPanels,
+        activePanelId: null,
       };
     }
   }
@@ -139,6 +167,7 @@ interface PanelistProviderProps {
 function PanelsProvider(props: { panelCoordinates?: PanelCoordinate[]; children: ReactNode }) {
   const initialState: PanelsState = {
     panels: props.panelCoordinates || [],
+    activePanelId: null,
   };
   const [state, dispatch] = useReducer(panelsReducer, initialState);
   const { columnCount } = useGridConfig();
@@ -146,6 +175,7 @@ function PanelsProvider(props: { panelCoordinates?: PanelCoordinate[]; children:
 
   const addPanel = useCallback(() => dispatch({ type: "ADD_PANEL" }), []);
   const removePanel = useCallback((id: PanelId) => dispatch({ type: "REMOVE_PANEL", id }), []);
+  const startResizingPanel = useCallback((id: PanelId) => dispatch({ type: "START_RESIZING_PANEL", id }), []);
   const resizePanel = useCallback(
     (id: PanelId, w: number, h: number) => {
       dispatch({ type: "RESIZE_PANEL", id, w, h, columnCount });
@@ -160,6 +190,8 @@ function PanelsProvider(props: { panelCoordinates?: PanelCoordinate[]; children:
     },
     [columnCount, clearGhostPanel]
   );
+
+  const startMovingPanel = useCallback((id: PanelId) => dispatch({ type: "START_MOVING_PANEL", id }), []);
 
   const movingPanel = useCallback(
     (id: PanelId, x: number, y: number) => {
@@ -187,7 +219,9 @@ function PanelsProvider(props: { panelCoordinates?: PanelCoordinate[]; children:
         value={{
           addPanel,
           removePanel,
+          startResizingPanel,
           resizePanel,
+          startMovingPanel,
           movePanel,
           movingPanel,
           resizingPanel,

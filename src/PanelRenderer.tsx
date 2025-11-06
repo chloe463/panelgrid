@@ -1,12 +1,10 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
-import { Ghost } from "./Ghost";
 import { usePanelsState } from "./PanelistProvider";
 import type { PanelId } from "./PanelistProvider";
 import { Panel } from "./Panel";
 import { useGridConfig, useGridConfigControls } from "./contexts/GridConfigContext";
-import { useDragState } from "./contexts/DragStateContext";
 
 interface PanelRendererProps {
   itemRenderer: (id: PanelId) => ReactNode;
@@ -14,8 +12,7 @@ interface PanelRendererProps {
 
 export function PanelRenderer(props: PanelRendererProps) {
   const { itemRenderer } = props;
-  const { panels } = usePanelsState();
-  const { activePanelId } = useDragState();
+  const { panels, activePanelId } = usePanelsState();
   const { columnCount, baseSize, gap } = useGridConfig();
   const { setBaseSize } = useGridConfigControls();
 
@@ -62,7 +59,6 @@ export function PanelRenderer(props: PanelRendererProps) {
           {itemRenderer(panel.id)}
         </Panel>
       ))}
-      <Ghost />
     </div>
   );
 }

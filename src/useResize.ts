@@ -14,10 +14,18 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
   const ref = options.ref;
   const id = options.panelId;
   const { baseSize, gap } = useGridConfig();
-  const { resizePanel, resizingPanel } = usePanelControls();
+  const { startResizingPanel, resizePanel, resizingPanel } = usePanelControls();
 
   // Throttle resizingPanel to reduce re-renders during resize
   const throttledResizingPanel = useMemo(() => throttleRAF(resizingPanel), [resizingPanel]);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    ref.current.addEventListener("animationend", () => {
+      if (!ref.current) return;
+      ref.current.style.transition = "";
+    });
+  }, [ref]);
 
   useEffect(() => {
     if (!ref.current) return;
@@ -40,6 +48,9 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
 
         const mouseMoveController = new AbortController();
         const mouseUpController = new AbortController();
+
+        startResizingPanel(id);
+
         document.addEventListener(
           "mousemove",
           (e) => {
@@ -81,9 +92,11 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
               window.requestAnimationFrame(() => {
                 panel.style.width = `${rect.width}px`;
                 panel.style.height = `${rect.height}px`;
+                panel.style.transition = "";
                 window.requestAnimationFrame(() => {
                   panel.style.width = `${width}px`;
                   panel.style.height = `${height}px`;
+                  panel.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
                 });
               });
               resizePanel(id, nextW, nextH);
@@ -101,7 +114,7 @@ export function useResize<E extends HTMLElement = HTMLElement>(options: UseResiz
     );
 
     return () => mouseDownController.abort();
-  }, [id, baseSize, gap, resizePanel, ref, throttledResizingPanel]);
+  }, [id, baseSize, gap, resizePanel, ref, throttledResizingPanel, startResizingPanel]);
 
   return ref;
 }
