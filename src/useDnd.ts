@@ -16,7 +16,7 @@ export function useDnd(options: UseDndOptions) {
   const { panelId: id } = options;
   const ref = options.ref;
   const { baseSize, gap } = useGridConfig();
-  const { movePanel, movingPanel } = usePanelControls();
+  const { startMovingPanel, movePanel, movingPanel } = usePanelControls();
 
   // Throttle movingPanel to reduce re-renders during drag
   const throttledMovingPanel = useMemo(() => throttleRAF(movingPanel), [movingPanel]);
@@ -60,6 +60,8 @@ export function useDnd(options: UseDndOptions) {
           signal: mouseUpListenerCtrl.signal,
         });
 
+        startMovingPanel(id);
+
         function onMouseMove(e: MouseEvent) {
           if (!isDragging) return;
 
@@ -72,11 +74,11 @@ export function useDnd(options: UseDndOptions) {
           draggable.style.left = offsetX + deltaX + "px";
           draggable.style.top = offsetY + deltaY + "px";
 
-          const nextX = pixelsToGridPosition(offsetX + deltaX, baseSize, gap);
-          const nextY = pixelsToGridPosition(offsetY + deltaY, baseSize, gap);
+          // const nextX = pixelsToGridPosition(offsetX + deltaX, baseSize, gap);
+          // const nextY = pixelsToGridPosition(offsetY + deltaY, baseSize, gap);
 
           e.preventDefault(); // Prevent text selection during drag
-          throttledMovingPanel(id, nextX, nextY);
+          // throttledMovingPanel(id, nextX, nextY);
         }
 
         function onMouseUp() {
@@ -93,16 +95,16 @@ export function useDnd(options: UseDndOptions) {
           const nextTop = gridPositionToPixels(nextY, baseSize, gap);
 
           // Animation
-          window.requestAnimationFrame(() => {
-            const deltaX = droppedLeft - nextLeft;
-            const deltaY = droppedTop - nextTop;
+          // window.requestAnimationFrame(() => {
+          //   const deltaX = droppedLeft - nextLeft;
+          //   const deltaY = droppedTop - nextTop;
 
-            draggable.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
+          //   draggable.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
 
-            window.requestAnimationFrame(() => {
-              draggable.style.transform = "translate3D(0, 0, 0)";
-            });
-          });
+          //   window.requestAnimationFrame(() => {
+          //     draggable.style.transform = "translate3D(0, 0, 0)";
+          //   });
+          // });
 
           draggable.style.left = `${nextLeft}px`;
           draggable.style.top = `${nextTop}px`;
