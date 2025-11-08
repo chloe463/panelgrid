@@ -207,19 +207,14 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
               const width = gridToPixels(nextGridW, baseSize, gap);
               const height = gridToPixels(nextGridH, baseSize, gap);
 
-              draggingElement.style.width = `${width}px`;
-              draggingElement.style.height = `${height}px`;
-              draggingElement.style.zIndex = initialZIndex;
+              draggingElement.style.width = `${rect.width}px`;
+              draggingElement.style.height = `${rect.height}px`;
 
               window.requestAnimationFrame(() => {
-                draggingElement.style.width = `${rect.width}px`;
-                draggingElement.style.height = `${rect.height}px`;
-                draggingElement.style.transition = "";
-                window.requestAnimationFrame(() => {
-                  draggingElement.style.width = `${width}px`;
-                  draggingElement.style.height = `${height}px`;
-                  draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
-                });
+                draggingElement.style.width = `${width}px`;
+                draggingElement.style.height = `${height}px`;
+                draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
+                draggingElement.style.zIndex = initialZIndex;
               });
               const nextPanels = rearrangePanels({ ...panel, w: nextGridW, h: nextGridH }, state.panels, columnCount);
               setState((current) => {
