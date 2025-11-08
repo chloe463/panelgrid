@@ -6,8 +6,8 @@ import {
   findNewPosition,
   rearrangePanels,
   compactLayout,
-  type PanelCoordinate,
 } from "./rearrangement";
+import type { PanelCoordinate } from "../types";
 
 describe("rectanglesOverlap", () => {
   it("should return true when rectangles overlap", () => {

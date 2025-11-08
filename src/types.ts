@@ -7,3 +7,11 @@ declare module "react" {
 }
 
 export type PanelId = number | string;
+
+export interface PanelCoordinate {
+  id: PanelId;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}

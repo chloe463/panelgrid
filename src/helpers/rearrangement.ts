@@ -1,12 +1,4 @@
-import type { PanelId } from "../types";
-
-export interface PanelCoordinate {
-  id: PanelId;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+import type { PanelId, PanelCoordinate } from "../types";
 
 /**
  * Check if two rectangles overlap using AABB (Axis-Aligned Bounding Box) test

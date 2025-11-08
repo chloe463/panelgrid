@@ -2,14 +2,7 @@ import { useState, useRef } from "react";
 import { gridPositionToPixels, pixelsToGridSize } from "./helpers";
 import { gridToPixels, pixelsToGridPosition } from "./helpers";
 import { rearrangePanels } from "./helpers/rearrangement";
-
-export interface PanelCoordinate {
-  id: number | string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+import type { PanelCoordinate } from "./types";
 
 interface PanelistOptions {
   panels: PanelCoordinate[];
