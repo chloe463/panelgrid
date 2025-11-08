@@ -85,10 +85,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           const shadow = draggingElement.style.boxShadow;
           const zIndex = draggingElement.style.zIndex;
 
-          draggingElement.style.cursor = "grabbing";
-          draggingElement.style.position = "absolute";
-          draggingElement.style.boxShadow = "0px 11px 30px 0px #0000001F";
-          draggingElement.style.zIndex = "calc(infinity)";
+          draggingElement.classList.add("panelist-dragging");
 
           const mouseUpListenerCtrl = new AbortController();
           const mouseMoveListenerCtrl = new AbortController();
@@ -122,7 +119,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           function onMouseUp() {
             if (!draggingElement) return;
             internalState.isDragging = false;
-            draggingElement.style.cursor = "default";
+            draggingElement.classList.remove("panelist-dragging");
 
             const droppedLeft = Number(draggingElement.style.left.replace("px", ""));
             const droppedTop = Number(draggingElement.style.top.replace("px", ""));
