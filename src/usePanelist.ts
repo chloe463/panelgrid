@@ -29,6 +29,7 @@ interface InternalPanelState {
   draggableElements: Record<number | string, HTMLElement | null>;
   isResizing: boolean;
   isMoving: boolean;
+  animatingPanels: Set<number | string>;
 }
 
 export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOptions) {
@@ -43,9 +44,13 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     isMoving: false,
     draggableElements: {},
     isResizing: false,
+    animatingPanels: new Set(),
   }).current;
 
   return state.panels.map((panel) => {
+    const isAnimating = internalState.animatingPanels.has(panel.id);
+    const isActive = internalState.activePanelId === panel.id;
+
     return {
       panelProps: {
         key: panel.id,
@@ -58,6 +63,10 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           left: gridPositionToPixels(panel.x, baseSize, gap),
           width: gridToPixels(panel.w, baseSize, gap),
           height: gridToPixels(panel.h, baseSize, gap),
+          transition:
+            isAnimating && !isActive
+              ? "top 0.3s ease-out, left 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out"
+              : undefined,
         },
         ref: (element: HTMLElement | null) => {
           if (!element) return;
@@ -77,10 +86,10 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           const initialY = e.clientY;
           const offsetX = draggingElement.offsetLeft;
           const offsetY = draggingElement.offsetTop;
-          const shadow = draggingElement.style.boxShadow;
-          const zIndex = draggingElement.style.zIndex;
+          const originalTransition = draggingElement.style.transition;
 
           draggingElement.classList.add("panelist-dragging");
+          draggingElement.style.transition = "";
 
           const mouseUpListenerCtrl = new AbortController();
           const mouseMoveListenerCtrl = new AbortController();
@@ -138,16 +147,38 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
             draggingElement.style.left = `${nextLeft}px`;
             draggingElement.style.top = `${nextTop}px`;
-            draggingElement.style.boxShadow = shadow;
-            draggingElement.style.zIndex = zIndex;
+            draggingElement.style.transition = originalTransition;
 
             const nextPanels = rearrangePanels({ ...panel, x: nextGridX, y: nextGridY }, state.panels, columnCount);
+
+            // Detect which panels have been rearranged (excluding the active panel)
+            internalState.animatingPanels.clear();
+            state.panels.forEach((oldPanel) => {
+              const newPanel = nextPanels.find((p) => p.id === oldPanel.id);
+              if (newPanel && oldPanel.id !== panel.id) {
+                const hasChanged =
+                  oldPanel.x !== newPanel.x ||
+                  oldPanel.y !== newPanel.y ||
+                  oldPanel.w !== newPanel.w ||
+                  oldPanel.h !== newPanel.h;
+                if (hasChanged) {
+                  internalState.animatingPanels.add(oldPanel.id);
+                }
+              }
+            });
+
             setState((current) => {
               return {
                 ...current,
                 panels: nextPanels,
               };
             });
+
+            // Clear animating panels after animation completes
+            setTimeout(() => {
+              internalState.animatingPanels.clear();
+            }, 300);
+
             internalState.activePanelId = null;
 
             mouseMoveListenerCtrl.abort();
@@ -209,12 +240,35 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
                 draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
               });
               const nextPanels = rearrangePanels({ ...panel, w: nextGridW, h: nextGridH }, state.panels, columnCount);
+
+              // Detect which panels have been rearranged (excluding the active panel)
+              internalState.animatingPanels.clear();
+              state.panels.forEach((oldPanel) => {
+                const newPanel = nextPanels.find((p) => p.id === oldPanel.id);
+                if (newPanel && oldPanel.id !== panel.id) {
+                  const hasChanged =
+                    oldPanel.x !== newPanel.x ||
+                    oldPanel.y !== newPanel.y ||
+                    oldPanel.w !== newPanel.w ||
+                    oldPanel.h !== newPanel.h;
+                  if (hasChanged) {
+                    internalState.animatingPanels.add(oldPanel.id);
+                  }
+                }
+              });
+
               setState((current) => {
                 return {
                   ...current,
                   panels: nextPanels,
                 };
               });
+
+              // Clear animating panels after animation completes
+              setTimeout(() => {
+                internalState.animatingPanels.clear();
+              }, 300);
+
               internalState.isResizing = false;
               internalState.activePanelId = null;
             }
