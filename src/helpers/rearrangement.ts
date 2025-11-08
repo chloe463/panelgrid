@@ -1,4 +1,4 @@
-import type { PanelId } from "../PanelistProvider";
+import type { PanelId } from "../types";
 
 export interface PanelCoordinate {
   id: PanelId;

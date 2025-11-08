@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePanelist, type PanelCoordinate } from "./usePanelist";
-import type { PanelId } from "./PanelistProvider";
+import type { PanelId } from "./types";
 
 interface PanelistProps {
   panels: PanelCoordinate[];

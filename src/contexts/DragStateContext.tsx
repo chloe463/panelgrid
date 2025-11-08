@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { PanelId } from "../PanelistProvider";
+import type { PanelId } from "../types";
 
 interface GhostPanel {
   x: number;

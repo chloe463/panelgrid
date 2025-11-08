@@ -1,6 +1,6 @@
 import "./App.css";
 
-import type { PanelId } from "../src/PanelistProvider";
+import type { PanelId } from "../src/types";
 import { Panelist } from "../src/Panelist";
 import "../src/styles.css";
 
