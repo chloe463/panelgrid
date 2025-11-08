@@ -1,7 +1,5 @@
 import { useState, useRef } from "react";
-import { gridPositionToPixels, pixelsToGridSize } from "./helpers";
-import { gridToPixels, pixelsToGridPosition } from "./helpers";
-import { rearrangePanels } from "./helpers/rearrangement";
+import { gridPositionToPixels, pixelsToGridSize, gridToPixels, pixelsToGridPosition, rearrangePanels } from "./helpers";
 import type { PanelCoordinate } from "./types";
 
 interface PanelistOptions {
