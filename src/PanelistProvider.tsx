@@ -6,7 +6,7 @@ import { DragStateProvider, useDragStateControls } from "./contexts/DragStateCon
 
 export type PanelId = number | string;
 
-interface PanelCoordinate {
+export interface PanelCoordinate {
   id: PanelId;
   x: number;
   y: number;
