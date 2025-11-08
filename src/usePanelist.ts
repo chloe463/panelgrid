@@ -26,7 +26,7 @@ interface InternalPanelState {
   panels: PanelCoordinate[];
   activePanelId: number | string | null;
   isDragging: boolean;
-  draggingElement: Record<number | string, HTMLElement | null>;
+  draggableElements: Record<number | string, HTMLElement | null>;
   isResizing: boolean;
   isMoving: boolean;
 }
@@ -41,7 +41,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     activePanelId: null,
     isDragging: false,
     isMoving: false,
-    draggingElement: {},
+    draggableElements: {},
     isResizing: false,
   }).current;
 
@@ -62,8 +62,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         ref: (element: HTMLElement | null) => {
           if (!element) return;
 
-          if (!internalState.draggingElement[panel.id]) {
-            internalState.draggingElement[panel.id] = element;
+          if (!internalState.draggableElements[panel.id]) {
+            internalState.draggableElements[panel.id] = element;
             return;
           }
 
@@ -74,7 +74,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         },
         onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
           internalState.activePanelId = panel.id;
-          const draggingElement = internalState.draggingElement[panel.id];
+          const draggingElement = internalState.draggableElements[panel.id];
           if (!draggingElement) return;
 
           internalState.isDragging = true;
@@ -166,7 +166,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           e.stopPropagation();
           internalState.isResizing = true;
           internalState.activePanelId = panel.id;
-          const draggingElement = internalState.draggingElement[panel.id];
+          const draggingElement = internalState.draggableElements[panel.id];
           if (!draggingElement) return;
 
           const startX = e.clientX;
