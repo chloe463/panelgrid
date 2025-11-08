@@ -66,11 +66,6 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
             internalState.draggableElements[panel.id] = element;
             return;
           }
-
-          element.addEventListener("transitionend", () => {
-            if (!element) return;
-            element.style.transition = "";
-          });
         },
         onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
           internalState.activePanelId = panel.id;
@@ -136,7 +131,6 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
             draggingElement.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
             draggingElement.style.transition = "";
-
             window.requestAnimationFrame(() => {
               draggingElement.style.transform = "translate3D(0, 0, 0)";
               draggingElement.style.transition = "transform 0.1s ease-out";
@@ -206,12 +200,13 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
               draggingElement.style.width = `${rect.width}px`;
               draggingElement.style.height = `${rect.height}px`;
+              draggingElement.style.transition = "";
 
               window.requestAnimationFrame(() => {
                 draggingElement.style.width = `${width}px`;
                 draggingElement.style.height = `${height}px`;
-                draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
                 draggingElement.style.zIndex = initialZIndex;
+                draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
               });
               const nextPanels = rearrangePanels({ ...panel, w: nextGridW, h: nextGridH }, state.panels, columnCount);
               setState((current) => {
