@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { detectAnimatingPanels } from "./panelDetection";
+import { describe, expect, it } from "vitest";
 import type { PanelCoordinate } from "../types";
+import { detectAnimatingPanels } from "./panelDetection";
 
 describe("panelDetection", () => {
   describe("detectAnimatingPanels", () => {

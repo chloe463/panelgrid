@@ -1,4 +1,4 @@
-import type { PanelId, PanelCoordinate } from "../types";
+import type { PanelCoordinate, PanelId } from "../types";
 
 /**
  * Check if two rectangles overlap using AABB (Axis-Aligned Bounding Box) test

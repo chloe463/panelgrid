@@ -1,6 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// biome-ignore lint/suspicious/noExplicitAny: Generic utility function needs any for flexibility
 export function throttle(fn: (...args: any[]) => void, delay: number) {
   let timer: ReturnType<typeof setTimeout> | null = null;
+  // biome-ignore lint/suspicious/noExplicitAny: Matches parent function signature
   return function (...args: any[]) {
     if (timer) return;
     timer = setTimeout(() => {
@@ -19,10 +20,13 @@ export function throttle(fn: (...args: any[]) => void, delay: number) {
  * アニメーションフレームごとに最大1回（60fps）呼び出され、
  * 最後の呼び出し後は必ず最新の引数で実行されます。
  */
+// biome-ignore lint/suspicious/noExplicitAny: Generic utility function needs any for flexibility
 export function throttleRAF<T extends (...args: any[]) => void>(fn: T): T {
   let rafId: number | null = null;
+  // biome-ignore lint/suspicious/noExplicitAny: Needed to store arguments of any type
   let lastArgs: any[] | null = null;
 
+  // biome-ignore lint/suspicious/noExplicitAny: Matches generic function signature
   const throttled = function (...args: any[]) {
     lastArgs = args;
 

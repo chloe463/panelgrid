@@ -28,9 +28,7 @@ function PanelControls() {
   const { addPanel, exportState } = usePanelistControls();
 
   const save = () => {
-    const state = exportState();
-    // eslint-disable-next-line no-console
-    console.log(state);
+    const _state = exportState();
   };
 
   return (
