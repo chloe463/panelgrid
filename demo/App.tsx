@@ -29,6 +29,8 @@ function PanelControls() {
 
   const save = () => {
     const _state = exportState();
+    // biome-ignore lint/suspicious/noConsole: for demo purpose
+    console.log(_state);
   };
 
   return (
