@@ -7,7 +7,7 @@ interface PanelistRendererProps {
 }
 
 export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
-  const { panelistState, columnCount, gap } = usePanelistState();
+  const { panels, columnCount, gap, baseSize } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
   // const [baseSize, setBaseSize] = useState(80);
@@ -45,6 +45,7 @@ export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
       style={{
         "--column-count": `${columnCount}`,
         "--gap": `${gap}px`,
+        opacity: baseSize ? 1 : 0,
       }}
       ref={containerRef}
     >
@@ -52,7 +53,7 @@ export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
         return <div key={i} className="panel-placeholder" />;
       })}
 
-      {panelistState.map((panel) => {
+      {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
         const { key, ...panelProps } = _panelProps;
         return (

@@ -12,7 +12,7 @@ interface PanelistProps {
 export function Panelist({ panels: panelOptions, columnCount = 6, gap = 8, itemRenderer }: PanelistProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [baseSize, setBaseSize] = useState(80);
-  const panels = usePanelist({ panels: panelOptions, baseSize, gap, columnCount });
+  const { panels } = usePanelist({ panels: panelOptions, baseSize, gap, columnCount });
   const count = columnCount * columnCount;
 
   useEffect(() => {

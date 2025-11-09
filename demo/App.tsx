@@ -1,7 +1,7 @@
 import "./App.css";
 
 import type { PanelId } from "../src/types";
-import { PanelistProvider } from "../src/PanelistProvider";
+import { PanelistProvider, usePanelistControls } from "../src/PanelistProvider";
 import { PanelistRenderer } from "../src/PanelistRenderer";
 import "../src/styles.css";
 
@@ -18,12 +18,28 @@ export default function App() {
         columnCount={6}
         gap={8}
       >
+        <PanelControls />
         <PanelistRenderer itemRenderer={PanelContent} />
       </PanelistProvider>
     </div>
   );
 }
 
+function PanelControls() {
+  const { addPanel } = usePanelistControls();
+  return (
+    <div>
+      <button onClick={() => addPanel({ w: 2, h: 2 })}>Add Panel</button>
+    </div>
+  );
+}
+
 function PanelContent(id: PanelId) {
-  return <div className="panel-content">Panel Content {id}</div>;
+  const { removePanel } = usePanelistControls();
+  return (
+    <div className="panel-content">
+      Panel Content {id}
+      <button onClick={() => removePanel(id)}>Remove Panel</button>
+    </div>
+  );
 }

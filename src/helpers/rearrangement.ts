@@ -243,3 +243,41 @@ export function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[] {
     y: panel.y - rowOffsets[panel.y],
   }));
 }
+
+/**
+ * Find a new position for a panel to be added
+ * 追加するパネルの新しい位置を見つける
+ */
+export function findNewPositionToAddPanel(
+  panelToAdd: Partial<PanelCoordinate>,
+  allPanels: PanelCoordinate[],
+  columnCount: number
+): { x: number; y: number } {
+  const id = panelToAdd.id || Math.random().toString(36).substring(2, 15);
+  const w = panelToAdd.w || 1;
+  const h = panelToAdd.h || 1;
+
+  // Create a map for fast panel lookup
+  const panelMap = new Map<PanelId, PanelCoordinate>();
+  for (const panel of allPanels) {
+    panelMap.set(panel.id, panel);
+  }
+
+  // Try to find a position starting from top-left
+  for (let y = 0; ; y++) {
+    for (let x = 0; x <= columnCount - w; x++) {
+      const candidate: PanelCoordinate = {
+        id,
+        x,
+        y,
+        w,
+        h,
+      };
+
+      // Check if this position has any collisions
+      if (!hasCollision(candidate, candidate.id, panelMap)) {
+        return { x, y };
+      }
+    }
+  }
+}
