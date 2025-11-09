@@ -15,6 +15,7 @@ interface PanelistControlsContextType {
   setBaseSize: (baseSize: number) => void;
   addPanel: (panel: Partial<PanelCoordinate>) => void;
   removePanel: (id: PanelId) => void;
+  exportState: () => { panels: PanelCoordinate[] };
 }
 
 const PanelistStateContext = createContext<PanelistContextType | undefined>(undefined);
@@ -30,7 +31,7 @@ interface PanelistProviderProps {
 export function PanelistProvider({ panels: initialPanels, columnCount, gap, children }: PanelistProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
 
-  const { panels, addPanel, removePanel } = usePanelist({
+  const { panels, addPanel, removePanel, exportState } = usePanelist({
     panels: initialPanels,
     columnCount,
     baseSize: baseSize || 256,
@@ -39,7 +40,7 @@ export function PanelistProvider({ panels: initialPanels, columnCount, gap, chil
 
   return (
     <PanelistStateContext.Provider value={{ panels, columnCount, gap, baseSize }}>
-      <PanelistControlsContext.Provider value={{ setBaseSize, addPanel, removePanel }}>
+      <PanelistControlsContext.Provider value={{ setBaseSize, addPanel, removePanel, exportState }}>
         {children}
       </PanelistControlsContext.Provider>
     </PanelistStateContext.Provider>

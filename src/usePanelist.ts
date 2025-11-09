@@ -301,5 +301,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         };
       });
     },
+    exportState: () => {
+      return state.panels;
+    },
   };
 }
