@@ -6,14 +6,14 @@
   gap: var(--gap, 8px);
 }
 
-.panel-placeholder {
+.panelist-panel-placeholder {
   display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   background-color: rgb(0 0 0 / 0.03);
 }
 
-.panel-ghost {
+.panelist-panel-ghost {
   position: absolute;
   pointer-events: none;
   border-radius: 4px;
@@ -22,7 +22,7 @@
   z-index: -1;
 }
 
-.panel {
+.panelist-panel {
   position: absolute;
   box-sizing: border-box;
   aspect-ratio: 1 / 1;
@@ -31,13 +31,13 @@
   border-radius: 4px;
 }
 
-.panelist-dragging {
+.panelist-panel--dragging {
   cursor: grabbing;
   box-shadow: 0px 11px 30px 0px #0000001f;
   z-index: calc(infinity);
 }
 
-.panel--with-transition {
+.panelist-panel--with-transition {
   transition:
     top 0.15s ease-out,
     left 0.15s ease-out,
@@ -45,7 +45,7 @@
     height 0.1s ease-out;
 }
 
-.resize-handle {
+.panelist-resize-handle {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -60,7 +60,7 @@
   }
 }
 
-.panel-ghost {
+.panelist-panel-ghost {
   display: none;
   position: absolute;
   pointer-events: none;
