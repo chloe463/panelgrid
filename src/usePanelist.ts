@@ -33,13 +33,14 @@ interface InternalPanelState {
 }
 
 const ANIMATION_DURATION = 300;
+type TimeoutId = ReturnType<typeof setTimeout>;
 
 export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOptions) {
   const [state, setState] = useState<PanelistState>({
     panels,
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
-  const animationTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
+  const animationTimeoutsRef = useRef<Set<TimeoutId>>(new Set());
 
   const internalState = useRef<InternalPanelState>({
     panels,
