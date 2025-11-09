@@ -25,10 +25,18 @@ export default function App() {
 }
 
 function PanelControls() {
-  const { addPanel } = usePanelistControls();
+  const { addPanel, exportState } = usePanelistControls();
+
+  const save = () => {
+    const state = exportState();
+    // eslint-disable-next-line no-console
+    console.log(state);
+  };
+
   return (
-    <div>
+    <div className="controls">
       <button onClick={() => addPanel({ w: 2, h: 2 })}>Add Panel</button>
+      <button onClick={save}>Export State</button>
     </div>
   );
 }
@@ -37,8 +45,10 @@ function PanelContent(id: PanelId) {
   const { removePanel } = usePanelistControls();
   return (
     <div className="panel-content">
-      Panel Content {id}
-      <button onClick={() => removePanel(id)}>Remove Panel</button>
+      <button className="panel-remove-button" onClick={() => removePanel(id)}>
+        x
+      </button>
+      <div className="panel-content-inner">Panel Content {id}</div>
     </div>
   );
 }
