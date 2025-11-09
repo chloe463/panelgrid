@@ -6,14 +6,7 @@ export {
   snapToGrid,
 } from "./gridCalculations";
 
-export {
-  rectanglesOverlap,
-  detectCollisions,
-  hasCollision,
-  findNewPosition,
-  rearrangePanels,
-  compactLayout,
-} from "./rearrangement";
+export { rectanglesOverlap, detectCollisions, hasCollision, findNewPosition, rearrangePanels } from "./rearrangement";
 
 export { applySnapAnimation } from "./animation";
 

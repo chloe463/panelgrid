@@ -22,10 +22,6 @@
    - 優先順位 2: 横方向に入らない場合は縦方向（下）に押しのける
    - 斜め方向には動かさない
 
-4. **空行の自動削除**
-   - 再配置後、何も配置されていない行は自動的に削除
-   - レイアウトを常に詰まった状態に保つ
-
 ### 挙動の例
 
 以下の例において [ ] は 1 つのセルを表します。セル内の文字はそのセル上に存在しているパネルの ID です。
@@ -76,25 +72,6 @@ Aを上に移動
 [A][A][A][ ]
 [ ][ ][B][B] ← B が押しのけられて (x, y) = (2, 2) に移動
 [ ][ ][C][C] ← C が連鎖的に押しのけられて (x, y) = (2, 3) に移動
-```
-
-#### 例 4: 空行の自動削除
-
-```
-[ ][ ][ ][C]
-[A][A][A][ ]
-[A][A][A][ ]
-[ ][ ][B][B]
-
-Aを上に移動
-[A][A][A][C]
-[A][A][A][ ]
-[ ][ ][ ][ ] ← 一時的に空行ができてしまうが、これを削除
-[ ][ ][B][B]
-
-[A][A][A][C]
-[A][A][A][ ]
-[ ][ ][B][B]
 ```
 
 ## アルゴリズム設計
@@ -266,44 +243,8 @@ function rearrangePanels(
        // 現在のパネルの位置を確定
        panelMap.set(current.id, current)
 
-  5. 空行を削除してレイアウトを詰める:
-     compactedPanels = compactLayout(Array.from(panelMap.values()))
-
-  6. 再配置と圧縮後のパネルを返す:
-     return compactedPanels
-```
-
-#### 6. 空行の削除 (`compactLayout`)
-
-レイアウトから空行を削除してパネルを上に詰めます。
-
-```typescript
-function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[]
-  1. パネルが空の場合は空配列を返す:
-     if panels.length == 0: return []
-
-  2. 最大Y座標を見つけてグリッドの高さを決定:
-     maxY = Math.max(...panels.map(p => p.y + p.h))
-
-  3. どの行にパネルがあるかのマップを構築:
-     rowOccupancy = new Array(maxY).fill(false)
-     for each panel in panels:
-       for y = panel.y to panel.y + panel.h - 1:
-         rowOccupancy[y] = true
-
-  4. 各行のオフセット（その上にある空行の数）を計算:
-     rowOffsets = new Array(maxY).fill(0)
-     emptyRowCount = 0
-     for y = 0 to maxY - 1:
-       rowOffsets[y] = emptyRowCount
-       if !rowOccupancy[y]:
-         emptyRowCount++
-
-  5. パネルを行オフセット分だけ上に移動:
-     return panels.map(panel => ({
-       ...panel,
-       y: panel.y - rowOffsets[panel.y]
-     }))
+  5. 再配置後のパネルを返す:
+     return Array.from(panelMap.values())
 ```
 
 ### アルゴリズムの特徴
@@ -311,7 +252,6 @@ function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[]
 1. **段階的な衝突解決**: キューを使用して、移動によって発生する連鎖的な衝突を順次解決
 2. **押しのける挙動**: `calculatePushDistance` により最小限の距離だけパネルを移動
 3. **横優先の移動**: 横方向に入る場合は横を優先、入らない場合は縦方向に切り替え
-4. **空行の自動削除**: `compactLayout` により、再配置後の空行を自動的に削除
 
 ### 計算量
 
@@ -319,5 +259,4 @@ function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[]
 - **衝突検出**: O(N) (全パネルとの判定)
 - **押しのける距離計算**: O(1)
 - **パネル再配置**: O(N²) (最悪ケース: 全パネルが連鎖的に移動)
-- **空行削除**: O(N × H + R) (H: 平均パネル高さ, R: 行数)
 - **全体**: O(N²) (パネル数が少ない場合に最適)

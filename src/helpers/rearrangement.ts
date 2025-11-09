@@ -196,52 +196,9 @@ export function rearrangePanels(
     panelMap.set(current.id, current);
   }
 
-  // Compact the layout by removing empty rows
-  // 空行を削除してレイアウトを詰める
-  const compactedPanels = compactLayout(Array.from(panelMap.values()));
-
-  // Return the rearranged and compacted panels
-  // 再配置と圧縮後のパネルを返す
-  return compactedPanels;
-}
-
-/**
- * Compact layout by removing empty rows and moving panels up
- * 空行を削除してパネルを上に詰める
- */
-export function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[] {
-  if (panels.length === 0) return [];
-
-  // Find the maximum Y coordinate to determine the grid height
-  // 最大Y座標を見つけてグリッドの高さを決定
-  const maxY = Math.max(...panels.map((p) => p.y + p.h));
-
-  // Build a map of which rows have panels
-  // どの行にパネルがあるかのマップを構築
-  const rowOccupancy = new Array(maxY).fill(false);
-  for (const panel of panels) {
-    for (let y = panel.y; y < panel.y + panel.h; y++) {
-      rowOccupancy[y] = true;
-    }
-  }
-
-  // Calculate the offset for each row (how many empty rows above it)
-  // 各行のオフセット（その上にある空行の数）を計算
-  const rowOffsets = new Array(maxY).fill(0);
-  let emptyRowCount = 0;
-  for (let y = 0; y < maxY; y++) {
-    rowOffsets[y] = emptyRowCount;
-    if (!rowOccupancy[y]) {
-      emptyRowCount++;
-    }
-  }
-
-  // Move panels up by their row offset
-  // パネルを行オフセット分だけ上に移動
-  return panels.map((panel) => ({
-    ...panel,
-    y: panel.y - rowOffsets[panel.y],
-  }));
+  // Return the rearranged panels
+  // 再配置後のパネルを返す
+  return Array.from(panelMap.values());
 }
 
 /**
