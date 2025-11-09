@@ -191,6 +191,9 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
           const initialHeight = draggingElement.offsetHeight;
           const initialZIndex = draggingElement.style.zIndex;
 
+          draggingElement.style.cursor = "nwse-resize";
+          draggingElement.style.transition = "";
+
           const mouseMoveController = new AbortController();
           const mouseUpController = new AbortController();
 
@@ -222,6 +225,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
               draggingElement.style.width = `${rect.width}px`;
               draggingElement.style.height = `${rect.height}px`;
+              draggingElement.style.cursor = "default";
               draggingElement.style.transition = "";
 
               window.requestAnimationFrame(() => {
