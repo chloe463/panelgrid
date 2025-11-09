@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import {
   gridPositionToPixels,
   pixelsToGridSize,
@@ -39,6 +39,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     panels,
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
+  const animationTimeoutsRef = useRef<Set<NodeJS.Timeout>>(new Set());
 
   const internalState = useRef<InternalPanelState>({
     panels,
@@ -49,6 +50,14 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     isResizing: false,
     animatingPanels: new Set(),
   }).current;
+
+  // Cleanup animation timeouts on unmount
+  useEffect(() => {
+    return () => {
+      animationTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
+      animationTimeoutsRef.current.clear();
+    };
+  }, []);
 
   // Ghost panel helper functions
   // Direct DOM manipulation is intentionally used here for performance.
@@ -98,9 +107,11 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
       }));
 
       // Clear animating panels after animation completes
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         internalState.animatingPanels.clear();
+        animationTimeoutsRef.current.delete(timeoutId);
       }, ANIMATION_DURATION);
+      animationTimeoutsRef.current.add(timeoutId);
     },
     [columnCount, internalState]
   );
