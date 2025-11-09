@@ -134,7 +134,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const offsetY = draggingElement.offsetTop;
       const originalTransition = draggingElement.style.transition;
 
-      draggingElement.classList.add("panelist-dragging");
+      draggingElement.classList.add("panelist-panel--dragging");
       draggingElement.style.transition = "";
 
       showGhostPanel(offsetX, offsetY, draggingElement.offsetWidth, draggingElement.offsetHeight);
@@ -171,7 +171,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         if (!draggingElement) return;
 
         internalState.isDragging = false;
-        draggingElement.classList.remove("panelist-dragging");
+        draggingElement.classList.remove("panelist-panel--dragging");
 
         hideGhostPanel();
 

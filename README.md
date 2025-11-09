@@ -144,6 +144,105 @@ const zoneRearrangement: RearrangementFunction = (
 };
 ```
 
+### Customizing Styles
+
+Panelist uses non-scoped CSS classes with the `panelist-` prefix, allowing you to override the default styles to match your application's design.
+
+#### Available CSS Classes
+
+- `.panelist-renderer` - The main grid container
+- `.panelist-panel-placeholder` - Grid cell placeholders (background visualization)
+- `.panelist-panel` - Individual panel container
+- `.panelist-panel-ghost` - Ghost panel shown during drag/resize operations
+- `.panelist-panel--dragging` - Applied to a panel while it's being dragged
+- `.panelist-panel--with-transition` - Applied to panels that are animating to new positions
+- `.panelist-resize-handle` - Resize handle in the bottom-right corner of panels
+
+#### Example: Custom Panel Styling
+
+```css
+/* Import the base styles first */
+@import 'panelist/styles.css';
+
+/* Override panel appearance */
+.panelist-panel {
+  border-radius: 8px;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+/* Style the ghost panel */
+.panelist-panel-ghost {
+  outline: 2px dashed #3b82f6;
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Customize the resize handle */
+.panelist-resize-handle {
+  background-color: #3b82f6;
+  width: 20px;
+  border-bottom-right-radius: 8px;
+}
+
+.panelist-resize-handle:hover {
+  background-color: #2563eb;
+}
+
+/* Style dragging state */
+.panelist-panel--dragging {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  opacity: 0.8;
+}
+
+/* Customize grid placeholders */
+.panelist-panel-placeholder {
+  background-color: #f3f4f6;
+  border-radius: 4px;
+}
+```
+
+#### Example: Dark Mode Support
+
+```css
+@import 'panelist/styles.css';
+
+@media (prefers-color-scheme: dark) {
+  .panelist-panel-placeholder {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .panelist-panel {
+    background-color: #1f2937;
+    border-color: #374151;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .panelist-panel-ghost {
+    outline-color: #60a5fa;
+  }
+
+  .panelist-resize-handle {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+}
+```
+
+#### CSS Custom Properties
+
+The renderer uses CSS custom properties that you can use in your custom styles:
+
+- `--column-count` - Number of grid columns (set automatically)
+- `--gap` - Gap between panels in pixels
+
+```css
+/* Example: Use custom properties in your styles */
+.panelist-panel {
+  /* Add padding based on the gap size */
+  padding: calc(var(--gap) / 2);
+}
+```
+
 ## API
 
 ### `<PanelistProvider>`

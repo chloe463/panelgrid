@@ -45,18 +45,18 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
       ref={containerRef}
     >
       {Array.from({ length: count }).map((_, i) => {
-        return <div key={i} className="panel-placeholder" />;
+        return <div key={i} className="panelist-panel-placeholder" />;
       })}
 
-      <div className="panel-ghost" ref={ghostPanelRef}></div>
+      <div className="panelist-panel-ghost" ref={ghostPanelRef}></div>
 
       {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
         const { key, ...panelProps } = _panelProps;
         return (
-          <div key={key} className="panel" {...panelProps}>
+          <div key={key} className="panelist-panel" {...panelProps}>
             <ItemRenderer id={key} />
-            <span className="resize-handle" {...resizeHandleProps}></span>
+            <span className="panelist-resize-handle" {...resizeHandleProps}></span>
           </div>
         );
       })}
