@@ -165,6 +165,51 @@ describe("gridCalculations", () => {
         expect(pixelsToGridSize(500, 50, 10)).toBe(9);
         expect(pixelsToGridSize(100, 50, 10)).toBe(2);
       });
+
+      describe("with xPosition parameter (resize constraint)", () => {
+        it("should prevent panel at x=5 from resizing to w=2 when columnCount=6", () => {
+          const columnCount = 6;
+          const xPosition = 5;
+          // Panel at x=5, max width is 6 - 5 = 1
+          expect(pixelsToGridSize(120, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+
+        it("should allow panel at x=4 to resize to w=2 when columnCount=6", () => {
+          const columnCount = 6;
+          const xPosition = 4;
+          // Panel at x=4, max width is 6 - 4 = 2
+          expect(pixelsToGridSize(120, 50, 10, columnCount, xPosition)).toBe(2);
+        });
+
+        it("should allow panel at x=0 to resize to full width", () => {
+          const columnCount = 6;
+          const xPosition = 0;
+          // Panel at x=0, max width is 6 - 0 = 6
+          expect(pixelsToGridSize(360, 50, 10, columnCount, xPosition)).toBe(6);
+        });
+
+        it("should constrain oversized resize at x=2", () => {
+          const columnCount = 6;
+          const xPosition = 2;
+          // Panel at x=2, max width is 6 - 2 = 4
+          // Trying to resize to w=5 should constrain to w=4
+          expect(pixelsToGridSize(300, 50, 10, columnCount, xPosition)).toBe(4);
+        });
+
+        it("should enforce minimum width of 1 even at edge", () => {
+          const columnCount = 6;
+          const xPosition = 5;
+          // Panel at x=5, even with tiny resize, min width is 1
+          expect(pixelsToGridSize(10, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+
+        it("should handle panel at x=columnCount gracefully", () => {
+          const columnCount = 6;
+          const xPosition = 6;
+          // Panel beyond grid, still enforce min width of 1
+          expect(pixelsToGridSize(100, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+      });
     });
 
     describe("pixelsToGridPosition with columnCount", () => {
