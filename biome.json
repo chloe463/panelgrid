@@ -17,7 +17,16 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": false },
+    "rules": {
+      "recommended": false,
+      "style": {
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error"
+      },
+      "nursery": {
+        "useSortedClasses": "error"
+      }
+    },
     "includes": ["**", "!dist"]
   },
   "javascript": {
@@ -323,9 +332,5 @@
         }
       }
     }
-  ],
-  "assist": {
-    "enabled": true,
-    "actions": { "source": { "organizeImports": "on" } }
-  }
+  ]
 }
