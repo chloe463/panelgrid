@@ -16,7 +16,7 @@ describe("gridCalculations", () => {
     });
 
     it("should handle zero pixels", () => {
-      expect(pixelsToGridSize(0, 50, 10)).toBe(0);
+      expect(pixelsToGridSize(0, 50, 10)).toBe(1); // Minimum size is 1
     });
 
     it("should handle zero gap", () => {
@@ -130,6 +130,155 @@ describe("gridCalculations", () => {
       const expected = gridPositionToPixels(gridPos, baseSize, gap);
 
       expect(snapped).toBe(expected);
+    });
+  });
+
+  // Test cases for overflow handling (issue #23)
+  describe("overflow handling", () => {
+    describe("pixelsToGridSize with columnCount", () => {
+      it("should constrain size to columnCount", () => {
+        const columnCount = 6;
+        // Size that would normally be 8
+        expect(pixelsToGridSize(500, 50, 10, columnCount)).toBe(6);
+      });
+
+      it("should allow size equal to columnCount", () => {
+        const columnCount = 6;
+        // Size that equals columnCount
+        expect(pixelsToGridSize(360, 50, 10, columnCount)).toBe(6);
+      });
+
+      it("should not constrain size below columnCount", () => {
+        const columnCount = 6;
+        // Size that is less than columnCount
+        expect(pixelsToGridSize(120, 50, 10, columnCount)).toBe(2);
+      });
+
+      it("should enforce minimum size of 1", () => {
+        const columnCount = 6;
+        expect(pixelsToGridSize(0, 50, 10, columnCount)).toBe(1);
+        expect(pixelsToGridSize(-10, 50, 10, columnCount)).toBe(1);
+      });
+
+      it("should work without columnCount parameter", () => {
+        // Should work as before without columnCount
+        expect(pixelsToGridSize(500, 50, 10)).toBe(9);
+        expect(pixelsToGridSize(100, 50, 10)).toBe(2);
+      });
+
+      describe("with xPosition parameter (resize constraint)", () => {
+        it("should prevent panel at x=5 from resizing to w=2 when columnCount=6", () => {
+          const columnCount = 6;
+          const xPosition = 5;
+          // Panel at x=5, max width is 6 - 5 = 1
+          expect(pixelsToGridSize(120, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+
+        it("should allow panel at x=4 to resize to w=2 when columnCount=6", () => {
+          const columnCount = 6;
+          const xPosition = 4;
+          // Panel at x=4, max width is 6 - 4 = 2
+          expect(pixelsToGridSize(120, 50, 10, columnCount, xPosition)).toBe(2);
+        });
+
+        it("should allow panel at x=0 to resize to full width", () => {
+          const columnCount = 6;
+          const xPosition = 0;
+          // Panel at x=0, max width is 6 - 0 = 6
+          expect(pixelsToGridSize(360, 50, 10, columnCount, xPosition)).toBe(6);
+        });
+
+        it("should constrain oversized resize at x=2", () => {
+          const columnCount = 6;
+          const xPosition = 2;
+          // Panel at x=2, max width is 6 - 2 = 4
+          // Trying to resize to w=5 should constrain to w=4
+          expect(pixelsToGridSize(300, 50, 10, columnCount, xPosition)).toBe(4);
+        });
+
+        it("should enforce minimum width of 1 even at edge", () => {
+          const columnCount = 6;
+          const xPosition = 5;
+          // Panel at x=5, even with tiny resize, min width is 1
+          expect(pixelsToGridSize(10, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+
+        it("should handle panel at x=columnCount gracefully", () => {
+          const columnCount = 6;
+          const xPosition = 6;
+          // Panel beyond grid, still enforce min width of 1
+          expect(pixelsToGridSize(100, 50, 10, columnCount, xPosition)).toBe(1);
+        });
+      });
+    });
+
+    describe("pixelsToGridPosition with columnCount", () => {
+      it("should constrain position to columnCount - 1 (without width)", () => {
+        const columnCount = 6;
+        // Position that would normally be 10
+        expect(pixelsToGridPosition(600, 50, 10, columnCount)).toBe(5);
+      });
+
+      it("should allow position equal to columnCount - 1 (without width)", () => {
+        const columnCount = 6;
+        // Position that equals columnCount - 1
+        expect(pixelsToGridPosition(300, 50, 10, columnCount)).toBe(5);
+      });
+
+      it("should not constrain position below columnCount - 1 (without width)", () => {
+        const columnCount = 6;
+        // Position that is less than columnCount - 1
+        expect(pixelsToGridPosition(120, 50, 10, columnCount)).toBe(2);
+      });
+
+      it("should still enforce non-negative values", () => {
+        const columnCount = 6;
+        expect(pixelsToGridPosition(-100, 50, 10, columnCount)).toBe(0);
+      });
+
+      it("should work without columnCount parameter", () => {
+        // Should work as before without columnCount
+        expect(pixelsToGridPosition(600, 50, 10)).toBe(10);
+        expect(pixelsToGridPosition(100, 50, 10)).toBe(1);
+      });
+
+      describe("with width parameter", () => {
+        it("should prevent panel w=2 from being placed at x=5 when columnCount=6", () => {
+          const columnCount = 6;
+          const width = 2;
+          // Position that would be 5, but x + w = 5 + 2 = 7 > 6
+          // Should constrain to x = 4 (so x + w = 4 + 2 = 6)
+          expect(pixelsToGridPosition(300, 50, 10, columnCount, width)).toBe(4);
+        });
+
+        it("should allow panel w=2 at x=4 when columnCount=6", () => {
+          const columnCount = 6;
+          const width = 2;
+          // x + w = 4 + 2 = 6, which is valid
+          expect(pixelsToGridPosition(240, 50, 10, columnCount, width)).toBe(4);
+        });
+
+        it("should constrain panel w=6 to x=0 when columnCount=6", () => {
+          const columnCount = 6;
+          const width = 6;
+          // Panel takes up entire width, must be at x=0
+          expect(pixelsToGridPosition(300, 50, 10, columnCount, width)).toBe(0);
+        });
+
+        it("should handle panel w=1 normally", () => {
+          const columnCount = 6;
+          const width = 1;
+          // With w=1, max position is 5 (x + w = 5 + 1 = 6)
+          expect(pixelsToGridPosition(300, 50, 10, columnCount, width)).toBe(5);
+        });
+
+        it("should handle panel wider than columnCount", () => {
+          const columnCount = 6;
+          const width = 8;
+          // Panel is wider than grid, constrain to x=0
+          expect(pixelsToGridPosition(300, 50, 10, columnCount, width)).toBe(0);
+        });
+      });
     });
   });
 });
