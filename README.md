@@ -32,6 +32,7 @@ pnpm add panelist
 ```tsx
 import { PanelistProvider, PanelistRenderer } from 'panelist';
 import type { PanelCoordinate } from 'panelist';
+import 'panelist/styles.css';
 
 const initialPanels: PanelCoordinate[] = [
   { id: 1, x: 0, y: 0, w: 2, h: 2 },
@@ -55,6 +56,8 @@ function App() {
   );
 }
 ```
+
+**Note:** Don't forget to import the CSS file to enable proper styling for the panels.
 
 ## API
 
