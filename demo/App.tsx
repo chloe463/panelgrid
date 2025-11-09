@@ -1,13 +1,14 @@
 import "./App.css";
 
 import type { PanelId } from "../src/types";
-import { Panelist } from "../src/Panelist";
+import { PanelistProvider } from "../src/PanelistProvider";
+import { PanelistRenderer } from "../src/PanelistRenderer";
 import "../src/styles.css";
 
 export default function App() {
   return (
     <div className="App">
-      <Panelist
+      <PanelistProvider
         panels={[
           { id: 1, x: 0, y: 0, w: 2, h: 2 },
           { id: 2, x: 2, y: 0, w: 2, h: 2 },
@@ -16,8 +17,9 @@ export default function App() {
         ]}
         columnCount={6}
         gap={8}
-        itemRenderer={PanelContent}
-      />
+      >
+        <PanelistRenderer itemRenderer={PanelContent} />
+      </PanelistProvider>
     </div>
   );
 }
