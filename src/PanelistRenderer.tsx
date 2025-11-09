@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
-import type { PanelId } from "./types";
-import { usePanelistState, usePanelistControls } from "./PanelistProvider";
 import { getGridRowCount } from "./helpers/gridCalculations";
+import { usePanelistControls, usePanelistState } from "./PanelistProvider";
+import type { PanelId } from "./types";
 
 interface PanelistRendererProps {
   itemRenderer: React.ComponentType<{ id: PanelId }>;

@@ -1,15 +1,15 @@
-import { useState, useRef, useCallback, useMemo, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  gridPositionToPixels,
-  pixelsToGridSize,
-  gridToPixels,
-  pixelsToGridPosition,
-  rearrangePanels,
   applySnapAnimation,
   detectAnimatingPanels,
+  gridPositionToPixels,
+  gridToPixels,
+  pixelsToGridPosition,
+  pixelsToGridSize,
+  rearrangePanels,
 } from "./helpers";
-import type { PanelCoordinate } from "./types";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
+import type { PanelCoordinate } from "./types";
 
 interface PanelistOptions {
   panels: PanelCoordinate[];

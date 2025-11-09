@@ -1,13 +1,10 @@
+export { applySnapAnimation } from "./animation";
 export {
-  pixelsToGridSize,
-  pixelsToGridPosition,
-  gridToPixels,
   gridPositionToPixels,
+  gridToPixels,
+  pixelsToGridPosition,
+  pixelsToGridSize,
   snapToGrid,
 } from "./gridCalculations";
-
-export { rectanglesOverlap, detectCollisions, hasCollision, findNewPosition, rearrangePanels } from "./rearrangement";
-
-export { applySnapAnimation } from "./animation";
-
 export { detectAnimatingPanels } from "./panelDetection";
+export { detectCollisions, findNewPosition, hasCollision, rearrangePanels, rectanglesOverlap } from "./rearrangement";

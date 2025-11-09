@@ -28,9 +28,9 @@ function PanelControls() {
   const { addPanel, exportState } = usePanelistControls();
 
   const save = () => {
-    const state = exportState();
-    // eslint-disable-next-line no-console
-    console.log(state);
+    const _state = exportState();
+    // biome-ignore lint/suspicious/noConsole: for demo purpose
+    console.log(_state);
   };
 
   return (

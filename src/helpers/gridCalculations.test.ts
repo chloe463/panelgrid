@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
-  pixelsToGridSize,
-  pixelsToGridPosition,
-  gridToPixels,
   gridPositionToPixels,
+  gridToPixels,
+  pixelsToGridPosition,
+  pixelsToGridSize,
   snapToGrid,
 } from "./gridCalculations";
 

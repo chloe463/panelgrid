@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { rectanglesOverlap, detectCollisions, hasCollision, findNewPosition, rearrangePanels } from "./rearrangement";
+import { describe, expect, it } from "vitest";
 import type { PanelCoordinate } from "../types";
+import { detectCollisions, findNewPosition, hasCollision, rearrangePanels, rectanglesOverlap } from "./rearrangement";
 
 describe("rectanglesOverlap", () => {
   it("should return true when rectangles overlap", () => {
