@@ -11,7 +11,8 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist"
@@ -19,7 +20,7 @@
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
-    "build": "tsdown",
+    "build": "tsdown && cp src/styles.css dist/styles.css",
     "build:demo": "tsc -b && vite build",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
