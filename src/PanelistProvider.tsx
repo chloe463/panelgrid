@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import type { PanelCoordinate, PanelId } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
 import { usePanelist } from "./usePanelist";
 
 type PanelistState = ReturnType<typeof usePanelist>;
@@ -27,9 +27,20 @@ interface PanelistProviderProps {
   columnCount: number;
   gap: number;
   children: React.ReactNode;
+  /**
+   * Optional custom rearrangement function to override default collision resolution logic
+   * If provided, this function will be called instead of the default rearrangePanels
+   */
+  rearrangement?: RearrangementFunction;
 }
 
-export function PanelistProvider({ panels: initialPanels, columnCount, gap, children }: PanelistProviderProps) {
+export function PanelistProvider({
+  panels: initialPanels,
+  columnCount,
+  gap,
+  children,
+  rearrangement,
+}: PanelistProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
 
   const { panels, addPanel, removePanel, exportState, ghostPanelRef } = usePanelist({
@@ -37,6 +48,7 @@ export function PanelistProvider({ panels: initialPanels, columnCount, gap, chil
     columnCount,
     baseSize: baseSize || 256,
     gap,
+    rearrangement,
   });
 
   return (

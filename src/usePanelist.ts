@@ -9,13 +9,14 @@ import {
   rearrangePanels,
 } from "./helpers";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
-import type { PanelCoordinate } from "./types";
+import type { PanelCoordinate, RearrangementFunction } from "./types";
 
 interface PanelistOptions {
   panels: PanelCoordinate[];
   columnCount: number;
   baseSize: number;
   gap: number;
+  rearrangement?: RearrangementFunction;
 }
 
 interface PanelistState {
@@ -35,7 +36,7 @@ interface InternalPanelState {
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
-export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOptions) {
+export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement }: PanelistOptions) {
   const [state, setState] = useState<PanelistState>({
     panels,
   });
@@ -93,7 +94,9 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
   // Callback to update panels and trigger animations
   const updatePanelsWithAnimation = useCallback(
     (updatedPanel: PanelCoordinate, currentPanels: PanelCoordinate[]) => {
-      const nextPanels = rearrangePanels(updatedPanel, currentPanels, columnCount);
+      // Use custom rearrangement function if provided, otherwise use default
+      const rearrange = rearrangement || rearrangePanels;
+      const nextPanels = rearrange(updatedPanel, currentPanels, columnCount);
 
       // Detect which panels have been rearranged
       internalState.animatingPanels = detectAnimatingPanels({
@@ -114,7 +117,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
       }, ANIMATION_DURATION);
       animationTimeoutsRef.current.add(timeoutId);
     },
-    [columnCount, internalState]
+    [columnCount, internalState, rearrangement]
   );
 
   // Create drag handler for a specific panel
