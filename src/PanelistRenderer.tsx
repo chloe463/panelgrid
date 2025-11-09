@@ -10,8 +10,6 @@ export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
   const { panels, columnCount, gap, baseSize } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  // const [baseSize, setBaseSize] = useState(80);
-  // const panels = usePanelist({ panels: panelOptions, baseSize, gap, columnCount });
   const count = columnCount * columnCount;
 
   useLayoutEffect(() => {
@@ -25,19 +23,6 @@ export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
     observer.observe(containerRef.current);
     return () => observer.disconnect();
   }, [columnCount, gap, setBaseSize]);
-
-  // useEffect(() => {
-  //   if (!containerRef.current) return;
-  //   const observer = new ResizeObserver((entries) => {
-  //     const [entry] = entries;
-  //     const rect = entry.contentRect;
-  //     const baseSize = Math.floor((rect.width - gap * (columnCount - 1)) / columnCount);
-  //     setBaseSize(baseSize);
-  //   });
-  //   observer.observe(containerRef.current);
-
-  //   return () => observer.disconnect();
-  // }, [columnCount, gap]);
 
   return (
     <div

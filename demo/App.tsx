@@ -1,8 +1,7 @@
 import "./App.css";
 
-import type { PanelId } from "../src/types";
-import { PanelistProvider, usePanelistControls } from "../src/PanelistProvider";
-import { PanelistRenderer } from "../src/PanelistRenderer";
+import type { PanelId } from "../src";
+import { PanelistProvider, PanelistRenderer, usePanelistControls } from "../src";
 import "../src/styles.css";
 
 export default function App() {
