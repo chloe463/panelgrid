@@ -220,8 +220,13 @@ export function findNewPositionToAddPanel(
     panelMap.set(panel.id, panel);
   }
 
+  // Calculate maximum row based on existing panels
+  // Add some buffer rows to ensure we can find a position
+  const maxExistingY = allPanels.length > 0 ? Math.max(...allPanels.map((p) => p.y + p.h)) : 0;
+  const MAX_ROWS = Math.max(maxExistingY + 100, 1000);
+
   // Try to find a position starting from top-left
-  for (let y = 0; ; y++) {
+  for (let y = 0; y < MAX_ROWS; y++) {
     for (let x = 0; x <= columnCount - w; x++) {
       const candidate: PanelCoordinate = {
         id,
@@ -237,4 +242,7 @@ export function findNewPositionToAddPanel(
       }
     }
   }
+
+  // Fallback: if no position found, place at the bottom
+  return { x: 0, y: maxExistingY };
 }
