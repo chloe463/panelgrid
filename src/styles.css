@@ -59,3 +59,9 @@
     cursor: nwse-resize;
   }
 }
+
+.panel-ghost {
+  display: none;
+  position: absolute;
+  pointer-events: none;
+}

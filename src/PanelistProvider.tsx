@@ -9,6 +9,7 @@ interface PanelistContextType {
   baseSize: number | null;
   columnCount: number;
   gap: number;
+  ghostPanelRef: React.RefObject<HTMLDivElement | null>;
 }
 
 interface PanelistControlsContextType {
@@ -31,7 +32,7 @@ interface PanelistProviderProps {
 export function PanelistProvider({ panels: initialPanels, columnCount, gap, children }: PanelistProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
 
-  const { panels, addPanel, removePanel, exportState } = usePanelist({
+  const { panels, addPanel, removePanel, exportState, ghostPanelRef } = usePanelist({
     panels: initialPanels,
     columnCount,
     baseSize: baseSize || 256,
@@ -39,7 +40,7 @@ export function PanelistProvider({ panels: initialPanels, columnCount, gap, chil
   });
 
   return (
-    <PanelistStateContext.Provider value={{ panels, columnCount, gap, baseSize }}>
+    <PanelistStateContext.Provider value={{ panels, columnCount, gap, baseSize, ghostPanelRef }}>
       <PanelistControlsContext.Provider value={{ setBaseSize, addPanel, removePanel, exportState }}>
         {children}
       </PanelistControlsContext.Provider>

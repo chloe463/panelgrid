@@ -38,6 +38,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
   const [state, setState] = useState<PanelistState>({
     panels,
   });
+  const ghostPanelRef = useRef<HTMLDivElement | null>(null);
 
   const internalState = useRef<InternalPanelState>({
     panels,
@@ -48,6 +49,36 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     isResizing: false,
     animatingPanels: new Set(),
   }).current;
+
+  // Ghost panel helper functions
+  // Direct DOM manipulation is intentionally used here for performance.
+  // This avoids React re-renders during high-frequency mousemove events.
+  const showGhostPanel = useCallback((left: number, top: number, width: number, height: number) => {
+    if (!ghostPanelRef.current) return;
+    ghostPanelRef.current.style.display = "block";
+    ghostPanelRef.current.style.left = `${left}px`;
+    ghostPanelRef.current.style.top = `${top}px`;
+    ghostPanelRef.current.style.width = `${width}px`;
+    ghostPanelRef.current.style.height = `${height}px`;
+    ghostPanelRef.current.style.outline = "1px dashed rgba(0, 0, 0, 0.2)";
+  }, []);
+
+  const updateGhostPanelPosition = useCallback((left: number, top: number) => {
+    if (!ghostPanelRef.current) return;
+    ghostPanelRef.current.style.left = `${left}px`;
+    ghostPanelRef.current.style.top = `${top}px`;
+  }, []);
+
+  const updateGhostPanelSize = useCallback((width: number, height: number) => {
+    if (!ghostPanelRef.current) return;
+    ghostPanelRef.current.style.width = `${width}px`;
+    ghostPanelRef.current.style.height = `${height}px`;
+  }, []);
+
+  const hideGhostPanel = useCallback(() => {
+    if (!ghostPanelRef.current) return;
+    ghostPanelRef.current.style.display = "none";
+  }, []);
 
   // Callback to update panels and trigger animations
   const updatePanelsWithAnimation = useCallback(
@@ -91,6 +122,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
       draggingElement.classList.add("panelist-dragging");
       draggingElement.style.transition = "";
 
+      showGhostPanel(offsetX, offsetY, draggingElement.offsetWidth, draggingElement.offsetHeight);
+
       const mouseUpListenerCtrl = new AbortController();
       const mouseMoveListenerCtrl = new AbortController();
 
@@ -106,6 +139,16 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         draggingElement.style.left = offsetX + deltaX + "px";
         draggingElement.style.top = offsetY + deltaY + "px";
 
+        // Update ghost panel position to snap to grid
+        const droppedLeft = offsetX + deltaX;
+        const droppedTop = offsetY + deltaY;
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
+        const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
+        const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
+        const nextTop = gridPositionToPixels(nextGridY, baseSize, gap);
+
+        updateGhostPanelPosition(nextLeft, nextTop);
+
         e.preventDefault(); // Prevent text selection during drag
       };
 
@@ -114,6 +157,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
         internalState.isDragging = false;
         draggingElement.classList.remove("panelist-dragging");
+
+        hideGhostPanel();
 
         const droppedLeft = Number(draggingElement.style.left.replace("px", ""));
         const droppedTop = Number(draggingElement.style.top.replace("px", ""));
@@ -149,7 +194,16 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         signal: mouseUpListenerCtrl.signal,
       });
     },
-    [baseSize, gap, internalState, state.panels, updatePanelsWithAnimation]
+    [
+      baseSize,
+      gap,
+      internalState,
+      state.panels,
+      updatePanelsWithAnimation,
+      showGhostPanel,
+      updateGhostPanelPosition,
+      hideGhostPanel,
+    ]
   );
 
   // Create resize handler for a specific panel
@@ -170,6 +224,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
       draggingElement.style.cursor = "nwse-resize";
       draggingElement.style.transition = "";
 
+      showGhostPanel(draggingElement.offsetLeft, draggingElement.offsetTop, initialWidth, initialHeight);
+
       const mouseMoveController = new AbortController();
       const mouseUpController = new AbortController();
 
@@ -183,10 +239,22 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         draggingElement.style.width = `${initialWidth + deltaX}px`;
         draggingElement.style.height = `${initialHeight + deltaY}px`;
         draggingElement.style.zIndex = "calc(infinity)";
+
+        // Update ghost panel size to snap to grid
+        const newWidth = initialWidth + deltaX;
+        const newHeight = initialHeight + deltaY;
+        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap);
+        const nextGridH = pixelsToGridSize(newHeight, baseSize, gap);
+        const snappedWidth = gridToPixels(nextGridW, baseSize, gap);
+        const snappedHeight = gridToPixels(nextGridH, baseSize, gap);
+
+        updateGhostPanelSize(snappedWidth, snappedHeight);
       };
 
       const onMouseUp = () => {
         if (!draggingElement) return;
+
+        hideGhostPanel();
 
         const rect = draggingElement.getBoundingClientRect();
         const nextGridW = pixelsToGridSize(rect.width, baseSize, gap);
@@ -219,7 +287,16 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
       document.addEventListener("mousemove", onMouseMove, { signal: mouseMoveController.signal });
       document.addEventListener("mouseup", onMouseUp, { signal: mouseUpController.signal });
     },
-    [baseSize, gap, internalState, state.panels, updatePanelsWithAnimation]
+    [
+      baseSize,
+      gap,
+      internalState,
+      state.panels,
+      updatePanelsWithAnimation,
+      showGhostPanel,
+      updateGhostPanelSize,
+      hideGhostPanel,
+    ]
   );
 
   // Create ref callback for panel elements
@@ -308,6 +385,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
   return {
     panels: panelsWithProps,
+    ghostPanelRef,
     addPanel,
     removePanel,
     exportState,

@@ -8,7 +8,7 @@ interface PanelistRendererProps {
 }
 
 export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendererProps) {
-  const { panels, columnCount, gap, baseSize } = usePanelistState();
+  const { panels, columnCount, gap, baseSize, ghostPanelRef } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rowCount = getGridRowCount(panels.map(({ panelProps: p }) => ({ id: p.key, x: p.x, y: p.y, w: p.w, h: p.h })));
@@ -39,6 +39,8 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
       {Array.from({ length: count }).map((_, i) => {
         return <div key={i} className="panel-placeholder" />;
       })}
+
+      <div className="panel-ghost" ref={ghostPanelRef}></div>
 
       {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
