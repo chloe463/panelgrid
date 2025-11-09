@@ -1,73 +1,130 @@
-# React + TypeScript + Vite
+# Panelist
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A flexible and performant React grid layout library with drag-and-drop and resize capabilities.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎯 **Drag and Drop**: Intuitive panel repositioning with snap-to-grid behavior
+- 📏 **Resizable**: Panels can be resized with visual feedback
+- 🎨 **Ghost Panel**: Visual preview of panel placement during drag/resize operations
+- ⚡ **Performance Optimized**: Direct DOM manipulation for high-frequency interactions
+- 🔧 **TypeScript**: Full type safety with comprehensive type definitions
+- ♿ **Accessible**: ARIA attributes and keyboard navigation support
+- 📦 **Tree-shakeable**: ESM and CommonJS builds available
 
-## React Compiler
+## Requirements
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+- React 18.0.0 or higher
+- React DOM 18.0.0 or higher
 
-## Expanding the ESLint configuration
+## Installation
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+npm install panelist
+# or
+yarn add panelist
+# or
+pnpm add panelist
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Usage
 
-```js
-// eslint.config.js
-import reactX from "eslint-plugin-react-x";
-import reactDom from "eslint-plugin-react-dom";
+```tsx
+import { PanelistProvider, PanelistRenderer } from 'panelist';
+import type { PanelCoordinate } from 'panelist';
 
-export default defineConfig([
-  globalIgnores(["dist"]),
-  {
-    files: ["**/*.{ts,tsx}"],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs["recommended-typescript"],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ["./tsconfig.node.json", "./tsconfig.app.json"],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+const initialPanels: PanelCoordinate[] = [
+  { id: 1, x: 0, y: 0, w: 2, h: 2 },
+  { id: 2, x: 2, y: 0, w: 1, h: 1 },
+  { id: 3, x: 0, y: 2, w: 1, h: 1 },
+];
+
+function PanelContent({ id }: { id: number | string }) {
+  return <div>Panel {id}</div>;
+}
+
+function App() {
+  return (
+    <PanelistProvider
+      panels={initialPanels}
+      columnCount={4}
+      gap={8}
+    >
+      <PanelistRenderer itemRenderer={PanelContent} />
+    </PanelistProvider>
+  );
+}
 ```
+
+## API
+
+### `<PanelistProvider>`
+
+The main provider component that manages panel state.
+
+**Props:**
+
+- `panels`: `PanelCoordinate[]` - Array of panel configurations
+- `columnCount`: `number` - Number of columns in the grid
+- `gap`: `number` - Gap between panels in pixels
+
+### `<PanelistRenderer>`
+
+Renderer component that displays the panels.
+
+**Props:**
+
+- `itemRenderer`: `React.ComponentType<{ id: PanelId }>` - Component to render each panel
+
+### `usePanelistControls()`
+
+Hook to access panel control functions.
+
+**Returns:**
+
+- `addPanel(panel: Partial<PanelCoordinate>)`: Add a new panel
+- `removePanel(id: PanelId)`: Remove a panel by ID
+- `exportState()`: Export current panel state
+
+### Types
+
+```typescript
+type PanelId = number | string;
+
+interface PanelCoordinate {
+  id: PanelId;
+  x: number;      // Column position (0-indexed)
+  y: number;      // Row position (0-indexed)
+  w: number;      // Width in columns
+  h: number;      // Height in rows
+}
+```
+
+## Development
+
+```bash
+# Install dependencies
+yarn install
+
+# Run development server
+yarn dev
+
+# Build package
+yarn build
+
+# Run tests
+yarn test
+
+# Type check
+yarn typecheck
+
+# Lint
+yarn lint
+
+# Format
+yarn format
+```
+
+## License
+
+MIT
