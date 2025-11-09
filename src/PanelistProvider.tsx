@@ -15,7 +15,7 @@ interface PanelistControlsContextType {
   setBaseSize: (baseSize: number) => void;
   addPanel: (panel: Partial<PanelCoordinate>) => void;
   removePanel: (id: PanelId) => void;
-  exportState: () => { panels: PanelCoordinate[] };
+  exportState: () => PanelCoordinate[];
 }
 
 const PanelistStateContext = createContext<PanelistContextType | undefined>(undefined);
