@@ -1,26 +1,54 @@
 import "./App.css";
 
-import { PanelistProvider, PanelRenderer, type PanelId } from "../src";
+import type { PanelId } from "../src";
+import { PanelistProvider, PanelistRenderer, usePanelistControls } from "../src";
+import "../src/styles.css";
 
 export default function App() {
   return (
     <div className="App">
       <PanelistProvider
-        columnCount={6}
-        gap={8}
-        panelCoordinates={[
+        panels={[
           { id: 1, x: 0, y: 0, w: 2, h: 2 },
           { id: 2, x: 2, y: 0, w: 2, h: 2 },
           { id: 3, x: 4, y: 0, w: 2, h: 1 },
           { id: 4, x: 0, y: 2, w: 1, h: 1 },
         ]}
+        columnCount={6}
+        gap={8}
       >
-        <PanelRenderer itemRenderer={PanelContent} />
+        <PanelControls />
+        <PanelistRenderer itemRenderer={PanelContent} />
       </PanelistProvider>
     </div>
   );
 }
 
-function PanelContent(id: PanelId) {
-  return <div className="panel-content">Panel Content {id}</div>;
+function PanelControls() {
+  const { addPanel, exportState } = usePanelistControls();
+
+  const save = () => {
+    const state = exportState();
+    // eslint-disable-next-line no-console
+    console.log(state);
+  };
+
+  return (
+    <div className="controls">
+      <button onClick={() => addPanel({ w: 2, h: 2 })}>Add Panel</button>
+      <button onClick={save}>Export State</button>
+    </div>
+  );
+}
+
+function PanelContent({ id }: { id: PanelId }) {
+  const { removePanel } = usePanelistControls();
+  return (
+    <div className="panel-content">
+      <button className="panel-remove-button" onClick={() => removePanel(id)}>
+        x
+      </button>
+      <div className="panel-content-inner">Panel Content {id}</div>
+    </div>
+  );
 }

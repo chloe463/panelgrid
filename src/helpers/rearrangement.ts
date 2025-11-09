@@ -1,12 +1,4 @@
-import type { PanelId } from "../PanelistProvider";
-
-export interface PanelCoordinate {
-  id: PanelId;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+import type { PanelId, PanelCoordinate } from "../types";
 
 /**
  * Check if two rectangles overlap using AABB (Axis-Aligned Bounding Box) test
@@ -204,50 +196,53 @@ export function rearrangePanels(
     panelMap.set(current.id, current);
   }
 
-  // Compact the layout by removing empty rows
-  // 空行を削除してレイアウトを詰める
-  const compactedPanels = compactLayout(Array.from(panelMap.values()));
-
-  // Return the rearranged and compacted panels
-  // 再配置と圧縮後のパネルを返す
-  return compactedPanels;
+  // Return the rearranged panels
+  // 再配置後のパネルを返す
+  return Array.from(panelMap.values());
 }
 
 /**
- * Compact layout by removing empty rows and moving panels up
- * 空行を削除してパネルを上に詰める
+ * Find a new position for a panel to be added
+ * 追加するパネルの新しい位置を見つける
  */
-export function compactLayout(panels: PanelCoordinate[]): PanelCoordinate[] {
-  if (panels.length === 0) return [];
+export function findNewPositionToAddPanel(
+  panelToAdd: Partial<PanelCoordinate>,
+  allPanels: PanelCoordinate[],
+  columnCount: number
+): { x: number; y: number } {
+  const id = panelToAdd.id || Math.random().toString(36).substring(2, 15);
+  const w = panelToAdd.w || 1;
+  const h = panelToAdd.h || 1;
 
-  // Find the maximum Y coordinate to determine the grid height
-  // 最大Y座標を見つけてグリッドの高さを決定
-  const maxY = Math.max(...panels.map((p) => p.y + p.h));
+  // Create a map for fast panel lookup
+  const panelMap = new Map<PanelId, PanelCoordinate>();
+  for (const panel of allPanels) {
+    panelMap.set(panel.id, panel);
+  }
 
-  // Build a map of which rows have panels
-  // どの行にパネルがあるかのマップを構築
-  const rowOccupancy = new Array(maxY).fill(false);
-  for (const panel of panels) {
-    for (let y = panel.y; y < panel.y + panel.h; y++) {
-      rowOccupancy[y] = true;
+  // Calculate maximum row based on existing panels
+  // Add some buffer rows to ensure we can find a position
+  const maxExistingY = allPanels.length > 0 ? Math.max(...allPanels.map((p) => p.y + p.h)) : 0;
+  const MAX_ROWS = Math.max(maxExistingY + 100, 1000);
+
+  // Try to find a position starting from top-left
+  for (let y = 0; y < MAX_ROWS; y++) {
+    for (let x = 0; x <= columnCount - w; x++) {
+      const candidate: PanelCoordinate = {
+        id,
+        x,
+        y,
+        w,
+        h,
+      };
+
+      // Check if this position has any collisions
+      if (!hasCollision(candidate, candidate.id, panelMap)) {
+        return { x, y };
+      }
     }
   }
 
-  // Calculate the offset for each row (how many empty rows above it)
-  // 各行のオフセット（その上にある空行の数）を計算
-  const rowOffsets = new Array(maxY).fill(0);
-  let emptyRowCount = 0;
-  for (let y = 0; y < maxY; y++) {
-    rowOffsets[y] = emptyRowCount;
-    if (!rowOccupancy[y]) {
-      emptyRowCount++;
-    }
-  }
-
-  // Move panels up by their row offset
-  // パネルを行オフセット分だけ上に移動
-  return panels.map((panel) => ({
-    ...panel,
-    y: panel.y - rowOffsets[panel.y],
-  }));
+  // Fallback: if no position found, place at the bottom
+  return { x: 0, y: maxExistingY };
 }
