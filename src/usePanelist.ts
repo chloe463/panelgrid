@@ -157,7 +157,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         // Update ghost panel position to snap to grid
         const droppedLeft = offsetX + deltaX;
         const droppedTop = offsetY + deltaY;
-        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap, columnCount, panel.w);
         const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
         const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
         const nextTop = gridPositionToPixels(nextGridY, baseSize, gap);
@@ -178,7 +178,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         const droppedLeft = parseFloat(draggingElement.style.left) || 0;
         const droppedTop = parseFloat(draggingElement.style.top) || 0;
 
-        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap, columnCount, panel.w);
         const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
 
         const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
@@ -218,6 +218,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       showGhostPanel,
       updateGhostPanelPosition,
       hideGhostPanel,
+      columnCount,
     ]
   );
 
@@ -258,7 +259,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         // Update ghost panel size to snap to grid
         const newWidth = initialWidth + deltaX;
         const newHeight = initialHeight + deltaY;
-        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap);
+        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount);
         const nextGridH = pixelsToGridSize(newHeight, baseSize, gap);
         const snappedWidth = gridToPixels(nextGridW, baseSize, gap);
         const snappedHeight = gridToPixels(nextGridH, baseSize, gap);
@@ -272,7 +273,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         hideGhostPanel();
 
         const rect = draggingElement.getBoundingClientRect();
-        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap);
+        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount);
         const nextGridH = pixelsToGridSize(rect.height, baseSize, gap);
 
         const width = gridToPixels(nextGridW, baseSize, gap);
@@ -299,8 +300,12 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         mouseUpController.abort();
       };
 
-      document.addEventListener("mousemove", onMouseMove, { signal: mouseMoveController.signal });
-      document.addEventListener("mouseup", onMouseUp, { signal: mouseUpController.signal });
+      document.addEventListener("mousemove", onMouseMove, {
+        signal: mouseMoveController.signal,
+      });
+      document.addEventListener("mouseup", onMouseUp, {
+        signal: mouseUpController.signal,
+      });
     },
     [
       baseSize,
@@ -311,6 +316,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       showGhostPanel,
       updateGhostPanelSize,
       hideGhostPanel,
+      columnCount,
     ]
   );
 

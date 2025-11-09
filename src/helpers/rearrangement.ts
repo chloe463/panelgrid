@@ -123,6 +123,27 @@ export function findNewPosition(
 }
 
 /**
+ * Constrain a panel to stay within grid boundaries
+ * パネルをグリッド境界内に制約
+ */
+function constrainToGrid(panel: PanelCoordinate, columnCount: number): PanelCoordinate {
+  // Ensure x + w doesn't exceed columnCount
+  // x + w が columnCount を超えないようにする
+  const maxX = Math.max(0, columnCount - panel.w);
+  const constrainedX = Math.max(0, Math.min(panel.x, maxX));
+
+  // Ensure y is non-negative
+  // y が負にならないようにする
+  const constrainedY = Math.max(0, panel.y);
+
+  return {
+    ...panel,
+    x: constrainedX,
+    y: constrainedY,
+  };
+}
+
+/**
  * Rearrange panels to resolve collisions when a panel is moved or resized
  * Panels are moved horizontally first, then vertically if needed
  * パネルの移動・リサイズ時に衝突を解決するようにパネルを再配置
@@ -133,6 +154,10 @@ export function rearrangePanels(
   allPanels: PanelCoordinate[],
   columnCount: number
 ): PanelCoordinate[] {
+  // Constrain the moving panel to grid boundaries
+  // 移動中のパネルをグリッド境界内に制約
+  const constrainedMovingPanel = constrainToGrid(movingPanel, columnCount);
+
   // Create a map for fast panel lookup
   // パネルIDから座標への高速マップを作成
   const panelMap = new Map<PanelId, PanelCoordinate>();
@@ -142,11 +167,11 @@ export function rearrangePanels(
 
   // Update the moving panel's position in the map
   // 移動中のパネルの位置をマップに反映
-  panelMap.set(movingPanel.id, { ...movingPanel });
+  panelMap.set(constrainedMovingPanel.id, { ...constrainedMovingPanel });
 
   // Queue for processing panels that need to be repositioned
   // 再配置が必要なパネルの処理キュー
-  const queue: PanelCoordinate[] = [{ ...movingPanel }];
+  const queue: PanelCoordinate[] = [{ ...constrainedMovingPanel }];
   const processed = new Set<PanelId>();
 
   // Process panels until no more collisions

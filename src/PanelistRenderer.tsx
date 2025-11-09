@@ -11,7 +11,15 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
   const { panels, columnCount, gap, baseSize, ghostPanelRef } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const rowCount = getGridRowCount(panels.map(({ panelProps: p }) => ({ id: p.key, x: p.x, y: p.y, w: p.w, h: p.h })));
+  const rowCount = getGridRowCount(
+    panels.map(({ panelProps: p }) => ({
+      id: p.key,
+      x: p.x,
+      y: p.y,
+      w: p.w,
+      h: p.h,
+    }))
+  );
   const count = Math.max(columnCount * (rowCount + 1), columnCount * columnCount);
 
   useLayoutEffect(() => {

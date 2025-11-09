@@ -452,4 +452,121 @@ describe("rearrangePanels", () => {
     // panel-2 should be moved to avoid collision
     expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
   });
+
+  // Test cases for issue #23: prevent panel overflow beyond grid boundaries
+  it("should constrain panel within grid boundaries when x + w exceeds columnCount", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-1",
+      x: 5, // x + w = 5 + 2 = 7, which exceeds columnCount = 6
+      y: 0,
+      w: 2,
+      h: 2,
+    };
+
+    const allPanels: PanelCoordinate[] = [movingPanel];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(1);
+    const panel = result.find((p) => p.id === "panel-1");
+
+    // Panel should be constrained to x = 4 (so x + w = 4 + 2 = 6)
+    expect(panel).toEqual({ id: "panel-1", x: 4, y: 0, w: 2, h: 2 });
+    expect(panel!.x + panel!.w).toBeLessThanOrEqual(6);
+  });
+
+  it("should constrain panel to x = 0 when x is negative", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-1",
+      x: -2, // Negative x
+      y: 0,
+      w: 2,
+      h: 2,
+    };
+
+    const allPanels: PanelCoordinate[] = [movingPanel];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(1);
+    const panel = result.find((p) => p.id === "panel-1");
+
+    // Panel should be constrained to x = 0
+    expect(panel).toEqual({ id: "panel-1", x: 0, y: 0, w: 2, h: 2 });
+    expect(panel!.x).toBeGreaterThanOrEqual(0);
+  });
+
+  it("should constrain panel to y = 0 when y is negative", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-1",
+      x: 0,
+      y: -3, // Negative y
+      w: 2,
+      h: 2,
+    };
+
+    const allPanels: PanelCoordinate[] = [movingPanel];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(1);
+    const panel = result.find((p) => p.id === "panel-1");
+
+    // Panel should be constrained to y = 0
+    expect(panel).toEqual({ id: "panel-1", x: 0, y: 0, w: 2, h: 2 });
+    expect(panel!.y).toBeGreaterThanOrEqual(0);
+  });
+
+  it("should handle panel width equal to columnCount", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-1",
+      x: 1, // x + w = 1 + 6 = 7, which exceeds columnCount = 6
+      y: 0,
+      w: 6, // Width equals columnCount
+      h: 2,
+    };
+
+    const allPanels: PanelCoordinate[] = [movingPanel];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(1);
+    const panel = result.find((p) => p.id === "panel-1");
+
+    // Panel should be constrained to x = 0 (so x + w = 0 + 6 = 6)
+    expect(panel).toEqual({ id: "panel-1", x: 0, y: 0, w: 6, h: 2 });
+    expect(panel!.x + panel!.w).toBeLessThanOrEqual(6);
+  });
+
+  it("should constrain panel and handle collisions simultaneously", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-1",
+      x: 5, // x + w = 5 + 2 = 7, which exceeds columnCount = 6
+      y: 0,
+      w: 2,
+      h: 2,
+    };
+
+    const allPanels: PanelCoordinate[] = [
+      movingPanel,
+      {
+        id: "panel-2",
+        x: 4,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(2);
+    const panel1 = result.find((p) => p.id === "panel-1");
+    const panel2 = result.find((p) => p.id === "panel-2");
+
+    // panel-1 should be constrained to x = 4
+    expect(panel1!.x + panel1!.w).toBeLessThanOrEqual(6);
+    // No panels should overlap
+    expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
+  });
 });
