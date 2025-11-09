@@ -171,8 +171,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
 
         hideGhostPanel();
 
-        const droppedLeft = Number(draggingElement.style.left.replace("px", ""));
-        const droppedTop = Number(draggingElement.style.top.replace("px", ""));
+        const droppedLeft = parseFloat(draggingElement.style.left) || 0;
+        const droppedTop = parseFloat(draggingElement.style.top) || 0;
 
         const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
         const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
