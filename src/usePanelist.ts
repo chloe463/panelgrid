@@ -1,5 +1,13 @@
-import { useState, useRef } from "react";
-import { gridPositionToPixels, pixelsToGridSize, gridToPixels, pixelsToGridPosition, rearrangePanels } from "./helpers";
+import { useState, useRef, useCallback, useMemo } from "react";
+import {
+  gridPositionToPixels,
+  pixelsToGridSize,
+  gridToPixels,
+  pixelsToGridPosition,
+  rearrangePanels,
+  applySnapAnimation,
+  detectAnimatingPanels,
+} from "./helpers";
 import type { PanelCoordinate } from "./types";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
 
@@ -24,6 +32,8 @@ interface InternalPanelState {
   animatingPanels: Set<number | string>;
 }
 
+const ANIMATION_DURATION = 300;
+
 export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOptions) {
   const [state, setState] = useState<PanelistState>({
     panels,
@@ -39,8 +49,193 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
     animatingPanels: new Set(),
   }).current;
 
-  return {
-    panels: state.panels.map((panel) => {
+  // Callback to update panels and trigger animations
+  const updatePanelsWithAnimation = useCallback(
+    (updatedPanel: PanelCoordinate, currentPanels: PanelCoordinate[]) => {
+      const nextPanels = rearrangePanels(updatedPanel, currentPanels, columnCount);
+
+      // Detect which panels have been rearranged
+      internalState.animatingPanels = detectAnimatingPanels({
+        oldPanels: currentPanels,
+        newPanels: nextPanels,
+        excludePanelId: updatedPanel.id,
+      });
+
+      setState((current) => ({
+        ...current,
+        panels: nextPanels,
+      }));
+
+      // Clear animating panels after animation completes
+      setTimeout(() => {
+        internalState.animatingPanels.clear();
+      }, ANIMATION_DURATION);
+    },
+    [columnCount, internalState]
+  );
+
+  // Create drag handler for a specific panel
+  const createDragHandler = useCallback(
+    (panel: PanelCoordinate) => (e: React.MouseEvent<HTMLDivElement>) => {
+      internalState.activePanelId = panel.id;
+      const draggingElement = internalState.draggableElements[panel.id];
+      if (!draggingElement) return;
+
+      internalState.isDragging = true;
+      const initialX = e.clientX;
+      const initialY = e.clientY;
+      const offsetX = draggingElement.offsetLeft;
+      const offsetY = draggingElement.offsetTop;
+      const originalTransition = draggingElement.style.transition;
+
+      draggingElement.classList.add("panelist-dragging");
+      draggingElement.style.transition = "";
+
+      const mouseUpListenerCtrl = new AbortController();
+      const mouseMoveListenerCtrl = new AbortController();
+
+      const onMouseMove = (e: MouseEvent) => {
+        if (!internalState.isDragging) return;
+        if (!draggingElement) return;
+
+        const currentX = e.clientX;
+        const currentY = e.clientY;
+        const deltaX = currentX - initialX;
+        const deltaY = currentY - initialY;
+
+        draggingElement.style.left = offsetX + deltaX + "px";
+        draggingElement.style.top = offsetY + deltaY + "px";
+
+        e.preventDefault(); // Prevent text selection during drag
+      };
+
+      const onMouseUp = () => {
+        if (!draggingElement) return;
+
+        internalState.isDragging = false;
+        draggingElement.classList.remove("panelist-dragging");
+
+        const droppedLeft = Number(draggingElement.style.left.replace("px", ""));
+        const droppedTop = Number(draggingElement.style.top.replace("px", ""));
+
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
+        const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
+
+        const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
+        const nextTop = gridPositionToPixels(nextGridY, baseSize, gap);
+
+        // Apply snap-back animation
+        applySnapAnimation({
+          element: draggingElement,
+          droppedLeft,
+          droppedTop,
+          nextLeft,
+          nextTop,
+          originalTransition,
+        });
+
+        updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY }, state.panels);
+
+        internalState.activePanelId = null;
+
+        mouseMoveListenerCtrl.abort();
+        mouseUpListenerCtrl.abort();
+      };
+
+      document.addEventListener("mousemove", onMouseMove, {
+        signal: mouseMoveListenerCtrl.signal,
+      });
+      document.addEventListener("mouseup", onMouseUp, {
+        signal: mouseUpListenerCtrl.signal,
+      });
+    },
+    [baseSize, gap, internalState, state.panels, updatePanelsWithAnimation]
+  );
+
+  // Create resize handler for a specific panel
+  const createResizeHandler = useCallback(
+    (panel: PanelCoordinate) => (e: React.MouseEvent<HTMLSpanElement>) => {
+      e.stopPropagation();
+      internalState.isResizing = true;
+      internalState.activePanelId = panel.id;
+      const draggingElement = internalState.draggableElements[panel.id];
+      if (!draggingElement) return;
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const initialWidth = draggingElement.offsetWidth;
+      const initialHeight = draggingElement.offsetHeight;
+      const initialZIndex = draggingElement.style.zIndex;
+
+      draggingElement.style.cursor = "nwse-resize";
+      draggingElement.style.transition = "";
+
+      const mouseMoveController = new AbortController();
+      const mouseUpController = new AbortController();
+
+      const onMouseMove = (e: MouseEvent) => {
+        if (!internalState.isResizing) return;
+        if (!draggingElement) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        draggingElement.style.width = `${initialWidth + deltaX}px`;
+        draggingElement.style.height = `${initialHeight + deltaY}px`;
+        draggingElement.style.zIndex = "calc(infinity)";
+      };
+
+      const onMouseUp = () => {
+        if (!draggingElement) return;
+
+        const rect = draggingElement.getBoundingClientRect();
+        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap);
+        const nextGridH = pixelsToGridSize(rect.height, baseSize, gap);
+
+        const width = gridToPixels(nextGridW, baseSize, gap);
+        const height = gridToPixels(nextGridH, baseSize, gap);
+
+        draggingElement.style.width = `${rect.width}px`;
+        draggingElement.style.height = `${rect.height}px`;
+        draggingElement.style.cursor = "default";
+        draggingElement.style.transition = "";
+
+        window.requestAnimationFrame(() => {
+          draggingElement.style.width = `${width}px`;
+          draggingElement.style.height = `${height}px`;
+          draggingElement.style.zIndex = initialZIndex;
+          draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
+        });
+
+        updatePanelsWithAnimation({ ...panel, w: nextGridW, h: nextGridH }, state.panels);
+
+        internalState.isResizing = false;
+        internalState.activePanelId = null;
+
+        mouseMoveController.abort();
+        mouseUpController.abort();
+      };
+
+      document.addEventListener("mousemove", onMouseMove, { signal: mouseMoveController.signal });
+      document.addEventListener("mouseup", onMouseUp, { signal: mouseUpController.signal });
+    },
+    [baseSize, gap, internalState, state.panels, updatePanelsWithAnimation]
+  );
+
+  // Create ref callback for panel elements
+  const createRefCallback = useCallback(
+    (panelId: number | string) => (element: HTMLElement | null) => {
+      if (!element) return;
+      if (!internalState.draggableElements[panelId]) {
+        internalState.draggableElements[panelId] = element;
+      }
+    },
+    [internalState]
+  );
+
+  // Memoize panel props to avoid recreating on every render
+  const panelsWithProps = useMemo(() => {
+    return state.panels.map((panel) => {
       const isAnimating = internalState.animatingPanels.has(panel.id);
       const isActive = internalState.activePanelId === panel.id;
 
@@ -61,223 +256,27 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
                 ? "top 0.3s ease-out, left 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out"
                 : undefined,
           },
-          ref: (element: HTMLElement | null) => {
-            if (!element) return;
-
-            if (!internalState.draggableElements[panel.id]) {
-              internalState.draggableElements[panel.id] = element;
-              return;
-            }
-          },
-          onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => {
-            internalState.activePanelId = panel.id;
-            const draggingElement = internalState.draggableElements[panel.id];
-            if (!draggingElement) return;
-
-            internalState.isDragging = true;
-            const initialX = e.clientX;
-            const initialY = e.clientY;
-            const offsetX = draggingElement.offsetLeft;
-            const offsetY = draggingElement.offsetTop;
-            const originalTransition = draggingElement.style.transition;
-
-            draggingElement.classList.add("panelist-dragging");
-            draggingElement.style.transition = "";
-
-            const mouseUpListenerCtrl = new AbortController();
-            const mouseMoveListenerCtrl = new AbortController();
-
-            document.addEventListener("mousemove", onMouseMove, {
-              signal: mouseMoveListenerCtrl.signal,
-            });
-            document.addEventListener("mouseup", onMouseUp, {
-              signal: mouseUpListenerCtrl.signal,
-            });
-
-            function onMouseMove(e: MouseEvent) {
-              if (!internalState.isDragging) return;
-              if (!draggingElement) return;
-              const currentX = e.clientX;
-              const currentY = e.clientY;
-
-              const deltaX = currentX - initialX;
-              const deltaY = currentY - initialY;
-
-              draggingElement.style.left = offsetX + deltaX + "px";
-              draggingElement.style.top = offsetY + deltaY + "px";
-
-              // const nextX = pixelsToGridPosition(offsetX + deltaX, baseSize, gap);
-              // const nextY = pixelsToGridPosition(offsetY + deltaY, baseSize, gap);
-
-              e.preventDefault(); // Prevent text selection during drag
-              // throttledMovingPanel(id, nextX, nextY);
-            }
-
-            function onMouseUp() {
-              if (!draggingElement) return;
-              internalState.isDragging = false;
-              draggingElement.classList.remove("panelist-dragging");
-
-              const droppedLeft = Number(draggingElement.style.left.replace("px", ""));
-              const droppedTop = Number(draggingElement.style.top.replace("px", ""));
-
-              const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap);
-              const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
-
-              const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
-              const nextTop = gridPositionToPixels(nextGridY, baseSize, gap);
-
-              // Animation
-              const deltaX = droppedLeft - nextLeft;
-              const deltaY = droppedTop - nextTop;
-
-              draggingElement.style.transform = `translate3D(${deltaX}px, ${deltaY}px, 0)`;
-              draggingElement.style.transition = "";
-              window.requestAnimationFrame(() => {
-                draggingElement.style.transform = "translate3D(0, 0, 0)";
-                draggingElement.style.transition = "transform 0.1s ease-out";
-              });
-
-              draggingElement.style.left = `${nextLeft}px`;
-              draggingElement.style.top = `${nextTop}px`;
-              draggingElement.style.transition = originalTransition;
-
-              const nextPanels = rearrangePanels({ ...panel, x: nextGridX, y: nextGridY }, state.panels, columnCount);
-
-              // Detect which panels have been rearranged (excluding the active panel)
-              internalState.animatingPanels.clear();
-              state.panels.forEach((oldPanel) => {
-                const newPanel = nextPanels.find((p) => p.id === oldPanel.id);
-                if (newPanel && oldPanel.id !== panel.id) {
-                  const hasChanged =
-                    oldPanel.x !== newPanel.x ||
-                    oldPanel.y !== newPanel.y ||
-                    oldPanel.w !== newPanel.w ||
-                    oldPanel.h !== newPanel.h;
-                  if (hasChanged) {
-                    internalState.animatingPanels.add(oldPanel.id);
-                  }
-                }
-              });
-
-              setState((current) => {
-                return {
-                  ...current,
-                  panels: nextPanels,
-                };
-              });
-
-              // Clear animating panels after animation completes
-              setTimeout(() => {
-                internalState.animatingPanels.clear();
-              }, 300);
-
-              internalState.activePanelId = null;
-
-              mouseMoveListenerCtrl.abort();
-              mouseUpListenerCtrl.abort();
-            }
-          },
+          ref: createRefCallback(panel.id),
+          onMouseDown: createDragHandler(panel),
         },
         resizeHandleProps: {
-          onMouseDown: (e: React.MouseEvent<HTMLSpanElement>) => {
-            e.stopPropagation();
-            internalState.isResizing = true;
-            internalState.activePanelId = panel.id;
-            const draggingElement = internalState.draggableElements[panel.id];
-            if (!draggingElement) return;
-
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const initialWidth = draggingElement.offsetWidth;
-            const initialHeight = draggingElement.offsetHeight;
-            const initialZIndex = draggingElement.style.zIndex;
-
-            draggingElement.style.cursor = "nwse-resize";
-            draggingElement.style.transition = "";
-
-            const mouseMoveController = new AbortController();
-            const mouseUpController = new AbortController();
-
-            document.addEventListener("mousemove", onMouseMove, { signal: mouseMoveController.signal });
-            document.addEventListener("mouseup", onMouseUp, { signal: mouseUpController.signal });
-
-            function onMouseMove(e: MouseEvent) {
-              if (!internalState.isResizing) return;
-              if (!draggingElement) return;
-              const deltaX = e.clientX - startX;
-              const deltaY = e.clientY - startY;
-
-              draggingElement.style.width = `${initialWidth + deltaX}px`;
-              draggingElement.style.height = `${initialHeight + deltaY}px`;
-              draggingElement.style.zIndex = "calc(infinity)";
-
-              // const nextW = pixelsToGridSize(initialWidth + deltaX, baseSize, gap);
-              // const nextH = pixelsToGridSize(initialHeight + deltaY, baseSize, gap);
-            }
-
-            function onMouseUp() {
-              if (draggingElement) {
-                const rect = draggingElement?.getBoundingClientRect();
-                const nextGridW = pixelsToGridSize(rect.width, baseSize, gap);
-                const nextGridH = pixelsToGridSize(rect.height, baseSize, gap);
-
-                const width = gridToPixels(nextGridW, baseSize, gap);
-                const height = gridToPixels(nextGridH, baseSize, gap);
-
-                draggingElement.style.width = `${rect.width}px`;
-                draggingElement.style.height = `${rect.height}px`;
-                draggingElement.style.cursor = "default";
-                draggingElement.style.transition = "";
-
-                window.requestAnimationFrame(() => {
-                  draggingElement.style.width = `${width}px`;
-                  draggingElement.style.height = `${height}px`;
-                  draggingElement.style.zIndex = initialZIndex;
-                  draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
-                });
-                const nextPanels = rearrangePanels({ ...panel, w: nextGridW, h: nextGridH }, state.panels, columnCount);
-
-                // Detect which panels have been rearranged (excluding the active panel)
-                internalState.animatingPanels.clear();
-                state.panels.forEach((oldPanel) => {
-                  const newPanel = nextPanels.find((p) => p.id === oldPanel.id);
-                  if (newPanel && oldPanel.id !== panel.id) {
-                    const hasChanged =
-                      oldPanel.x !== newPanel.x ||
-                      oldPanel.y !== newPanel.y ||
-                      oldPanel.w !== newPanel.w ||
-                      oldPanel.h !== newPanel.h;
-                    if (hasChanged) {
-                      internalState.animatingPanels.add(oldPanel.id);
-                    }
-                  }
-                });
-
-                setState((current) => {
-                  return {
-                    ...current,
-                    panels: nextPanels,
-                  };
-                });
-
-                // Clear animating panels after animation completes
-                setTimeout(() => {
-                  internalState.animatingPanels.clear();
-                }, 300);
-
-                internalState.isResizing = false;
-                internalState.activePanelId = null;
-              }
-
-              mouseMoveController.abort();
-              mouseUpController.abort();
-            }
-          },
+          onMouseDown: createResizeHandler(panel),
         },
       };
-    }),
-    addPanel: (panel: Partial<PanelCoordinate>) => {
+    });
+  }, [
+    state.panels,
+    baseSize,
+    gap,
+    internalState.animatingPanels,
+    internalState.activePanelId,
+    createRefCallback,
+    createDragHandler,
+    createResizeHandler,
+  ]);
+
+  const addPanel = useCallback(
+    (panel: Partial<PanelCoordinate>) => {
       setState((current) => {
         const newPosition = findNewPositionToAddPanel(panel, current.panels, columnCount);
         const newPanel: PanelCoordinate = {
@@ -293,16 +292,24 @@ export function usePanelist({ panels, columnCount, baseSize, gap }: PanelistOpti
         };
       });
     },
-    removePanel: (id: number | string) => {
-      setState((current) => {
-        return {
-          ...current,
-          panels: current.panels.filter((panel) => panel.id !== id),
-        };
-      });
-    },
-    exportState: () => {
-      return state.panels;
-    },
+    [columnCount]
+  );
+
+  const removePanel = useCallback((id: number | string) => {
+    setState((current) => ({
+      ...current,
+      panels: current.panels.filter((panel) => panel.id !== id),
+    }));
+  }, []);
+
+  const exportState = useCallback(() => {
+    return state.panels;
+  }, [state.panels]);
+
+  return {
+    panels: panelsWithProps,
+    addPanel,
+    removePanel,
+    exportState,
   };
 }

@@ -14,3 +14,7 @@ export {
   rearrangePanels,
   compactLayout,
 } from "./rearrangement";
+
+export { applySnapAnimation } from "./animation";
+
+export { detectAnimatingPanels } from "./panelDetection";
