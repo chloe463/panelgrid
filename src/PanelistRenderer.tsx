@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import type { PanelId } from "./types";
 import { usePanelistState, usePanelistControls } from "./PanelistProvider";
+import { getGridRowCount } from "./helpers/gridCalculations";
 
 interface PanelistRendererProps {
   itemRenderer: React.ComponentType<{ id: PanelId }>;
@@ -10,7 +11,8 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
   const { panels, columnCount, gap, baseSize } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const count = columnCount * columnCount;
+  const rowCount = getGridRowCount(panels.map(({ panelProps: p }) => ({ id: p.key, x: p.x, y: p.y, w: p.w, h: p.h })));
+  const count = Math.max(columnCount * (rowCount + 1), columnCount * columnCount);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;

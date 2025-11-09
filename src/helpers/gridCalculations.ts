@@ -1,3 +1,5 @@
+import type { PanelCoordinate } from "../types";
+
 /**
  * Converts a pixel value to grid units by dividing by the cell size (baseSize + gap)
  * and rounding up with Math.ceil
@@ -55,4 +57,12 @@ export function gridPositionToPixels(gridCoord: number, baseSize: number, gap: n
 export function snapToGrid(pixels: number, baseSize: number, gap: number): number {
   const gridPosition = pixelsToGridPosition(pixels, baseSize, gap);
   return gridPositionToPixels(gridPosition, baseSize, gap);
+}
+
+/**
+ * Gets the maximum Y coordinate of the panels
+ * パネルの最大Y座標を取得します。
+ */
+export function getGridRowCount(panels: PanelCoordinate[]): number {
+  return Math.max(...panels.map((p) => p.y + p.h));
 }
