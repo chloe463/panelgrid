@@ -3,10 +3,10 @@ import type { PanelId } from "./types";
 import { usePanelistState, usePanelistControls } from "./PanelistProvider";
 
 interface PanelistRendererProps {
-  itemRenderer: (id: PanelId) => React.ReactNode;
+  itemRenderer: React.ComponentType<{ id: PanelId }>;
 }
 
-export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
+export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendererProps) {
   const { panels, columnCount, gap, baseSize } = usePanelistState();
   const { setBaseSize } = usePanelistControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -43,7 +43,7 @@ export function PanelistRenderer({ itemRenderer }: PanelistRendererProps) {
         const { key, ...panelProps } = _panelProps;
         return (
           <div key={key} className="panel" {...panelProps}>
-            {itemRenderer(key)}
+            <ItemRenderer id={key} />
             <span className="resize-handle" {...resizeHandleProps}></span>
           </div>
         );

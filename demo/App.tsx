@@ -41,7 +41,7 @@ function PanelControls() {
   );
 }
 
-function PanelContent(id: PanelId) {
+function PanelContent({ id }: { id: PanelId }) {
   const { removePanel } = usePanelistControls();
   return (
     <div className="panel-content">
