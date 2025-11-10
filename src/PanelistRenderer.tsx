@@ -45,6 +45,7 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
       ref={containerRef}
     >
       {Array.from({ length: count }).map((_, i) => {
+        // biome-ignore lint/suspicious/noArrayIndexKey: This list will not change order.
         return <div key={i} className="panelist-panel-placeholder" />;
       })}
 

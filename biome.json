@@ -154,7 +154,8 @@
             "noUnsafeNegation": "off",
             "noVar": "error",
             "noWith": "off",
-            "useGetterReturn": "off"
+            "useGetterReturn": "off",
+            "noArrayIndexKey": "error"
           }
         }
       }
