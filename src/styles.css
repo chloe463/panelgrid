@@ -1,4 +1,4 @@
-.panelist-renderer {
+.panelgrid-renderer {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--column-count, 6), 1fr);
@@ -6,14 +6,14 @@
   gap: var(--gap, 8px);
 }
 
-.panelist-panel-placeholder {
+.panelgrid-panel-placeholder {
   display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   background-color: rgb(0 0 0 / 0.03);
 }
 
-.panelist-panel-ghost {
+.panelgrid-panel-ghost {
   position: absolute;
   pointer-events: none;
   border-radius: 4px;
@@ -22,7 +22,7 @@
   z-index: -1;
 }
 
-.panelist-panel {
+.panelgrid-panel {
   position: absolute;
   box-sizing: border-box;
   aspect-ratio: 1 / 1;
@@ -31,13 +31,13 @@
   border-radius: 4px;
 }
 
-.panelist-panel--dragging {
+.panelgrid-panel--dragging {
   cursor: grabbing;
   box-shadow: 0px 11px 30px 0px #0000001f;
   z-index: calc(infinity);
 }
 
-.panelist-panel--with-transition {
+.panelgrid-panel--with-transition {
   transition:
     top 0.15s ease-out,
     left 0.15s ease-out,
@@ -45,7 +45,7 @@
     height 0.1s ease-out;
 }
 
-.panelist-resize-handle {
+.panelgrid-resize-handle {
   position: absolute;
   right: 0;
   bottom: 0;
@@ -60,7 +60,7 @@
   }
 }
 
-.panelist-panel-ghost {
+.panelgrid-panel-ghost {
   display: none;
   position: absolute;
   pointer-events: none;

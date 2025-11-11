@@ -11,7 +11,7 @@ import {
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
 import type { PanelCoordinate, RearrangementFunction } from "./types";
 
-interface PanelistOptions {
+interface PanelGridOptions {
   panels: PanelCoordinate[];
   columnCount: number;
   baseSize: number;
@@ -19,7 +19,7 @@ interface PanelistOptions {
   rearrangement?: RearrangementFunction;
 }
 
-interface PanelistState {
+interface PanelGridState {
   panels: PanelCoordinate[];
 }
 
@@ -36,8 +36,8 @@ interface InternalPanelState {
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
-export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement }: PanelistOptions) {
-  const [state, setState] = useState<PanelistState>({
+export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement }: PanelGridOptions) {
+  const [state, setState] = useState<PanelGridState>({
     panels,
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
@@ -134,7 +134,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const offsetY = draggingElement.offsetTop;
       const originalTransition = draggingElement.style.transition;
 
-      draggingElement.classList.add("panelist-panel--dragging");
+      draggingElement.classList.add("panelgrid-panel--dragging");
       draggingElement.style.transition = "";
 
       showGhostPanel(offsetX, offsetY, draggingElement.offsetWidth, draggingElement.offsetHeight);
@@ -171,7 +171,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         if (!draggingElement) return;
 
         internalState.isDragging = false;
-        draggingElement.classList.remove("panelist-panel--dragging");
+        draggingElement.classList.remove("panelgrid-panel--dragging");
 
         hideGhostPanel();
 

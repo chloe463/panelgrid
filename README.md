@@ -1,4 +1,4 @@
-# Panelist
+# PanelGrid
 
 A flexible and performant React grid layout library with drag-and-drop and resize capabilities.
 
@@ -21,19 +21,19 @@ A flexible and performant React grid layout library with drag-and-drop and resiz
 ## Installation
 
 ```bash
-npm install panelist
+npm install panelgrid
 # or
-yarn add panelist
+yarn add panelgrid
 # or
-pnpm add panelist
+pnpm add panelgrid
 ```
 
 ## Usage
 
 ```tsx
-import { PanelistProvider, PanelistRenderer } from 'panelist';
-import type { PanelCoordinate } from 'panelist';
-import 'panelist/styles.css';
+import { PanelGridProvider, PanelGridRenderer } from 'panelgrid';
+import type { PanelCoordinate } from 'panelgrid';
+import 'panelgrid/styles.css';
 
 const initialPanels: PanelCoordinate[] = [
   { id: 1, x: 0, y: 0, w: 2, h: 2 },
@@ -47,13 +47,13 @@ function PanelContent({ id }: { id: number | string }) {
 
 function App() {
   return (
-    <PanelistProvider
+    <PanelGridProvider
       panels={initialPanels}
       columnCount={4}
       gap={8}
     >
-      <PanelistRenderer itemRenderer={PanelContent} />
-    </PanelistProvider>
+      <PanelGridRenderer itemRenderer={PanelContent} />
+    </PanelGridProvider>
   );
 }
 ```
@@ -67,8 +67,8 @@ function App() {
 You can override the default collision resolution logic by providing a custom `rearrangement` function:
 
 ```tsx
-import { PanelistProvider, rearrangePanels } from 'panelist';
-import type { RearrangementFunction, PanelCoordinate } from 'panelist';
+import { PanelGridProvider, rearrangePanels } from 'panelgrid';
+import type { RearrangementFunction, PanelCoordinate } from 'panelgrid';
 
 // Example: Custom rearrangement that prevents vertical movement
 const customRearrange: RearrangementFunction = (
@@ -91,14 +91,14 @@ const customRearrange: RearrangementFunction = (
 
 function App() {
   return (
-    <PanelistProvider
+    <PanelGridProvider
       panels={initialPanels}
       columnCount={4}
       gap={8}
       rearrangement={customRearrange}
     >
-      <PanelistRenderer itemRenderer={PanelContent} />
-    </PanelistProvider>
+      <PanelGridRenderer itemRenderer={PanelContent} />
+    </PanelGridProvider>
   );
 }
 ```
@@ -146,26 +146,26 @@ const zoneRearrangement: RearrangementFunction = (
 
 ### Customizing Styles
 
-Panelist uses non-scoped CSS classes with the `panelist-` prefix, allowing you to override the default styles to match your application's design.
+PanelGrid uses non-scoped CSS classes with the `panelgrid-` prefix, allowing you to override the default styles to match your application's design.
 
 #### Available CSS Classes
 
-- `.panelist-renderer` - The main grid container
-- `.panelist-panel-placeholder` - Grid cell placeholders (background visualization)
-- `.panelist-panel` - Individual panel container
-- `.panelist-panel-ghost` - Ghost panel shown during drag/resize operations
-- `.panelist-panel--dragging` - Applied to a panel while it's being dragged
-- `.panelist-panel--with-transition` - Applied to panels that are animating to new positions
-- `.panelist-resize-handle` - Resize handle in the bottom-right corner of panels
+- `.panelgrid-renderer` - The main grid container
+- `.panelgrid-panel-placeholder` - Grid cell placeholders (background visualization)
+- `.panelgrid-panel` - Individual panel container
+- `.panelgrid-panel-ghost` - Ghost panel shown during drag/resize operations
+- `.panelgrid-panel--dragging` - Applied to a panel while it's being dragged
+- `.panelgrid-panel--with-transition` - Applied to panels that are animating to new positions
+- `.panelgrid-resize-handle` - Resize handle in the bottom-right corner of panels
 
 #### Example: Custom Panel Styling
 
 ```css
 /* Import the base styles first */
-@import 'panelist/styles.css';
+@import 'panelgrid/styles.css';
 
 /* Override panel appearance */
-.panelist-panel {
+.panelgrid-panel {
   border-radius: 8px;
   border: 2px solid #3b82f6;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -173,30 +173,30 @@ Panelist uses non-scoped CSS classes with the `panelist-` prefix, allowing you t
 }
 
 /* Style the ghost panel */
-.panelist-panel-ghost {
+.panelgrid-panel-ghost {
   outline: 2px dashed #3b82f6;
   background-color: rgba(59, 130, 246, 0.1);
 }
 
 /* Customize the resize handle */
-.panelist-resize-handle {
+.panelgrid-resize-handle {
   background-color: #3b82f6;
   width: 20px;
   border-bottom-right-radius: 8px;
 }
 
-.panelist-resize-handle:hover {
+.panelgrid-resize-handle:hover {
   background-color: #2563eb;
 }
 
 /* Style dragging state */
-.panelist-panel--dragging {
+.panelgrid-panel--dragging {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
   opacity: 0.8;
 }
 
 /* Customize grid placeholders */
-.panelist-panel-placeholder {
+.panelgrid-panel-placeholder {
   background-color: #f3f4f6;
   border-radius: 4px;
 }
@@ -205,24 +205,24 @@ Panelist uses non-scoped CSS classes with the `panelist-` prefix, allowing you t
 #### Example: Dark Mode Support
 
 ```css
-@import 'panelist/styles.css';
+@import 'panelgrid/styles.css';
 
 @media (prefers-color-scheme: dark) {
-  .panelist-panel-placeholder {
+  .panelgrid-panel-placeholder {
     background-color: rgba(255, 255, 255, 0.05);
   }
 
-  .panelist-panel {
+  .panelgrid-panel {
     background-color: #1f2937;
     border-color: #374151;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
   }
 
-  .panelist-panel-ghost {
+  .panelgrid-panel-ghost {
     outline-color: #60a5fa;
   }
 
-  .panelist-resize-handle {
+  .panelgrid-resize-handle {
     background-color: rgba(255, 255, 255, 0.2);
   }
 }
@@ -237,7 +237,7 @@ The renderer uses CSS custom properties that you can use in your custom styles:
 
 ```css
 /* Example: Use custom properties in your styles */
-.panelist-panel {
+.panelgrid-panel {
   /* Add padding based on the gap size */
   padding: calc(var(--gap) / 2);
 }
@@ -245,7 +245,7 @@ The renderer uses CSS custom properties that you can use in your custom styles:
 
 ## API
 
-### `<PanelistProvider>`
+### `<PanelGridProvider>`
 
 The main provider component that manages panel state.
 
@@ -256,7 +256,7 @@ The main provider component that manages panel state.
 - `gap`: `number` - Gap between panels in pixels
 - `rearrangement?`: `RearrangementFunction` - Optional custom rearrangement logic (see [Custom Rearrangement Logic](#custom-rearrangement-logic))
 
-### `<PanelistRenderer>`
+### `<PanelGridRenderer>`
 
 Renderer component that displays the panels.
 
@@ -264,7 +264,7 @@ Renderer component that displays the panels.
 
 - `itemRenderer`: `React.ComponentType<{ id: PanelId }>` - Component to render each panel
 
-### `usePanelistControls()`
+### `usePanelGridControls()`
 
 Hook to access panel control functions.
 
