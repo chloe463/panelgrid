@@ -1,15 +1,15 @@
 import { useLayoutEffect, useRef } from "react";
 import { getGridRowCount } from "./helpers/gridCalculations";
-import { usePanelistControls, usePanelistState } from "./PanelistProvider";
+import { usePanelGridControls, usePanelGridState } from "./PanelGridProvider";
 import type { PanelId } from "./types";
 
-interface PanelistRendererProps {
+interface PanelGridRendererProps {
   itemRenderer: React.ComponentType<{ id: PanelId }>;
 }
 
-export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendererProps) {
-  const { panels, columnCount, gap, baseSize, ghostPanelRef } = usePanelistState();
-  const { setBaseSize } = usePanelistControls();
+export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRendererProps) {
+  const { panels, columnCount, gap, baseSize, ghostPanelRef } = usePanelGridState();
+  const { setBaseSize } = usePanelGridControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rowCount = getGridRowCount(
     panels.map(({ panelProps: p }) => ({
@@ -36,7 +36,7 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
 
   return (
     <div
-      className="panelist-renderer"
+      className="panelgrid-renderer"
       style={{
         "--column-count": `${columnCount}`,
         "--gap": `${gap}px`,
@@ -45,18 +45,18 @@ export function PanelistRenderer({ itemRenderer: ItemRenderer }: PanelistRendere
       ref={containerRef}
     >
       {Array.from({ length: count }).map((_, i) => {
-        return <div key={i} className="panelist-panel-placeholder" />;
+        return <div key={i} className="panelgrid-panel-placeholder" />;
       })}
 
-      <div className="panelist-panel-ghost" ref={ghostPanelRef}></div>
+      <div className="panelgrid-panel-ghost" ref={ghostPanelRef}></div>
 
       {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
         const { key, ...panelProps } = _panelProps;
         return (
-          <div key={key} className="panelist-panel" {...panelProps}>
+          <div key={key} className="panelgrid-panel" {...panelProps}>
             <ItemRenderer id={key} />
-            <span className="panelist-resize-handle" {...resizeHandleProps}></span>
+            <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>
           </div>
         );
       })}

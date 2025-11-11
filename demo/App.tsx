@@ -1,13 +1,13 @@
 import "./App.css";
 
 import type { PanelId } from "../src";
-import { PanelistProvider, PanelistRenderer, usePanelistControls } from "../src";
+import { PanelGridProvider, PanelGridRenderer, usePanelGridControls } from "../src";
 import "../src/styles.css";
 
 export default function App() {
   return (
     <div className="App">
-      <PanelistProvider
+      <PanelGridProvider
         panels={[
           { id: 1, x: 0, y: 0, w: 2, h: 2 },
           { id: 2, x: 2, y: 0, w: 2, h: 2 },
@@ -18,14 +18,14 @@ export default function App() {
         gap={8}
       >
         <PanelControls />
-        <PanelistRenderer itemRenderer={PanelContent} />
-      </PanelistProvider>
+        <PanelGridRenderer itemRenderer={PanelContent} />
+      </PanelGridProvider>
     </div>
   );
 }
 
 function PanelControls() {
-  const { addPanel, exportState } = usePanelistControls();
+  const { addPanel, exportState } = usePanelGridControls();
 
   const save = () => {
     const _state = exportState();
@@ -42,7 +42,7 @@ function PanelControls() {
 }
 
 function PanelContent({ id }: { id: PanelId }) {
-  const { removePanel } = usePanelistControls();
+  const { removePanel } = usePanelGridControls();
   return (
     <div className="panel-content">
       <button className="panel-remove-button" onClick={() => removePanel(id)}>
