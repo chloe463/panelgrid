@@ -9,7 +9,6 @@ A flexible and performant React grid layout library with drag-and-drop and resiz
 - 🎨 **Ghost Panel**: Visual preview of panel placement during drag/resize operations
 - ⚡ **Performance Optimized**: Direct DOM manipulation for high-frequency interactions
 - 🔧 **TypeScript**: Full type safety with comprehensive type definitions
-- ♿ **Accessible**: ARIA attributes and keyboard navigation support
 - 📦 **Tree-shakeable**: ESM and CommonJS builds available
 - 🎛️ **Customizable Rearrangement**: Override default collision resolution logic
 
