@@ -24,12 +24,10 @@ interface PanelGridState {
 }
 
 interface InternalPanelState {
-  panels: PanelCoordinate[];
   activePanelId: number | string | null;
   isDragging: boolean;
   draggableElements: Record<number | string, HTMLElement | null>;
   isResizing: boolean;
-  isMoving: boolean;
   animatingPanels: Set<number | string>;
 }
 
@@ -44,10 +42,8 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
   const animationTimeoutsRef = useRef<Set<TimeoutId>>(new Set());
 
   const internalState = useRef<InternalPanelState>({
-    panels,
     activePanelId: null,
     isDragging: false,
-    isMoving: false,
     draggableElements: {},
     isResizing: false,
     animatingPanels: new Set(),
