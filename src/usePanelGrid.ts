@@ -25,9 +25,7 @@ interface PanelGridState {
 
 interface InternalPanelState {
   activePanelId: number | string | null;
-  isDragging: boolean;
   draggableElements: Record<number | string, HTMLElement | null>;
-  isResizing: boolean;
   animatingPanels: Set<number | string>;
 }
 
@@ -43,9 +41,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   const internalState = useRef<InternalPanelState>({
     activePanelId: null,
-    isDragging: false,
     draggableElements: {},
-    isResizing: false,
     animatingPanels: new Set(),
   }).current;
 
@@ -123,7 +119,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const draggingElement = internalState.draggableElements[panel.id];
       if (!draggingElement) return;
 
-      internalState.isDragging = true;
+      let isDragging = true;
       const initialX = e.clientX;
       const initialY = e.clientY;
       const offsetX = draggingElement.offsetLeft;
@@ -139,7 +135,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const mouseMoveListenerCtrl = new AbortController();
 
       const onMouseMove = (e: MouseEvent) => {
-        if (!internalState.isDragging) return;
+        if (!isDragging) return;
         if (!draggingElement) return;
 
         const currentX = e.clientX;
@@ -166,7 +162,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const onMouseUp = () => {
         if (!draggingElement) return;
 
-        internalState.isDragging = false;
+        isDragging = false;
         draggingElement.classList.remove("panelgrid-panel--dragging");
 
         hideGhostPanel();
@@ -222,7 +218,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
   const createResizeHandler = useCallback(
     (panel: PanelCoordinate) => (e: React.MouseEvent<HTMLSpanElement>) => {
       e.stopPropagation();
-      internalState.isResizing = true;
+      let isResizing = true;
       internalState.activePanelId = panel.id;
       const draggingElement = internalState.draggableElements[panel.id];
       if (!draggingElement) return;
@@ -242,7 +238,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const mouseUpController = new AbortController();
 
       const onMouseMove = (e: MouseEvent) => {
-        if (!internalState.isResizing) return;
+        if (!isResizing) return;
         if (!draggingElement) return;
 
         const deltaX = e.clientX - startX;
@@ -289,7 +285,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
         updatePanelsWithAnimation({ ...panel, w: nextGridW, h: nextGridH }, state.panels);
 
-        internalState.isResizing = false;
+        isResizing = false;
         internalState.activePanelId = null;
 
         mouseMoveController.abort();
