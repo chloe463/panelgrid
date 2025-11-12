@@ -1,7 +1,7 @@
 {
   "name": "panelgrid",
-  "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "A flexible and performant React grid layout library with drag-and-drop and resize capabilities",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
@@ -15,6 +15,26 @@
     "./styles.css": "./dist/styles.css"
   },
   "files": ["dist"],
+  "keywords": [
+    "react",
+    "grid",
+    "layout",
+    "drag-and-drop",
+    "resize",
+    "dashboard",
+    "panel",
+    "typescript"
+  ],
+  "author": "Tsuyoshi HARA <chloe463+git@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chloe463/panelgrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chloe463/panelgrid/issues"
+  },
+  "homepage": "https://github.com/chloe463/panelgrid#readme",
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
@@ -25,7 +45,8 @@
     "format": "biome format --write .",
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "prepublishOnly": "yarn test run && yarn typecheck && yarn lint && yarn build"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": ["biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"]
