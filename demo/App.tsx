@@ -2,7 +2,6 @@ import "./App.css";
 
 import type { PanelId } from "../src";
 import { PanelGridProvider, PanelGridRenderer, usePanelGridControls } from "../src";
-import "../src/styles.css";
 
 export default function App() {
   return (

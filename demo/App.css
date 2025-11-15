@@ -1,63 +1,73 @@
-.App {
-  font-family: sans-serif;
-  text-align: center;
-  width: calc(100% - 64px);
-  margin: 0 32px;
-}
+@layer lib, app;
+@import "../src/styles.css" layer(lib);
 
-.controls {
-  display: flex;
-  gap: 8px;
-  justify-content: flex-start;
-  margin-bottom: 16px;
-}
+@layer app {
 
-button {
-  appearance: none;
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: none;
-  background-color: #ffffff;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 600;
-  color: #2b2b2b;
-  transition: background-color 150ms ease-in-out;
-  &:hover {
-    background-color: rgb(0 0 0 / 0.03);
+  .App {
+    font-family: sans-serif;
+    text-align: center;
+    width: calc(100% - 64px);
+    margin: 0 32px;
   }
-  &:active {
-    background-color: rgb(0 0 0 / 0.06);
+  
+  .controls {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+    margin-bottom: 16px;
   }
-}
-
-.panel-content {
-  position: relative;
-  background-color: white;
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-  padding: 8px;
-  box-sizing: border-box;
-}
-
-.panel-remove-button {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  background-color: transparent;
-  &:hover {
-    background-color: rgb(0 0 0 / 0.06);
+  
+  button {
+    appearance: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    background-color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #2b2b2b;
+    transition: background-color 150ms ease-in-out;
+    &:hover {
+      background-color: rgb(0 0 0 / 0.03);
+    }
+    &:active {
+      background-color: rgb(0 0 0 / 0.06);
+    }
   }
-}
-
-.locked-badge {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 4px 8px;
-  background-color: rgba(59, 130, 246, 0.1);
-  color: rgb(59, 130, 246);
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
+  
+  .panel-content {
+    position: relative;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    padding: 8px;
+    box-sizing: border-box;
+  }
+  
+  .panel-remove-button {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background-color: transparent;
+    &:hover {
+      background-color: rgb(0 0 0 / 0.06);
+    }
+  }
+  
+  .panelgrid-panel--size-locked{
+    border: 2px dashed rgb(255 0 85 / 50%);
+  }
+  
+  .locked-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 4px 8px;
+    background-color: rgba(59, 130, 246, 0.1);
+    color: rgb(59, 130, 246);
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+  }
 }
