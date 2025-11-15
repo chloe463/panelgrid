@@ -14,6 +14,7 @@ export interface PanelCoordinate {
   y: number;
   w: number;
   h: number;
+  lockSize?: boolean;
 }
 
 /**

@@ -284,6 +284,7 @@ interface PanelCoordinate {
   y: number;      // Row position (0-indexed)
   w: number;      // Width in columns
   h: number;      // Height in rows
+  lockSize?: boolean; // If true, prevents panel from being resized
 }
 
 type RearrangementFunction = (

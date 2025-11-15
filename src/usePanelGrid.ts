@@ -228,6 +228,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const initialWidth = draggingElement.offsetWidth;
       const initialHeight = draggingElement.offsetHeight;
       const initialZIndex = draggingElement.style.zIndex;
+      const initialCursor = draggingElement.style.cursor;
 
       draggingElement.style.cursor = "nwse-resize";
       draggingElement.style.transition = "";
@@ -273,7 +274,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
         draggingElement.style.width = `${rect.width}px`;
         draggingElement.style.height = `${rect.height}px`;
-        draggingElement.style.cursor = "default";
+        draggingElement.style.cursor = initialCursor;
         draggingElement.style.transition = "";
 
         window.requestAnimationFrame(() => {
@@ -336,6 +337,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
           y: panel.y,
           w: panel.w,
           h: panel.h,
+          lockSize: panel.lockSize,
           style: {
             top: gridPositionToPixels(panel.y, baseSize, gap),
             left: gridPositionToPixels(panel.x, baseSize, gap),
@@ -349,9 +351,11 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
           ref: createRefCallback(panel.id),
           onMouseDown: createDragHandler(panel),
         },
-        resizeHandleProps: {
-          onMouseDown: createResizeHandler(panel),
-        },
+        resizeHandleProps: panel.lockSize
+          ? undefined
+          : {
+              onMouseDown: createResizeHandler(panel),
+            },
       };
     });
   }, [

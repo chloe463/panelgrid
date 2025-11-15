@@ -50,3 +50,14 @@ button {
     background-color: rgb(0 0 0 / 0.06);
   }
 }
+
+.locked-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: rgb(59, 130, 246);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}

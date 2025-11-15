@@ -52,11 +52,12 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
 
       {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
-        const { key, ...panelProps } = _panelProps;
+        const { key, lockSize, ...panelProps } = _panelProps;
+        const className = lockSize ? "panelgrid-panel panelgrid-panel--locked" : "panelgrid-panel";
         return (
-          <div key={key} className="panelgrid-panel" {...panelProps}>
+          <div key={key} className={className} {...panelProps}>
             <ItemRenderer id={key} />
-            <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>
+            {resizeHandleProps && <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>}
           </div>
         );
       })}

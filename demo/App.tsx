@@ -13,6 +13,7 @@ export default function App() {
           { id: 2, x: 2, y: 0, w: 2, h: 2 },
           { id: 3, x: 4, y: 0, w: 2, h: 1 },
           { id: 4, x: 0, y: 2, w: 1, h: 1 },
+          { id: 5, x: 1, y: 2, w: 1, h: 1, lockSize: true },
         ]}
         columnCount={6}
         gap={8}
@@ -43,12 +44,16 @@ function PanelControls() {
 
 function PanelContent({ id }: { id: PanelId }) {
   const { removePanel } = usePanelGridControls();
+  const isLocked = id === 5;
   return (
     <div className="panel-content">
       <button className="panel-remove-button" onClick={() => removePanel(id)}>
         x
       </button>
-      <div className="panel-content-inner">Panel Content {id}</div>
+      <div className="panel-content-inner">
+        Panel Content {id}
+        {isLocked && <span className="locked-badge">🔒 Size Locked</span>}
+      </div>
     </div>
   );
 }

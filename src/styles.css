@@ -29,12 +29,17 @@
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
+  cursor: grab;
 }
 
 .panelgrid-panel--dragging {
   cursor: grabbing;
   box-shadow: 0px 11px 30px 0px #0000001f;
   z-index: calc(infinity);
+}
+
+.panelgrid-panel--locked {
+  cursor: default;
 }
 
 .panelgrid-panel--with-transition {
