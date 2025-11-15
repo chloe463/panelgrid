@@ -38,9 +38,6 @@
   z-index: calc(infinity);
 }
 
-.panelgrid-panel--size-locked {
-}
-
 .panelgrid-panel--with-transition {
   transition:
     top 0.15s ease-out,
