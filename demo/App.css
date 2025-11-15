@@ -2,21 +2,20 @@
 @import "../src/styles.css" layer(lib);
 
 @layer app {
-
   .App {
     font-family: sans-serif;
     text-align: center;
     width: calc(100% - 64px);
     margin: 0 32px;
   }
-  
+
   .controls {
     display: flex;
     gap: 8px;
     justify-content: flex-start;
     margin-bottom: 16px;
   }
-  
+
   button {
     appearance: none;
     padding: 8px 16px;
@@ -35,7 +34,7 @@
       background-color: rgb(0 0 0 / 0.06);
     }
   }
-  
+
   .panel-content {
     position: relative;
     background-color: white;
@@ -45,7 +44,7 @@
     padding: 8px;
     box-sizing: border-box;
   }
-  
+
   .panel-remove-button {
     position: absolute;
     top: 0px;
@@ -55,11 +54,11 @@
       background-color: rgb(0 0 0 / 0.06);
     }
   }
-  
-  .panelgrid-panel--size-locked{
+
+  .panelgrid-panel--size-locked {
     border: 2px dashed rgb(255 0 85 / 50%);
   }
-  
+
   .locked-badge {
     display: inline-block;
     margin-top: 8px;
