@@ -53,7 +53,7 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
       {panels.map((panel) => {
         const { panelProps: _panelProps, resizeHandleProps } = panel;
         const { key, lockSize, ...panelProps } = _panelProps;
-        const className = lockSize ? "panelgrid-panel panelgrid-panel--locked" : "panelgrid-panel";
+        const className = lockSize ? "panelgrid-panel panelgrid-panel--size-locked" : "panelgrid-panel";
         return (
           <div key={key} className={className} {...panelProps}>
             <ItemRenderer id={key} />

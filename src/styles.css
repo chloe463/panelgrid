@@ -38,8 +38,7 @@
   z-index: calc(infinity);
 }
 
-.panelgrid-panel--locked {
-  cursor: default;
+.panelgrid-panel--size-locked {
 }
 
 .panelgrid-panel--with-transition {
