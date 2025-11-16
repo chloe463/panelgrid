@@ -126,6 +126,8 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const offsetY = draggingElement.offsetTop;
       const originalTransition = draggingElement.style.transition;
 
+      document.body.classList.add("panelgrid-dragging");
+
       draggingElement.classList.add("panelgrid-panel--dragging");
       draggingElement.style.transition = "";
 
@@ -188,6 +190,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
         updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY }, state.panels);
 
+        document.body.classList.remove("panelgrid-dragging");
         internalState.activePanelId = null;
 
         mouseMoveListenerCtrl.abort();
@@ -229,6 +232,8 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       const initialHeight = draggingElement.offsetHeight;
       const initialZIndex = draggingElement.style.zIndex;
       const initialCursor = draggingElement.style.cursor;
+
+      document.body.classList.add("panelgrid-resizing");
 
       draggingElement.style.cursor = "nwse-resize";
       draggingElement.style.transition = "";
@@ -288,6 +293,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
         isResizing = false;
         internalState.activePanelId = null;
+        document.body.classList.remove("panelgrid-resizing");
 
         mouseMoveController.abort();
         mouseUpController.abort();

@@ -66,3 +66,7 @@
   position: absolute;
   pointer-events: none;
 }
+
+.panelgrid-resizing, .panelgrid-dragging {
+  user-select: none;
+}
