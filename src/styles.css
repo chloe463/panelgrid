@@ -67,6 +67,7 @@
   pointer-events: none;
 }
 
-.panelgrid-resizing, .panelgrid-dragging {
+.panelgrid-resizing,
+.panelgrid-dragging {
   user-select: none;
 }
