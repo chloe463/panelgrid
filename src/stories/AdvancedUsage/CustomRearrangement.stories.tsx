@@ -70,7 +70,7 @@ export const VerticalPriorityAlgorithm: Story = {
     const customRearrangement = (
       movingPanel: PanelCoordinate,
       allPanels: PanelCoordinate[],
-      columnCount: number
+      _columnCount: number
     ): PanelCoordinate[] => {
       const result = [...allPanels];
       const movedIndex = result.findIndex((p) => p.id === movingPanel.id);
