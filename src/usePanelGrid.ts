@@ -339,11 +339,13 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       return {
         panelProps: {
           key: panel.id,
-          x: panel.x,
-          y: panel.y,
-          w: panel.w,
-          h: panel.h,
           lockSize: panel.lockSize,
+          positionData: {
+            x: panel.x,
+            y: panel.y,
+            w: panel.w,
+            h: panel.h,
+          },
           style: {
             top: gridPositionToPixels(panel.y, baseSize, gap),
             left: gridPositionToPixels(panel.x, baseSize, gap),
