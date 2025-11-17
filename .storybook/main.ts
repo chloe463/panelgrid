@@ -12,6 +12,11 @@ const config: StorybookConfig = {
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
+  },
+  viteFinal: async (config) => {
+    // Configure base path for GitHub Pages deployment
+    config.base = process.env.NODE_ENV === 'production' ? '/panelgrid/' : '/';
+    return config;
   }
 };
 export default config;
