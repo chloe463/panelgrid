@@ -12,6 +12,26 @@ A flexible and performant React grid layout library with drag-and-drop and resiz
 - 📦 **Tree-shakeable**: ESM and CommonJS builds available
 - 🎛️ **Customizable Rearrangement**: Override default collision resolution logic
 
+## Documentation & Demo
+
+Interactive documentation and live examples are available on our [**Storybook site**](https://chloe463.github.io/panelgrid/).
+
+Explore comprehensive examples including:
+- Basic grid layouts
+- Size-locked panels
+- Custom rearrangement algorithms
+- Performance demonstrations with heavy calculations
+
+### Running Storybook Locally
+
+```bash
+# Start Storybook development server
+yarn storybook
+
+# Build Storybook for production
+yarn build:storybook
+```
+
 ## Requirements
 
 - React 18.0.0 or higher

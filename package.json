@@ -14,7 +14,9 @@
     },
     "./styles.css": "./dist/styles.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "react",
     "grid",
@@ -38,8 +40,10 @@
   "scripts": {
     "prepare": "husky",
     "dev": "vite",
+    "storybook": "storybook dev -p 6006",
     "build": "tsdown && cp src/styles.css dist/styles.css",
     "build:demo": "tsc -b && vite build",
+    "build:storybook": "storybook build",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -49,7 +53,9 @@
     "prepublishOnly": "yarn test run && yarn typecheck && yarn lint && yarn build"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": ["biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"]
+    "*.{js,jsx,ts,tsx}": [
+      "biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+    ]
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",
@@ -57,6 +63,9 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.4",
+    "@storybook/addon-docs": "^10.0.7",
+    "@storybook/addon-onboarding": "^10.0.7",
+    "@storybook/react-vite": "^10.0.7",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
@@ -70,6 +79,7 @@
     "lint-staged": "^16.2.6",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "storybook": "^10.0.7",
     "tsdown": "^0.16.1",
     "typescript": "~5.9.3",
     "vite": "^7.1.7",

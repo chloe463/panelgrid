@@ -1,3 +1,22 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Poppins:wght@400;600&display=swap");
+
+:root {
+  font-family: "Lato", sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+}
+
 .panelgrid-renderer {
   position: relative;
   display: grid;
@@ -14,12 +33,13 @@
 }
 
 .panelgrid-panel-ghost {
+  display: none;
   position: absolute;
-  pointer-events: none;
   border-radius: 4px;
   outline: 1px dashed rgba(0, 0, 0, 0.2);
-  outline-offset: 2px;
-  z-index: -1;
+  outline-offset: 1px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .panelgrid-panel {
@@ -59,12 +79,6 @@
   &:hover {
     cursor: nwse-resize;
   }
-}
-
-.panelgrid-panel-ghost {
-  display: none;
-  position: absolute;
-  pointer-events: none;
 }
 
 .panelgrid-resizing,
