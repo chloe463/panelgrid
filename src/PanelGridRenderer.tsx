@@ -14,10 +14,10 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
   const rowCount = getGridRowCount(
     panels.map(({ panelProps: p }) => ({
       id: p.key,
-      x: p.x,
-      y: p.y,
-      w: p.w,
-      h: p.h,
+      x: p.positionData.x,
+      y: p.positionData.y,
+      w: p.positionData.w,
+      h: p.positionData.h,
     }))
   );
   const count = Math.max(columnCount * (rowCount + 1), columnCount * columnCount);
@@ -51,11 +51,25 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
       <div className="panelgrid-panel-ghost" ref={ghostPanelRef}></div>
 
       {panels.map((panel) => {
-        const { panelProps: _panelProps, resizeHandleProps } = panel;
-        const { key, lockSize, ...panelProps } = _panelProps;
+        const { panelProps, resizeHandleProps } = panel;
+        const { key, lockSize, style, positionData, ref, onMouseDown } = panelProps;
+
         const className = lockSize ? "panelgrid-panel panelgrid-panel--size-locked" : "panelgrid-panel";
+        const { x, y, w, h } = positionData;
+
         return (
-          <div key={key} className={className} {...panelProps}>
+          <div
+            key={key}
+            className={className}
+            style={style}
+            ref={ref}
+            onMouseDown={onMouseDown}
+            data-panel-id={key}
+            data-pg-x={x}
+            data-pg-y={y}
+            data-pg-w={w}
+            data-pg-h={h}
+          >
             <ItemRenderer id={key} />
             {resizeHandleProps && <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>}
           </div>
