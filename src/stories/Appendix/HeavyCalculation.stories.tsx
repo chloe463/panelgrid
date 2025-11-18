@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../../types";
 import { PanelContent } from "./PanelContentWithHeavyCalc";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Appendix/Heavy Calculation Panels",
+  title: "Appendix/Heavy Calculation Panels",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",

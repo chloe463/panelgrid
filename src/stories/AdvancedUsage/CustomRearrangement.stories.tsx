@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../../types";
 import { PanelContent } from "../PanelContent";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Advanced Usage/Custom Rearrangement",
+  title: "Advanced Usage/Custom Rearrangement",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",

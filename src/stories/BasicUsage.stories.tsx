@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../types";
 import { PanelContent } from "./PanelContent";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Basic Usage",
+  title: "Basic Usage",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",
@@ -33,7 +33,7 @@ const defaultPanels: PanelCoordinate[] = [
 
 export const Default: Story = {
   render: () => (
-    <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+    <div style={{ padding: "20px", height: "100vh" }}>
       <h1 style={{ marginBottom: "20px" }}>PanelGrid - Basic Example</h1>
       <p style={{ marginBottom: "20px", color: "#666" }}>
         Try dragging panels to move them or use the resize handle in the bottom-right corner to resize them. Panels will

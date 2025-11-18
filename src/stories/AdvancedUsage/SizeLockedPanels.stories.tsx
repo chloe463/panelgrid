@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../../types";
 import { PanelContent } from "../PanelContent";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Advanced Usage/Size Locked Panels",
+  title: "Advanced Usage/Size Locked Panels",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",
