@@ -17,7 +17,7 @@ const preview: Preview = {
           "Advanced Usage",
           ["Size Locked Panels", "Custom Rearrangement"],
           "Appendix",
-          ["Heavy Calculation Panels"],
+          ["Heavy Calculation Panels", "Dark Mode"],
         ],
       },
     },
