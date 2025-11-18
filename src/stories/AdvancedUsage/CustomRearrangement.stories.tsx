@@ -31,7 +31,7 @@ export const DefaultAlgorithm: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Default Rearrangement Algorithm</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           The default algorithm uses a BFS (Breadth-First Search) approach:
@@ -100,7 +100,7 @@ export const VerticalPriorityAlgorithm: Story = {
     };
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Custom: Vertical-Priority Algorithm</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           This custom algorithm pushes panels down instead of to the right:
@@ -164,7 +164,7 @@ export const NoRearrangementAlgorithm: Story = {
     };
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Custom: No Automatic Rearrangement</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           This custom algorithm disables automatic collision resolution entirely:

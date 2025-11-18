@@ -48,7 +48,7 @@ export const Default: Story = {
 
 export const SixColumnGrid: Story = {
   render: () => (
-    <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+    <div style={{ padding: "20px", height: "100vh" }}>
       <h1 style={{ marginBottom: "20px" }}>6-Column Grid Layout</h1>
       <p style={{ marginBottom: "20px", color: "#666" }}>
         A standard 6-column grid with various panel sizes. This is the recommended configuration for most use cases.
@@ -73,7 +73,7 @@ export const TwelveColumnGrid: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>12-Column Grid Layout</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           A finer 12-column grid allows for more flexible layouts. Useful for complex dashboards.
@@ -88,7 +88,7 @@ export const TwelveColumnGrid: Story = {
 
 export const CustomGap: Story = {
   render: () => (
-    <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+    <div style={{ padding: "20px", height: "100vh" }}>
       <h1 style={{ marginBottom: "20px" }}>Custom Gap Size</h1>
       <p style={{ marginBottom: "20px", color: "#666" }}>
         Gap between panels can be customized. This example uses a 16px gap instead of the default 8px.
@@ -108,7 +108,7 @@ export const MinimalExample: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Minimal Example</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           The simplest possible grid with just two panels. Perfect for getting started.
