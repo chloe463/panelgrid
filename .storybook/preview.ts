@@ -9,6 +9,20 @@ const preview: Preview = {
        date: /Date$/i,
       },
     },
+    options: {
+      storySort: {
+        order: [
+          'PanelGrid',
+          [
+            'Basic Usage',
+            'Advanced Usage',
+            ['Size Locked Panels', 'Custom Rearrangement'],
+            'Appendix',
+            ['Heavy Calculation Panels'],
+          ],
+        ],
+      },
+    },
   },
 };
 
