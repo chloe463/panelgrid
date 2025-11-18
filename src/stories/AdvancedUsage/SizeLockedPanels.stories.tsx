@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../../types";
 import { PanelContent } from "../PanelContent";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Advanced Usage/Size Locked Panels",
+  title: "Advanced Usage/Size Locked Panels",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",
@@ -31,7 +31,7 @@ export const SizeLockedPanels: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Lock Size Feature</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           Panel 2 (middle) has <code>lockSize: true</code>. Notice it has no resize handle and cannot be resized. It can
@@ -62,7 +62,7 @@ export const MixedSizeLocking: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Mixed Size Locking</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           A grid with both size-locked and unlocked panels. Panels 2, 4, and 6 have locked sizes.

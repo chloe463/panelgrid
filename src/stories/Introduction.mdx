@@ -1,0 +1,43 @@
+import { Canvas, Meta, Story, Source } from "@storybook/addon-docs/blocks";
+
+import * as BasicUsage from "./BasicUsage.stories";
+
+<Meta title="Introduction" />
+ 
+# PanelGrid Introduction
+
+Welcome to the PanelGrid documentation! This guide will help you get started with using the PanelGrid library to create dynamic and resizable panel layouts in your React applications.
+
+## Getting Started
+
+```bash
+npm install panelgrid
+# or
+yarn add panelgrid
+# or
+pnpm add panelgrid
+```
+
+## Usage
+
+```tsx
+<PanelGridProvider
+  panels={[
+    { id: 1, x: 0, y: 0, w: 2, h: 2 },
+    { id: 2, x: 2, y: 0, w: 2, h: 2 },
+    { id: 3, x: 4, y: 0, w: 2, h: 1 },
+    { id: 4, x: 0, y: 2, w: 1, h: 1 },
+    { id: 5, x: 1, y: 2, w: 1, h: 1 },
+    { id: 6, x: 2, y: 2, w: 2, h: 1 },
+  ]}
+  columnCount={6}
+  gap={8}
+>
+  <PanelGridRenderer
+    itemRenderer={({ id }) => <PanelContent id={id} />}
+  />
+</PanelGridProvider>
+```
+
+<Canvas of={BasicUsage.Default} />
+

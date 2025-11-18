@@ -5,7 +5,7 @@ import type { PanelCoordinate } from "../../types";
 import { PanelContent } from "./PanelContentWithHeavyCalc";
 
 const meta: Meta<typeof PanelGridProvider> = {
-  title: "PanelGrid/Appendix/Heavy Calculation Panels",
+  title: "Appendix/Heavy Calculation Panels",
   component: PanelGridProvider,
   parameters: {
     layout: "fullscreen",
@@ -34,7 +34,7 @@ export const PerformantDragAndDrop: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Performance with Heavy Calculations</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           Each panel performs an expensive calculation (summing 1 million numbers) on every render. Try dragging and
@@ -66,7 +66,7 @@ export const ComplexGridPerformance: Story = {
     ];
 
     return (
-      <div style={{ padding: "20px", height: "100vh", backgroundColor: "#fafafa" }}>
+      <div style={{ padding: "20px", height: "100vh" }}>
         <h1 style={{ marginBottom: "20px" }}>Complex Grid with Heavy Calculations</h1>
         <p style={{ marginBottom: "20px", color: "#666" }}>
           A more complex grid layout with 6 panels, each running expensive calculations on every render. The collision
