@@ -57,13 +57,11 @@ jobs:
 
           if [ -z "$CHANGELOG_CONTENT" ]; then
             echo "⚠️  No changelog entry found for version $VERSION"
-            CHANGELOG_CONTENT="Release $VERSION
-
-See [CHANGELOG.md](https://github.com/chloe463/panelgrid/blob/main/CHANGELOG.md) for details."
+            CHANGELOG_CONTENT="Release ${VERSION}\n\nSee [CHANGELOG.md](https://github.com/chloe463/panelgrid/blob/main/CHANGELOG.md) for details."
           fi
 
           # Write to file for multi-line content
-          echo "$CHANGELOG_CONTENT" > /tmp/changelog.txt
+          echo -e "$CHANGELOG_CONTENT" > /tmp/changelog.txt
           echo "changelog_file=/tmp/changelog.txt" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
