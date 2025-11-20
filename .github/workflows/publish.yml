@@ -41,8 +41,23 @@ jobs:
       - name: Build package
         run: yarn run build
 
+      - name: Determine npm tag
+        id: npm_tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          if [[ "$VERSION" == *"-alpha"* ]]; then
+            echo "tag=alpha" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == *"-beta"* ]]; then
+            echo "tag=beta" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == *"-rc"* ]]; then
+            echo "tag=rc" >> $GITHUB_OUTPUT
+          else
+            echo "tag=latest" >> $GITHUB_OUTPUT
+          fi
+          echo "Publishing version $VERSION with tag: $(cat $GITHUB_OUTPUT | grep tag | cut -d= -f2)"
+
       - name: Publish to npm
-        run: npm publish --access public
+        run: npm publish --access public --tag ${{ steps.npm_tag.outputs.tag }}
         # No NODE_AUTH_TOKEN needed - uses OIDC trusted publishing!
         # Provenance attestations are automatic with trusted publishing
 
