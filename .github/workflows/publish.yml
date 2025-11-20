@@ -1,0 +1,89 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write  # For creating GitHub releases
+  id-token: write  # Required for OIDC trusted publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'  # npm 11.6.0+ included
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'yarn'
+
+      - name: Validate version
+        run: |
+          TAG_VERSION=${GITHUB_REF#refs/tags/v}
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Tag version: $TAG_VERSION"
+          echo "Package version: $PACKAGE_VERSION"
+          if [ "$TAG_VERSION" != "$PACKAGE_VERSION" ]; then
+            echo "❌ Tag version ($TAG_VERSION) does not match package.json version ($PACKAGE_VERSION)"
+            exit 1
+          fi
+          echo "✅ Version validation passed"
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build package
+        run: yarn run build
+
+      - name: Publish to npm
+        run: npm publish --access public
+        # No NODE_AUTH_TOKEN needed - uses OIDC trusted publishing!
+        # Provenance attestations are automatic with trusted publishing
+
+      - name: Extract changelog for version
+        id: changelog
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "Extracting changelog for version $VERSION"
+
+          # Extract the section for this version from CHANGELOG.md
+          CHANGELOG_CONTENT=$(awk "/## \[$VERSION\]/,/## \[/" CHANGELOG.md | sed '$d' | tail -n +2)
+
+          if [ -z "$CHANGELOG_CONTENT" ]; then
+            echo "⚠️  No changelog entry found for version $VERSION"
+            CHANGELOG_CONTENT="Release $VERSION
+
+See [CHANGELOG.md](https://github.com/chloe463/panelgrid/blob/main/CHANGELOG.md) for details."
+          fi
+
+          # Write to file for multi-line content
+          echo "$CHANGELOG_CONTENT" > /tmp/changelog.txt
+          echo "changelog_file=/tmp/changelog.txt" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const changelogFile = '${{ steps.changelog.outputs.changelog_file }}';
+            const changelogContent = fs.readFileSync(changelogFile, 'utf8');
+            const version = context.ref.replace('refs/tags/', '');
+            const isPreRelease = version.includes('-alpha') || version.includes('-beta') || version.includes('-rc');
+
+            await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: version,
+              name: `Release ${version}`,
+              body: changelogContent,
+              draft: false,
+              prerelease: isPreRelease
+            });
+
+            console.log(`✅ GitHub release created for ${version}`);
