@@ -31,7 +31,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/chloe463/panelgrid.git"
+    "url": "git+https://github.com/chloe463/panelgrid.git"
   },
   "bugs": {
     "url": "https://github.com/chloe463/panelgrid/issues"
