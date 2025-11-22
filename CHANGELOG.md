@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-11-23
+
+### Changed
+- Modernized package configuration to follow JavaScript library packaging best practices (#50)
+- Enhanced `exports` field with `module` condition for better bundler optimization (#50)
+- Added nested `import`/`require` conditions with separate type definitions (`.d.cts` for CJS, `.d.mts` for ESM) (#50)
+- Enabled unbundle mode to preserve source structure (43 files vs 7 bundled files) for optimal tree-shaking (#50)
+- Added `sideEffects` field to prevent CSS from being incorrectly tree-shaken (#50)
+- Added `./package.json` export for package metadata access (#50)
+- Improved TypeScript type resolution with separate declaration files for each module format (#50)
+
+### Improved
+- Better tree-shaking for consumers - only load modules that are actually imported (#50)
+- Module-level code splitting and caching for more efficient bundling (#50)
+- More intuitive debugging with preserved file structure (#50)
+- Future-proof architecture for upcoming features (#50)
+
 ## [0.1.1] - 2025-11-20
 
 ### Added
