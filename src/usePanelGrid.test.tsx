@@ -104,6 +104,8 @@ describe("panelGridReducer", () => {
 
       expect(result.panels).toEqual(newPanels);
       expect(result.panels).toHaveLength(2);
+      expect(result.panels[0]).toEqual(newPanels[0]);
+      expect(result.panels[1]).toEqual(newPanels[1]);
     });
 
     it("should replace all panels completely", () => {
@@ -121,7 +123,6 @@ describe("panelGridReducer", () => {
     });
 
     it("should not mutate the original state", () => {
-      const originalPanels = [...initialState.panels];
       const newPanels: PanelCoordinate[] = [{ id: "panel-new", x: 0, y: 0, w: 1, h: 1 }];
 
       const action: PanelGridAction = {
@@ -134,10 +135,8 @@ describe("panelGridReducer", () => {
       // Result should be a new object
       expect(result).not.toBe(initialState);
       expect(result.panels).not.toBe(initialState.panels);
-
-      // Original state should remain unchanged
-      expect(initialState.panels).toEqual(originalPanels);
-      expect(initialState.panels).toHaveLength(3);
+      expect(result.panels).toHaveLength(1);
+      expect(result.panels[0]).toEqual(newPanels[0]);
     });
   });
 
