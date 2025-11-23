@@ -143,38 +143,36 @@ describe("panelGridReducer", () => {
 
   describe("ADD_PANEL", () => {
     it("should add a new panel to the panels array", () => {
-      const newPanel: PanelCoordinate = {
-        id: "panel-4",
-        x: 3,
-        y: 0,
-        w: 1,
-        h: 1,
-      };
-
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: newPanel,
+        payload: {
+          id: "panel-4",
+          w: 1,
+          h: 1,
+          columnCount: 4,
+        },
       };
 
       const result = panelGridReducer(initialState, action);
 
       expect(result.panels).toHaveLength(4);
-      expect(result.panels[3]).toEqual(newPanel);
-      expect(result.panels).toContainEqual(newPanel);
+      expect(result.panels[3].id).toBe("panel-4");
+      expect(result.panels[3].w).toBe(1);
+      expect(result.panels[3].h).toBe(1);
+      // Position is calculated by findNewPositionToAddPanel
+      expect(result.panels[3].x).toBeDefined();
+      expect(result.panels[3].y).toBeDefined();
     });
 
     it("should preserve existing panels when adding new one", () => {
-      const newPanel: PanelCoordinate = {
-        id: "panel-4",
-        x: 3,
-        y: 0,
-        w: 1,
-        h: 1,
-      };
-
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: newPanel,
+        payload: {
+          id: "panel-4",
+          w: 2,
+          h: 2,
+          columnCount: 4,
+        },
       };
 
       const result = panelGridReducer(initialState, action);
@@ -186,17 +184,12 @@ describe("panelGridReducer", () => {
 
     it("should not mutate the original state", () => {
       const originalPanels = [...initialState.panels];
-      const newPanel: PanelCoordinate = {
-        id: "panel-4",
-        x: 3,
-        y: 0,
-        w: 1,
-        h: 1,
-      };
-
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: newPanel,
+        payload: {
+          id: "panel-4",
+          columnCount: 4,
+        },
       };
 
       const result = panelGridReducer(initialState, action);
@@ -208,6 +201,60 @@ describe("panelGridReducer", () => {
       // Original state should remain unchanged
       expect(initialState.panels).toEqual(originalPanels);
       expect(initialState.panels).toHaveLength(3);
+    });
+
+    it("should generate ID when not provided", () => {
+      const action: PanelGridAction = {
+        type: "ADD_PANEL",
+        payload: {
+          w: 1,
+          h: 1,
+          columnCount: 4,
+        },
+      };
+
+      const result = panelGridReducer(initialState, action);
+
+      expect(result.panels).toHaveLength(4);
+      expect(result.panels[3].id).toBeDefined();
+      expect(typeof result.panels[3].id).toBe("string");
+    });
+
+    it("should use default width and height when not provided", () => {
+      const action: PanelGridAction = {
+        type: "ADD_PANEL",
+        payload: {
+          id: "panel-4",
+          columnCount: 4,
+        },
+      };
+
+      const result = panelGridReducer(initialState, action);
+
+      expect(result.panels).toHaveLength(4);
+      expect(result.panels[3].w).toBe(1);
+      expect(result.panels[3].h).toBe(1);
+    });
+
+    it("should calculate position using findNewPositionToAddPanel", () => {
+      // Empty grid - should place at (0, 0)
+      const emptyState: PanelGridState = { panels: [] };
+
+      const action: PanelGridAction = {
+        type: "ADD_PANEL",
+        payload: {
+          id: "panel-1",
+          w: 2,
+          h: 2,
+          columnCount: 4,
+        },
+      };
+
+      const result = panelGridReducer(emptyState, action);
+
+      expect(result.panels).toHaveLength(1);
+      expect(result.panels[0].x).toBe(0);
+      expect(result.panels[0].y).toBe(0);
     });
   });
 

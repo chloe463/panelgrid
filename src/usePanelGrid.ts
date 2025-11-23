@@ -31,7 +31,7 @@ interface InternalPanelState {
 
 export type PanelGridAction =
   | { type: "UPDATE_PANELS"; payload: PanelCoordinate[] }
-  | { type: "ADD_PANEL"; payload: PanelCoordinate }
+  | { type: "ADD_PANEL"; payload: Partial<PanelCoordinate> & { columnCount: number } }
   | { type: "REMOVE_PANEL"; payload: number | string };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
@@ -41,11 +41,21 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
         ...state,
         panels: action.payload,
       };
-    case "ADD_PANEL":
+    case "ADD_PANEL": {
+      const { columnCount, ...panelData } = action.payload;
+      const newPosition = findNewPositionToAddPanel(panelData, state.panels, columnCount);
+      const newPanel: PanelCoordinate = {
+        id: panelData.id || Math.random().toString(36).substring(2, 15),
+        x: newPosition.x,
+        y: newPosition.y,
+        w: panelData.w || 1,
+        h: panelData.h || 1,
+      };
       return {
         ...state,
-        panels: [...state.panels, action.payload],
+        panels: [...state.panels, newPanel],
       };
+    }
     case "REMOVE_PANEL":
       return {
         ...state,
@@ -403,17 +413,16 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   const addPanel = useCallback(
     (panel: Partial<PanelCoordinate>) => {
-      const newPosition = findNewPositionToAddPanel(panel, state.panels, columnCount);
-      const newPanel: PanelCoordinate = {
-        id: panel.id || Math.random().toString(36).substring(2, 15),
-        x: newPosition.x,
-        y: newPosition.y,
-        w: panel.w || 1,
-        h: panel.h || 1,
-      };
-      dispatch({ type: "ADD_PANEL", payload: newPanel });
+      dispatch({
+        type: "ADD_PANEL",
+        payload: {
+          ...panel,
+          id: panel.id || Math.random().toString(36).substring(2, 15),
+          columnCount,
+        },
+      });
     },
-    [columnCount, state.panels]
+    [columnCount]
   );
 
   const removePanel = useCallback((id: number | string) => {
