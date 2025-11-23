@@ -43,8 +43,7 @@ export const DarkModeExample: Story = {
       <PanelGridProvider panels={panels} columnCount={6} gap={8}>
         <PanelGridRenderer
           itemRenderer={({ id }) => {
-            const panel = panels.find((p) => p.id === id);
-            return <PanelContent id={id} lockSize={panel?.lockSize} />;
+            return <PanelContent id={id} />;
           }}
         />
       </PanelGridProvider>
@@ -83,8 +82,7 @@ export const ThemeToggle: Story = {
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
           <PanelGridRenderer
             itemRenderer={({ id }) => {
-              const panel = panels.find((p) => p.id === id);
-              return <PanelContent id={id} lockSize={panel?.lockSize} />;
+              return <PanelContent id={id} />;
             }}
           />
         </PanelGridProvider>
@@ -104,8 +102,7 @@ export const PrefersDarkMode: Story = {
       <PanelGridProvider panels={panels} columnCount={6} gap={8}>
         <PanelGridRenderer
           itemRenderer={({ id }) => {
-            const panel = panels.find((p) => p.id === id);
-            return <PanelContent id={id} lockSize={panel?.lockSize} />;
+            return <PanelContent id={id} />;
           }}
         />
       </PanelGridProvider>

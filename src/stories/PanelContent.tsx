@@ -23,28 +23,32 @@ export function PanelContent({ id, showLockButton = false, showRemoveButton = tr
         )}
       </div>
       <div className="panel-title">Panel {id}</div>
-      <div className="panel-lock-status">
-        <div className="panel-badge panel-badge--size-locked">
-          <label>
-            <input
-              type="checkbox"
-              checked={lockSize}
-              className="panel-lock-checkbox"
-              onMouseDown={(e) => e.stopPropagation()}
-              onChange={(e) => {
-                e.stopPropagation();
-                if (e.currentTarget.checked) {
-                  lockPanelSize(id);
-                } else {
-                  unlockPanelSize(id);
-                }
-              }}
-            />
-            {lockSize ? "🔒 Size Locked" : "🔓 Size Unlocked"}
-          </label>
-        </div>
-        {!lockSize && <div className="panel-hint">Drag to move • Resize from corner</div>}
-      </div>
+      {showLockButton && (
+        <>
+          <div className="panel-lock-status">
+            <div className="panel-badge panel-badge--size-locked">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={lockSize}
+                  className="panel-lock-checkbox"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    if (e.currentTarget.checked) {
+                      lockPanelSize(id);
+                    } else {
+                      unlockPanelSize(id);
+                    }
+                  }}
+                />
+                {lockSize ? "🔒 Size Locked" : "🔓 Size Unlocked"}
+              </label>
+            </div>
+            {!lockSize && <div className="panel-hint">Drag to move • Resize from corner</div>}
+          </div>
+        </>
+      )}
     </div>
   );
 }

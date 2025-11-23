@@ -69,7 +69,7 @@ export const MixedSizeLocking: Story = {
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
           <PanelGridRenderer
             itemRenderer={({ id }) => {
-              return <PanelContent id={id} />;
+              return <PanelContent id={id} showLockButton />;
             }}
           />
         </PanelGridProvider>
