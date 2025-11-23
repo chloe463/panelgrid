@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import {
   applySnapAnimation,
   detectAnimatingPanels,
@@ -19,7 +19,7 @@ interface PanelGridOptions {
   rearrangement?: RearrangementFunction;
 }
 
-interface PanelGridState {
+export interface PanelGridState {
   panels: PanelCoordinate[];
 }
 
@@ -29,11 +29,48 @@ interface InternalPanelState {
   animatingPanels: Set<number | string>;
 }
 
+export type PanelGridAction =
+  | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
+  | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
+  | { type: "REMOVE_PANEL"; panelId: number | string };
+
+export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
+  switch (action.type) {
+    case "UPDATE_PANELS":
+      return {
+        ...state,
+        panels: action.newPanels,
+      };
+    case "ADD_PANEL": {
+      const { newPanel, columnCount } = action;
+      const newPosition = findNewPositionToAddPanel(newPanel, state.panels, columnCount);
+      const newPanelCoordinate: PanelCoordinate = {
+        id: newPanel.id || Math.random().toString(36).substring(2, 15),
+        x: newPosition.x,
+        y: newPosition.y,
+        w: newPanel.w || 1,
+        h: newPanel.h || 1,
+      };
+      return {
+        ...state,
+        panels: [...state.panels, newPanelCoordinate],
+      };
+    }
+    case "REMOVE_PANEL":
+      return {
+        ...state,
+        panels: state.panels.filter((panel) => panel.id !== action.panelId),
+      };
+    default:
+      return state;
+  }
+}
+
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
 export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement }: PanelGridOptions) {
-  const [state, setState] = useState<PanelGridState>({
+  const [state, dispatch] = useReducer(panelGridReducer, {
     panels,
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
@@ -97,10 +134,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
         excludePanelId: updatedPanel.id,
       });
 
-      setState((current) => ({
-        ...current,
-        panels: nextPanels,
-      }));
+      dispatch({ type: "UPDATE_PANELS", newPanels: nextPanels });
 
       // Clear animating panels after animation completes
       const timeoutId = setTimeout(() => {
@@ -379,29 +413,20 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   const addPanel = useCallback(
     (panel: Partial<PanelCoordinate>) => {
-      setState((current) => {
-        const newPosition = findNewPositionToAddPanel(panel, current.panels, columnCount);
-        const newPanel: PanelCoordinate = {
+      dispatch({
+        type: "ADD_PANEL",
+        newPanel: {
+          ...panel,
           id: panel.id || Math.random().toString(36).substring(2, 15),
-          x: newPosition.x,
-          y: newPosition.y,
-          w: panel.w || 1,
-          h: panel.h || 1,
-        };
-        return {
-          ...current,
-          panels: [...current.panels, newPanel],
-        };
+        },
+        columnCount,
       });
     },
     [columnCount]
   );
 
   const removePanel = useCallback((id: number | string) => {
-    setState((current) => ({
-      ...current,
-      panels: current.panels.filter((panel) => panel.id !== id),
-    }));
+    dispatch({ type: "REMOVE_PANEL", panelId: id });
   }, []);
 
   const exportState = useCallback(() => {
