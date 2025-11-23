@@ -30,36 +30,36 @@ interface InternalPanelState {
 }
 
 export type PanelGridAction =
-  | { type: "UPDATE_PANELS"; payload: PanelCoordinate[] }
-  | { type: "ADD_PANEL"; payload: Partial<PanelCoordinate> & { columnCount: number } }
-  | { type: "REMOVE_PANEL"; payload: number | string };
+  | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
+  | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
+  | { type: "REMOVE_PANEL"; panelId: number | string };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
   switch (action.type) {
     case "UPDATE_PANELS":
       return {
         ...state,
-        panels: action.payload,
+        panels: action.newPanels,
       };
     case "ADD_PANEL": {
-      const { columnCount, ...panelData } = action.payload;
-      const newPosition = findNewPositionToAddPanel(panelData, state.panels, columnCount);
-      const newPanel: PanelCoordinate = {
-        id: panelData.id || Math.random().toString(36).substring(2, 15),
+      const { newPanel, columnCount } = action;
+      const newPosition = findNewPositionToAddPanel(newPanel, state.panels, columnCount);
+      const newPanelCoordinate: PanelCoordinate = {
+        id: newPanel.id || Math.random().toString(36).substring(2, 15),
         x: newPosition.x,
         y: newPosition.y,
-        w: panelData.w || 1,
-        h: panelData.h || 1,
+        w: newPanel.w || 1,
+        h: newPanel.h || 1,
       };
       return {
         ...state,
-        panels: [...state.panels, newPanel],
+        panels: [...state.panels, newPanelCoordinate],
       };
     }
     case "REMOVE_PANEL":
       return {
         ...state,
-        panels: state.panels.filter((panel) => panel.id !== action.payload),
+        panels: state.panels.filter((panel) => panel.id !== action.panelId),
       };
     default:
       return state;
@@ -134,7 +134,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
         excludePanelId: updatedPanel.id,
       });
 
-      dispatch({ type: "UPDATE_PANELS", payload: nextPanels });
+      dispatch({ type: "UPDATE_PANELS", newPanels: nextPanels });
 
       // Clear animating panels after animation completes
       const timeoutId = setTimeout(() => {
@@ -415,18 +415,18 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
     (panel: Partial<PanelCoordinate>) => {
       dispatch({
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           ...panel,
           id: panel.id || Math.random().toString(36).substring(2, 15),
-          columnCount,
         },
+        columnCount,
       });
     },
     [columnCount]
   );
 
   const removePanel = useCallback((id: number | string) => {
-    dispatch({ type: "REMOVE_PANEL", payload: id });
+    dispatch({ type: "REMOVE_PANEL", panelId: id });
   }, []);
 
   const exportState = useCallback(() => {

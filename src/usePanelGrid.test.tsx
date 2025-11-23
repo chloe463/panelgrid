@@ -97,7 +97,7 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "UPDATE_PANELS",
-        payload: newPanels,
+        newPanels: newPanels,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -111,7 +111,7 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "UPDATE_PANELS",
-        payload: newPanels,
+        newPanels: newPanels,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -126,7 +126,7 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "UPDATE_PANELS",
-        payload: newPanels,
+        newPanels: newPanels,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -145,12 +145,12 @@ describe("panelGridReducer", () => {
     it("should add a new panel to the panels array", () => {
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           id: "panel-4",
           w: 1,
           h: 1,
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -167,12 +167,12 @@ describe("panelGridReducer", () => {
     it("should preserve existing panels when adding new one", () => {
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           id: "panel-4",
           w: 2,
           h: 2,
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -186,10 +186,10 @@ describe("panelGridReducer", () => {
       const originalPanels = [...initialState.panels];
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           id: "panel-4",
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -206,11 +206,11 @@ describe("panelGridReducer", () => {
     it("should generate ID when not provided", () => {
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           w: 1,
           h: 1,
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -223,10 +223,10 @@ describe("panelGridReducer", () => {
     it("should use default width and height when not provided", () => {
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           id: "panel-4",
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(initialState, action);
@@ -242,12 +242,12 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "ADD_PANEL",
-        payload: {
+        newPanel: {
           id: "panel-1",
           w: 2,
           h: 2,
-          columnCount: 4,
         },
+        columnCount: 4,
       };
 
       const result = panelGridReducer(emptyState, action);
@@ -262,7 +262,7 @@ describe("panelGridReducer", () => {
     it("should remove panel by string id", () => {
       const action: PanelGridAction = {
         type: "REMOVE_PANEL",
-        payload: "panel-2",
+        panelId: "panel-2",
       };
 
       const result = panelGridReducer(initialState, action);
@@ -284,7 +284,7 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "REMOVE_PANEL",
-        payload: 2,
+        panelId: 2,
       };
 
       const result = panelGridReducer(stateWithNumberIds, action);
@@ -296,7 +296,7 @@ describe("panelGridReducer", () => {
     it("should do nothing if panel id does not exist", () => {
       const action: PanelGridAction = {
         type: "REMOVE_PANEL",
-        payload: "nonexistent-id",
+        panelId: "nonexistent-id",
       };
 
       const result = panelGridReducer(initialState, action);
@@ -309,7 +309,7 @@ describe("panelGridReducer", () => {
       const originalPanels = [...initialState.panels];
       const action: PanelGridAction = {
         type: "REMOVE_PANEL",
-        payload: "panel-1",
+        panelId: "panel-1",
       };
 
       const result = panelGridReducer(initialState, action);
@@ -328,7 +328,7 @@ describe("panelGridReducer", () => {
 
       const action: PanelGridAction = {
         type: "REMOVE_PANEL",
-        payload: "panel-1",
+        panelId: "panel-1",
       };
 
       const result = panelGridReducer(emptyState, action);
