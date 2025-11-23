@@ -9,7 +9,7 @@ import {
   rearrangePanels,
 } from "./helpers";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
-import type { PanelCoordinate, RearrangementFunction } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
 
 interface PanelGridOptions {
   panels: PanelCoordinate[];
@@ -75,6 +75,14 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
   const animationTimeoutsRef = useRef<Set<TimeoutId>>(new Set());
+
+  const panelMap = useMemo(() => {
+    const map = new Map<PanelId, PanelCoordinate>();
+    state.panels.forEach((panel) => {
+      map.set(panel.id, panel);
+    });
+    return map;
+  }, [state.panels]);
 
   const internalState = useRef<InternalPanelState>({
     activePanelId: null,
@@ -435,6 +443,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   return {
     panels: panelsWithProps,
+    panelMap,
     ghostPanelRef,
     addPanel,
     removePanel,

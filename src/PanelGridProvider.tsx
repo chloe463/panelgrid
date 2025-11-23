@@ -6,6 +6,7 @@ type PanelGridState = ReturnType<typeof usePanelGrid>;
 
 interface PanelGridContextType {
   panels: PanelGridState["panels"];
+  panelMap: PanelGridState["panelMap"];
   baseSize: number | null;
   columnCount: number;
   gap: number;
@@ -43,7 +44,7 @@ export function PanelGridProvider({
 }: PanelGridProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
 
-  const { panels, addPanel, removePanel, exportState, ghostPanelRef } = usePanelGrid({
+  const { panels, panelMap, addPanel, removePanel, exportState, ghostPanelRef } = usePanelGrid({
     panels: initialPanels,
     columnCount,
     baseSize: baseSize || 256,
@@ -52,7 +53,7 @@ export function PanelGridProvider({
   });
 
   return (
-    <PanelGridStateContext.Provider value={{ panels, columnCount, gap, baseSize, ghostPanelRef }}>
+    <PanelGridStateContext.Provider value={{ panels, panelMap, columnCount, gap, baseSize, ghostPanelRef }}>
       <PanelGridControlsContext.Provider value={{ setBaseSize, addPanel, removePanel, exportState }}>
         {children}
       </PanelGridControlsContext.Provider>
