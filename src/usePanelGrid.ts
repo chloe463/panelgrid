@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
+import { use, useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import {
   applySnapAnimation,
   detectAnimatingPanels,
@@ -32,7 +32,9 @@ interface InternalPanelState {
 export type PanelGridAction =
   | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
   | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
-  | { type: "REMOVE_PANEL"; panelId: number | string };
+  | { type: "REMOVE_PANEL"; panelId: number | string }
+  | { type: "LOCK_PANEL_SIZE"; panelId: number | string }
+  | { type: "UNLOCK_PANEL_SIZE"; panelId: number | string };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
   switch (action.type) {
@@ -60,6 +62,16 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
       return {
         ...state,
         panels: state.panels.filter((panel) => panel.id !== action.panelId),
+      };
+    case "LOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: true } : panel)),
+      };
+    case "UNLOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: false } : panel)),
       };
     default:
       return state;
@@ -437,6 +449,14 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
     dispatch({ type: "REMOVE_PANEL", panelId: id });
   }, []);
 
+  const lockPanelSize = useCallback((id: number | string) => {
+    dispatch({ type: "LOCK_PANEL_SIZE", panelId: id });
+  }, []);
+
+  const unlockPanelSize = useCallback((id: number | string) => {
+    dispatch({ type: "UNLOCK_PANEL_SIZE", panelId: id });
+  }, []);
+
   const exportState = useCallback(() => {
     return state.panels;
   }, [state.panels]);
@@ -447,6 +467,8 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
     ghostPanelRef,
     addPanel,
     removePanel,
+    lockPanelSize,
+    unlockPanelSize,
     exportState,
   };
 }

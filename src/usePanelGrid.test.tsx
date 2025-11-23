@@ -337,6 +337,32 @@ describe("panelGridReducer", () => {
     });
   });
 
+  describe("LOCK_PANEL_SIZE", () => {
+    it("should set lockSize to true for specified panel", () => {
+      const result = panelGridReducer(initialState, {
+        type: "LOCK_PANEL_SIZE",
+        panelId: "panel-2",
+      });
+
+      const updatedPanel = result.panels.find((p) => p.id === "panel-2");
+      expect(updatedPanel).toBeDefined();
+      expect(updatedPanel?.lockSize).toBe(true);
+    });
+  });
+
+  describe("UNLOCK_PANEL_SIZE", () => {
+    it("should set lockSize to false for specified panel", () => {
+      const result = panelGridReducer(initialState, {
+        type: "UNLOCK_PANEL_SIZE",
+        panelId: "panel-1",
+      });
+
+      const updatedPanel = result.panels.find((p) => p.id === "panel-1");
+      expect(updatedPanel).toBeDefined();
+      expect(updatedPanel?.lockSize).toBe(false);
+    });
+  });
+
   describe("Unknown action", () => {
     it("should return the same state for unknown action type", () => {
       const unknownAction = {
