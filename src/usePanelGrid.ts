@@ -9,7 +9,7 @@ import {
   rearrangePanels,
 } from "./helpers";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
-import type { PanelCoordinate, RearrangementFunction } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
 
 interface PanelGridOptions {
   panels: PanelCoordinate[];
@@ -24,15 +24,17 @@ export interface PanelGridState {
 }
 
 interface InternalPanelState {
-  activePanelId: number | string | null;
-  draggableElements: Record<number | string, HTMLElement | null>;
-  animatingPanels: Set<number | string>;
+  activePanelId: PanelId | null;
+  draggableElements: Record<PanelId, HTMLElement | null>;
+  animatingPanels: Set<PanelId>;
 }
 
 export type PanelGridAction =
   | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
   | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
-  | { type: "REMOVE_PANEL"; panelId: number | string };
+  | { type: "REMOVE_PANEL"; panelId: PanelId }
+  | { type: "LOCK_PANEL_SIZE"; panelId: PanelId }
+  | { type: "UNLOCK_PANEL_SIZE"; panelId: PanelId };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
   switch (action.type) {
@@ -61,6 +63,16 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
         ...state,
         panels: state.panels.filter((panel) => panel.id !== action.panelId),
       };
+    case "LOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: true } : panel)),
+      };
+    case "UNLOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: false } : panel)),
+      };
     default:
       return state;
   }
@@ -75,6 +87,14 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
   const animationTimeoutsRef = useRef<Set<TimeoutId>>(new Set());
+
+  const panelMap = useMemo(() => {
+    const map = new Map<PanelId, PanelCoordinate>();
+    state.panels.forEach((panel) => {
+      map.set(panel.id, panel);
+    });
+    return map;
+  }, [state.panels]);
 
   const internalState = useRef<InternalPanelState>({
     activePanelId: null,
@@ -355,7 +375,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   // Create ref callback for panel elements
   const createRefCallback = useCallback(
-    (panelId: number | string) => (element: HTMLElement | null) => {
+    (panelId: PanelId) => (element: HTMLElement | null) => {
       if (!element) return;
       if (!internalState.draggableElements[panelId]) {
         internalState.draggableElements[panelId] = element;
@@ -425,8 +445,16 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
     [columnCount]
   );
 
-  const removePanel = useCallback((id: number | string) => {
+  const removePanel = useCallback((id: PanelId) => {
     dispatch({ type: "REMOVE_PANEL", panelId: id });
+  }, []);
+
+  const lockPanelSize = useCallback((id: PanelId) => {
+    dispatch({ type: "LOCK_PANEL_SIZE", panelId: id });
+  }, []);
+
+  const unlockPanelSize = useCallback((id: PanelId) => {
+    dispatch({ type: "UNLOCK_PANEL_SIZE", panelId: id });
   }, []);
 
   const exportState = useCallback(() => {
@@ -435,9 +463,12 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   return {
     panels: panelsWithProps,
+    panelMap,
     ghostPanelRef,
     addPanel,
     removePanel,
+    lockPanelSize,
+    unlockPanelSize,
     exportState,
   };
 }
