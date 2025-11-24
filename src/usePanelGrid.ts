@@ -24,17 +24,17 @@ export interface PanelGridState {
 }
 
 interface InternalPanelState {
-  activePanelId: number | string | null;
-  draggableElements: Record<number | string, HTMLElement | null>;
-  animatingPanels: Set<number | string>;
+  activePanelId: PanelId | null;
+  draggableElements: Record<PanelId, HTMLElement | null>;
+  animatingPanels: Set<PanelId>;
 }
 
 export type PanelGridAction =
   | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
   | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
-  | { type: "REMOVE_PANEL"; panelId: number | string }
-  | { type: "LOCK_PANEL_SIZE"; panelId: number | string }
-  | { type: "UNLOCK_PANEL_SIZE"; panelId: number | string };
+  | { type: "REMOVE_PANEL"; panelId: PanelId }
+  | { type: "LOCK_PANEL_SIZE"; panelId: PanelId }
+  | { type: "UNLOCK_PANEL_SIZE"; panelId: PanelId };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
   switch (action.type) {
@@ -375,7 +375,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
   // Create ref callback for panel elements
   const createRefCallback = useCallback(
-    (panelId: number | string) => (element: HTMLElement | null) => {
+    (panelId: PanelId) => (element: HTMLElement | null) => {
       if (!element) return;
       if (!internalState.draggableElements[panelId]) {
         internalState.draggableElements[panelId] = element;
@@ -445,15 +445,15 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
     [columnCount]
   );
 
-  const removePanel = useCallback((id: number | string) => {
+  const removePanel = useCallback((id: PanelId) => {
     dispatch({ type: "REMOVE_PANEL", panelId: id });
   }, []);
 
-  const lockPanelSize = useCallback((id: number | string) => {
+  const lockPanelSize = useCallback((id: PanelId) => {
     dispatch({ type: "LOCK_PANEL_SIZE", panelId: id });
   }, []);
 
-  const unlockPanelSize = useCallback((id: number | string) => {
+  const unlockPanelSize = useCallback((id: PanelId) => {
     dispatch({ type: "UNLOCK_PANEL_SIZE", panelId: id });
   }, []);
 

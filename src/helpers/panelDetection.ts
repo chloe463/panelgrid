@@ -1,4 +1,4 @@
-import type { PanelCoordinate } from "../types";
+import type { PanelCoordinate, PanelId } from "../types";
 
 /**
  * Options for detecting animating panels
@@ -6,16 +6,16 @@ import type { PanelCoordinate } from "../types";
 interface DetectAnimatingPanelsOptions {
   oldPanels: PanelCoordinate[];
   newPanels: PanelCoordinate[];
-  excludePanelId: number | string;
+  excludePanelId: PanelId;
 }
 
 /**
  * Detects which panels have changed position/size and marks them for animation
  * Returns a Set of panel IDs that should be animated
  */
-export function detectAnimatingPanels(options: DetectAnimatingPanelsOptions): Set<number | string> {
+export function detectAnimatingPanels(options: DetectAnimatingPanelsOptions): Set<PanelId> {
   const { oldPanels, newPanels, excludePanelId } = options;
-  const animatingPanels = new Set<number | string>();
+  const animatingPanels = new Set<PanelId>();
 
   oldPanels.forEach((oldPanel) => {
     const newPanel = newPanels.find((p) => p.id === oldPanel.id);
