@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2025-11-24
+
+### Added
+- `panelMap` (Map<PanelId, PanelCoordinate>) for O(1) panel lookups by ID (#53)
+- `usePanel(id)` hook for convenient access to individual panel data (#53)
+- `lockPanelSize(id)` and `unlockPanelSize(id)` methods for dynamic panel size locking (#53)
+- Interactive checkbox UI in demo stories to toggle panel size lock status (#53)
+
+### Changed
+- Refactored state management from `useState` to `useReducer` for improved testability and extensibility (#52)
+- Moved panel position calculation logic into reducer for better performance (#52)
+- Standardized all panel ID type references to use `PanelId` type instead of inline `number | string` (#53)
+- Updated demo `PanelContent` component to use `usePanel` hook for efficient state access (#53)
+
+### Improved
+- Better performance for panel lookups with O(1) access via `panelMap` (#53)
+- Reduced `addPanel` function dependency array - no longer recreates when panels change (#52)
+- Enhanced debugging and state tracking with explicit action types in reducer (#52)
+- Improved code consistency and maintainability with centralized type definitions (#53)
+
 ## [0.1.2] - 2025-11-23
 
 ### Changed
