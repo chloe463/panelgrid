@@ -82,6 +82,17 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
+const RESIZE_CURSOR_MAP: Record<string, string> = {
+  nw: "nwse-resize",
+  ne: "nesw-resize",
+  se: "nwse-resize",
+  sw: "nesw-resize",
+  n: "ns-resize",
+  s: "ns-resize",
+  e: "ew-resize",
+  w: "ew-resize",
+};
+
 export function usePanelGrid({
   panels,
   columnCount,
@@ -307,17 +318,7 @@ export function usePanelGrid({
 
       document.body.classList.add("panelgrid-resizing");
 
-      const cursorMap: Record<string, string> = {
-        nw: "nwse-resize",
-        ne: "nesw-resize",
-        se: "nwse-resize",
-        sw: "nesw-resize",
-        n: "ns-resize",
-        s: "ns-resize",
-        e: "ew-resize",
-        w: "ew-resize",
-      };
-      draggingElement.style.cursor = cursorMap[handlePosition || "se"] || "nwse-resize";
+      draggingElement.style.cursor = RESIZE_CURSOR_MAP[handlePosition || "se"] || "nwse-resize";
       draggingElement.style.transition = "";
 
       showGhostPanel(draggingElement.offsetLeft, draggingElement.offsetTop, initialWidth, initialHeight);
