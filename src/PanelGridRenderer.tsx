@@ -81,7 +81,6 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
                 />
               );
             })}
-            {/* {resizeHandleProps && <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>} */}
           </div>
         );
       })}

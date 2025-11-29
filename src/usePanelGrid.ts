@@ -307,7 +307,17 @@ export function usePanelGrid({
 
       document.body.classList.add("panelgrid-resizing");
 
-      draggingElement.style.cursor = "nwse-resize";
+      const cursorMap: Record<string, string> = {
+        nw: "nwse-resize",
+        ne: "nesw-resize",
+        se: "nwse-resize",
+        sw: "nesw-resize",
+        n: "ns-resize",
+        s: "ns-resize",
+        e: "ew-resize",
+        w: "ew-resize",
+      };
+      draggingElement.style.cursor = cursorMap[handlePosition || "se"] || "nwse-resize";
       draggingElement.style.transition = "";
 
       showGhostPanel(draggingElement.offsetLeft, draggingElement.offsetTop, initialWidth, initialHeight);
@@ -322,31 +332,40 @@ export function usePanelGrid({
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
 
-        draggingElement.style.width = isVerticalResizeOnly ? `${initialWidth}px` : `${initialWidth + deltaX}px`;
-        draggingElement.style.height = isHorizontalResizeOnly ? `${initialHeight}px` : `${initialHeight + deltaY}px`;
+        // Calculate dimensions once, accounting for all resize directions
+        const newWidth = westSideResizeEnabled
+          ? Math.max(initialWidth - deltaX, 1)
+          : isVerticalResizeOnly
+            ? initialWidth
+            : initialWidth + deltaX;
+
+        const newHeight = northSideResizeEnabled
+          ? Math.max(initialHeight - deltaY, 1)
+          : isHorizontalResizeOnly
+            ? initialHeight
+            : initialHeight + deltaY;
+
+        draggingElement.style.width = `${newWidth}px`;
+        draggingElement.style.height = `${newHeight}px`;
         draggingElement.style.zIndex = "calc(infinity)";
 
+        // Update position for north/west resizing
         if (northSideResizeEnabled) {
-          const newTop = initialTop + deltaY;
-          draggingElement.style.top = `${newTop}px`;
-          draggingElement.style.height = `${Math.max(initialHeight - deltaY, 1)}px`;
+          draggingElement.style.top = `${initialTop + deltaY}px`;
         }
         if (westSideResizeEnabled) {
-          const newLeft = initialLeft + deltaX;
-          draggingElement.style.left = `${newLeft}px`;
-          draggingElement.style.width = `${Math.max(initialWidth - deltaX, 1)}px`;
+          draggingElement.style.left = `${initialLeft + deltaX}px`;
         }
 
-        // Update ghost panel size to snap to grid
-        const newWidth = Math.max(westSideResizeEnabled ? initialWidth - deltaX : initialWidth + deltaX, 1);
-        const newHeight = Math.max(northSideResizeEnabled ? initialHeight - deltaY : initialHeight + deltaY, 1);
+        // Calculate current position (needed for grid calculations)
         const currentLeft = westSideResizeEnabled ? initialLeft + deltaX : initialLeft;
         const currentTop = northSideResizeEnabled ? initialTop + deltaY : initialTop;
 
-        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount, panel.x);
-        const nextGridH = pixelsToGridSize(newHeight, baseSize, gap);
-        const nextGridX = pixelsToGridPosition(currentLeft, baseSize, gap, columnCount, nextGridW);
+        // Update ghost panel - calculate grid position BEFORE grid size
+        const nextGridX = pixelsToGridPosition(currentLeft, baseSize, gap, columnCount, panel.w);
         const nextGridY = pixelsToGridPosition(currentTop, baseSize, gap);
+        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount, nextGridX);
+        const nextGridH = pixelsToGridSize(newHeight, baseSize, gap, columnCount, nextGridY);
 
         const snappedWidth = gridToPixels(nextGridW, baseSize, gap);
         const snappedHeight = gridToPixels(nextGridH, baseSize, gap);
@@ -388,7 +407,8 @@ export function usePanelGrid({
           draggingElement.style.width = `${width}px`;
           draggingElement.style.height = `${height}px`;
           draggingElement.style.zIndex = initialZIndex;
-          draggingElement.style.transition = "width 0.1s ease-out, width height 0.1s ease-out";
+          draggingElement.style.transition =
+            "width 0.1s ease-out, height 0.1s ease-out, top 0.1s ease-out, left 0.1s ease-out";
         });
 
         updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY, w: nextGridW, h: nextGridH }, state.panels);
