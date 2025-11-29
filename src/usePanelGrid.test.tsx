@@ -14,6 +14,7 @@ describe("usePanelGrid", () => {
           columnCount: 4,
           baseSize: 100,
           gap: 10,
+          resizeHandlePositions: ["se"],
         })
       );
 
@@ -31,6 +32,7 @@ describe("usePanelGrid", () => {
           columnCount: 4,
           baseSize: 100,
           gap: 10,
+          resizeHandlePositions: ["se"],
         })
       );
 
@@ -48,6 +50,7 @@ describe("usePanelGrid", () => {
           columnCount: 4,
           baseSize: 100,
           gap: 10,
+          resizeHandlePositions: ["se"],
         })
       );
 
@@ -68,6 +71,7 @@ describe("usePanelGrid", () => {
           columnCount: 4,
           baseSize: 100,
           gap: 10,
+          resizeHandlePositions: ["se"],
         })
       );
 

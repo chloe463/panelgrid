@@ -8,7 +8,7 @@ interface PanelGridRendererProps {
 }
 
 export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRendererProps) {
-  const { panels, columnCount, gap, baseSize, ghostPanelRef } = usePanelGridState();
+  const { panels, columnCount, gap, baseSize, resizeHandlePositions, ghostPanelRef } = usePanelGridState();
   const { setBaseSize } = usePanelGridControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const rowCount = getGridRowCount(
@@ -71,7 +71,17 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
             data-pg-h={h}
           >
             <ItemRenderer id={key} />
-            {resizeHandleProps && <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>}
+            {resizeHandlePositions.map((pos) => {
+              return (
+                <span
+                  key={pos}
+                  className={`panelgrid-resize-handle panelgrid-resize-handle--${pos}`}
+                  {...resizeHandleProps}
+                  data-pg-resize-handle={pos}
+                />
+              );
+            })}
+            {/* {resizeHandleProps && <span className="panelgrid-resize-handle" {...resizeHandleProps}></span>} */}
           </div>
         );
       })}

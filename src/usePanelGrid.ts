@@ -9,13 +9,14 @@ import {
   rearrangePanels,
 } from "./helpers";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
-import type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction, ResizeHandlePosition } from "./types";
 
 interface PanelGridOptions {
   panels: PanelCoordinate[];
   columnCount: number;
   baseSize: number;
   gap: number;
+  resizeHandlePositions: ResizeHandlePosition[];
   rearrangement?: RearrangementFunction;
 }
 
@@ -81,7 +82,14 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
-export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement }: PanelGridOptions) {
+export function usePanelGrid({
+  panels,
+  columnCount,
+  baseSize,
+  gap,
+  resizeHandlePositions: _resizeHandlePositions,
+  rearrangement,
+}: PanelGridOptions) {
   const [state, dispatch] = useReducer(panelGridReducer, {
     panels,
   });
@@ -282,10 +290,18 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
 
       const startX = e.clientX;
       const startY = e.clientY;
+      const initialTop = draggingElement.offsetTop;
+      const initialLeft = draggingElement.offsetLeft;
       const initialWidth = draggingElement.offsetWidth;
       const initialHeight = draggingElement.offsetHeight;
       const initialZIndex = draggingElement.style.zIndex;
       const initialCursor = draggingElement.style.cursor;
+
+      const resizeHandle = e.currentTarget;
+      const handlePosition = resizeHandle.dataset.pgResizeHandle;
+
+      const northSideResizeEnabled = handlePosition?.includes("n");
+      const westSideResizeEnabled = handlePosition?.includes("w");
 
       document.body.classList.add("panelgrid-resizing");
 
@@ -308,14 +324,34 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
         draggingElement.style.height = `${initialHeight + deltaY}px`;
         draggingElement.style.zIndex = "calc(infinity)";
 
+        if (northSideResizeEnabled) {
+          const newTop = initialTop + deltaY;
+          draggingElement.style.top = `${newTop}px`;
+          draggingElement.style.height = `${Math.max(initialHeight - deltaY, 1)}px`;
+        }
+        if (westSideResizeEnabled) {
+          const newLeft = initialLeft + deltaX;
+          draggingElement.style.left = `${newLeft}px`;
+          draggingElement.style.width = `${Math.max(initialWidth - deltaX, 1)}px`;
+        }
+
         // Update ghost panel size to snap to grid
-        const newWidth = initialWidth + deltaX;
-        const newHeight = initialHeight + deltaY;
+        const newWidth = Math.max(westSideResizeEnabled ? initialWidth - deltaX : initialWidth + deltaX, 1);
+        const newHeight = Math.max(northSideResizeEnabled ? initialHeight - deltaY : initialHeight + deltaY, 1);
+        const currentLeft = westSideResizeEnabled ? initialLeft + deltaX : initialLeft;
+        const currentTop = northSideResizeEnabled ? initialTop + deltaY : initialTop;
+
         const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount, panel.x);
         const nextGridH = pixelsToGridSize(newHeight, baseSize, gap);
+        const nextGridX = pixelsToGridPosition(currentLeft, baseSize, gap, columnCount, nextGridW);
+        const nextGridY = pixelsToGridPosition(currentTop, baseSize, gap);
+
         const snappedWidth = gridToPixels(nextGridW, baseSize, gap);
         const snappedHeight = gridToPixels(nextGridH, baseSize, gap);
+        const snappedLeft = gridPositionToPixels(nextGridX, baseSize, gap);
+        const snappedTop = gridPositionToPixels(nextGridY, baseSize, gap);
 
+        updateGhostPanelPosition(snappedLeft, snappedTop);
         updateGhostPanelSize(snappedWidth, snappedHeight);
       };
 
@@ -325,12 +361,22 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
         hideGhostPanel();
 
         const rect = draggingElement.getBoundingClientRect();
-        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount, panel.x);
-        const nextGridH = pixelsToGridSize(rect.height, baseSize, gap);
+        const droppedLeft = parseFloat(draggingElement.style.left) || 0;
+        const droppedTop = parseFloat(draggingElement.style.top) || 0;
 
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap, columnCount, panel.w);
+        const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
+
+        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount, nextGridX);
+        const nextGridH = pixelsToGridSize(rect.height, baseSize, gap, columnCount, nextGridY);
+
+        const left = gridPositionToPixels(nextGridX, baseSize, gap);
+        const top = gridPositionToPixels(nextGridY, baseSize, gap);
         const width = gridToPixels(nextGridW, baseSize, gap);
         const height = gridToPixels(nextGridH, baseSize, gap);
 
+        draggingElement.style.top = `${top}px`;
+        draggingElement.style.left = `${left}px`;
         draggingElement.style.width = `${rect.width}px`;
         draggingElement.style.height = `${rect.height}px`;
         draggingElement.style.cursor = initialCursor;
@@ -340,10 +386,10 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
           draggingElement.style.width = `${width}px`;
           draggingElement.style.height = `${height}px`;
           draggingElement.style.zIndex = initialZIndex;
-          draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
+          draggingElement.style.transition = "width 0.1s ease-out, width height 0.1s ease-out";
         });
 
-        updatePanelsWithAnimation({ ...panel, w: nextGridW, h: nextGridH }, state.panels);
+        updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY, w: nextGridW, h: nextGridH }, state.panels);
 
         isResizing = false;
         internalState.activePanelId = null;
@@ -367,6 +413,7 @@ export function usePanelGrid({ panels, columnCount, baseSize, gap, rearrangement
       state.panels,
       updatePanelsWithAnimation,
       showGhostPanel,
+      updateGhostPanelPosition,
       updateGhostPanelSize,
       hideGhostPanel,
       columnCount,

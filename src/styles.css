@@ -50,16 +50,51 @@
 
 .panelgrid-resize-handle {
   position: absolute;
-  right: 0;
-  bottom: 0;
   display: inline-block;
   width: 24px;
   aspect-ratio: 1 / 1;
   background-color: rgba(0, 0, 0, 0.12);
-  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+}
 
+.panelgrid-resize-handle--nw {
+  top: 0;
+  left: 0;
+  right: auto;
+  bottom: auto;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
   &:hover {
     cursor: nwse-resize;
+  }
+}
+
+.panelgrid-resize-handle--ne {
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+  clip-path: polygon(0 0, 100% 100%, 100% 0);
+  &:hover {
+    cursor: nesw-resize;
+  }
+}
+
+.panelgrid-resize-handle--se {
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.12);
+  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+  &:hover {
+    cursor: nwse-resize;
+  }
+}
+
+.panelgrid-resize-handle--sw {
+  left: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.12);
+  clip-path: polygon(0 0, 0 100%, 100% 100%);
+  &:hover {
+    cursor: nesw-resize;
   }
 }
 
