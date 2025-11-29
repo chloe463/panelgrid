@@ -302,6 +302,8 @@ export function usePanelGrid({
 
       const northSideResizeEnabled = handlePosition?.includes("n");
       const westSideResizeEnabled = handlePosition?.includes("w");
+      const isVerticalResizeOnly = handlePosition === "n" || handlePosition === "s";
+      const isHorizontalResizeOnly = handlePosition === "e" || handlePosition === "w";
 
       document.body.classList.add("panelgrid-resizing");
 
@@ -320,8 +322,8 @@ export function usePanelGrid({
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
 
-        draggingElement.style.width = `${initialWidth + deltaX}px`;
-        draggingElement.style.height = `${initialHeight + deltaY}px`;
+        draggingElement.style.width = isVerticalResizeOnly ? `${initialWidth}px` : `${initialWidth + deltaX}px`;
+        draggingElement.style.height = isHorizontalResizeOnly ? `${initialHeight}px` : `${initialHeight + deltaY}px`;
         draggingElement.style.zIndex = "calc(infinity)";
 
         if (northSideResizeEnabled) {

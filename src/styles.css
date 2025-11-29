@@ -98,6 +98,52 @@
   }
 }
 
+.panelgrid-resize-handle--n {
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  aspect-ratio: 2 / 1;
+  background-color: rgba(0, 0, 0, 0.12);
+  &:hover {
+    cursor: ns-resize;
+  }
+}
+
+.panelgrid-resize-handle--s {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  aspect-ratio: 2 / 1;
+  background-color: rgba(0, 0, 0, 0.12);
+  &:hover {
+    cursor: ns-resize;
+  }
+}
+
+.panelgrid-resize-handle--e {
+  top: 50%;
+  right: 0;
+  width: 12px;
+  transform: translateY(-50%);
+  aspect-ratio: 1 / 2;
+  background-color: rgba(0, 0, 0, 0.12);
+  &:hover {
+    cursor: ew-resize;
+  }
+}
+
+.panelgrid-resize-handle--w {
+  top: 50%;
+  left: 0;
+  width: 12px;
+  transform: translateY(-50%);
+  aspect-ratio: 1 / 2;
+  background-color: rgba(0, 0, 0, 0.12);
+  &:hover {
+    cursor: ew-resize;
+  }
+}
+
 .panelgrid-resizing,
 .panelgrid-dragging {
   user-select: none;
