@@ -396,14 +396,14 @@ export function usePanelGrid({
         const width = gridToPixels(nextGridW, baseSize, gap);
         const height = gridToPixels(nextGridH, baseSize, gap);
 
-        draggingElement.style.top = `${top}px`;
-        draggingElement.style.left = `${left}px`;
         draggingElement.style.width = `${rect.width}px`;
         draggingElement.style.height = `${rect.height}px`;
         draggingElement.style.cursor = initialCursor;
         draggingElement.style.transition = "";
 
         window.requestAnimationFrame(() => {
+          draggingElement.style.top = `${top}px`;
+          draggingElement.style.left = `${left}px`;
           draggingElement.style.width = `${width}px`;
           draggingElement.style.height = `${height}px`;
           draggingElement.style.zIndex = initialZIndex;
