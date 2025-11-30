@@ -11,6 +11,7 @@ A flexible and performant React grid layout library with drag-and-drop and resiz
 - 🔧 **TypeScript**: Full type safety with comprehensive type definitions
 - 📦 **Tree-shakeable**: ESM and CommonJS builds available
 - 🎛️ **Customizable Rearrangement**: Override default collision resolution logic
+- ⚛️ **React Server Components**: Full support for Next.js App Router and RSC
 
 ## Documentation & Demo
 
@@ -60,6 +61,8 @@ const initialPanels: PanelCoordinate[] = [
   { id: 3, x: 0, y: 2, w: 1, h: 1 },
 ];
 
+// Mark panel component with "use client" for Next.js App Router
+"use client";
 function PanelContent({ id }: { id: number | string }) {
   return <div>Panel {id}</div>;
 }
@@ -71,13 +74,60 @@ function App() {
       columnCount={4}
       gap={8}
     >
-      <PanelGridRenderer itemRenderer={PanelContent} />
+      <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
     </PanelGridProvider>
   );
 }
 ```
 
 **Note:** Don't forget to import the CSS file to enable proper styling for the panels.
+
+### Next.js App Router / React Server Components
+
+PanelGrid is fully compatible with Next.js App Router and React Server Components. The library exports are marked with `"use client"` where necessary.
+
+**Important:** Your panel content components must also be marked with `"use client"` if they:
+- Use React hooks (`useState`, `useEffect`, etc.)
+- Access browser APIs
+- Use event handlers
+
+```tsx
+// app/dashboard/page.tsx (Server Component)
+import { PanelGridProvider, PanelGridRenderer } from 'panelgrid';
+import { PanelContent } from './PanelContent'; // Client Component
+import 'panelgrid/styles.css';
+
+export default function DashboardPage() {
+  const panels = [
+    { id: 1, x: 0, y: 0, w: 2, h: 2 },
+    { id: 2, x: 2, y: 0, w: 2, h: 2 },
+  ];
+
+  return (
+    <PanelGridProvider panels={panels} columnCount={4} gap={8}>
+      <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
+    </PanelGridProvider>
+  );
+}
+```
+
+```tsx
+// app/dashboard/PanelContent.tsx (Client Component)
+"use client";
+import { usePanelGridControls } from 'panelgrid';
+import type { PanelId } from 'panelgrid';
+
+export function PanelContent({ id }: { id: PanelId }) {
+  const { removePanel } = usePanelGridControls();
+
+  return (
+    <div>
+      <h3>Panel {id}</h3>
+      <button onClick={() => removePanel(id)}>Remove</button>
+    </div>
+  );
+}
+```
 
 ## Advanced Usage
 
@@ -116,7 +166,7 @@ function App() {
       gap={8}
       rearrangement={customRearrange}
     >
-      <PanelGridRenderer itemRenderer={PanelContent} />
+      <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
     </PanelGridProvider>
   );
 }
@@ -281,7 +331,30 @@ Renderer component that displays the panels.
 
 **Props:**
 
-- `itemRenderer`: `React.ComponentType<{ id: PanelId }>` - Component to render each panel
+- `children`: `React.ComponentType<{ id: PanelId }>` - Component type (not instance) to render each panel
+
+**Example:**
+
+```tsx
+"use client";
+function MyPanel({ id }: { id: PanelId }) {
+  return <div>Panel {id}</div>;
+}
+
+// Pass the component type (not JSX)
+<PanelGridRenderer>{MyPanel}</PanelGridRenderer>
+```
+
+For panels with custom props, create a wrapper component:
+
+```tsx
+"use client";
+function CustomPanel({ id }: { id: PanelId }) {
+  return <MyPanel id={id} customProp="value" />;
+}
+
+<PanelGridRenderer>{CustomPanel}</PanelGridRenderer>
+```
 
 ### `usePanelGridControls()`
 
