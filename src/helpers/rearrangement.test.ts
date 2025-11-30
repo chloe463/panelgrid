@@ -271,20 +271,22 @@ describe("rearrangePanels", () => {
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(2);
-    expect(result.find((p) => p.id === "panel-1")).toEqual({
-      id: "panel-1",
-      x: 0,
-      y: 0,
-      w: 2,
-      h: 2,
-    });
-    expect(result.find((p) => p.id === "panel-2")).toEqual({
-      id: "panel-2",
-      x: 2,
-      y: 0,
-      w: 2,
-      h: 2,
-    });
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+      {
+        id: "panel-2",
+        x: 2,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ]);
   });
 
   it("should move colliding panel horizontally", () => {
@@ -306,8 +308,8 @@ describe("rearrangePanels", () => {
       },
       {
         id: "panel-2",
-        x: 1,
-        y: 1,
+        x: 0,
+        y: 0,
         w: 2,
         h: 2,
       },
@@ -316,14 +318,22 @@ describe("rearrangePanels", () => {
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(2);
-    const panel1 = result.find((p) => p.id === "panel-1");
-    const panel2 = result.find((p) => p.id === "panel-2");
-
-    expect(panel1).toEqual({ id: "panel-1", x: 0, y: 0, w: 2, h: 2 });
-
-    // panel-2 should be moved (either horizontally or vertically)
-    expect(panel2?.id).toBe("panel-2");
-    expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+      {
+        id: "panel-2",
+        x: 2,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ]);
   });
 
   it("should move colliding panel vertically when horizontal is not available", () => {
@@ -338,7 +348,7 @@ describe("rearrangePanels", () => {
     const allPanels: PanelCoordinate[] = [
       {
         id: "panel-1",
-        x: 2,
+        x: 0,
         y: 2,
         w: 6,
         h: 2,
@@ -346,7 +356,7 @@ describe("rearrangePanels", () => {
       {
         id: "panel-2",
         x: 0,
-        y: 1,
+        y: 0,
         w: 6,
         h: 2,
       },
@@ -355,14 +365,23 @@ describe("rearrangePanels", () => {
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(2);
-    const panel1 = result.find((p) => p.id === "panel-1");
-    const panel2 = result.find((p) => p.id === "panel-2");
-
-    expect(panel1).toEqual({ id: "panel-1", x: 0, y: 0, w: 6, h: 2 });
-
-    // panel-2 should be moved vertically (y should increase)
-    expect(panel2?.id).toBe("panel-2");
-    expect(panel2?.y).toBeGreaterThan(1);
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 6,
+        h: 2,
+      },
+      {
+        id: "panel-2",
+        x: 0,
+        y: 2,
+        w: 6,
+        h: 2,
+      },
+    ]);
+    const [panel1, panel2] = result;
     expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
   });
 
@@ -393,7 +412,7 @@ describe("rearrangePanels", () => {
       {
         id: "panel-3",
         x: 3,
-        y: 1,
+        y: 2,
         w: 2,
         h: 2,
       },
@@ -402,12 +421,30 @@ describe("rearrangePanels", () => {
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(3);
-    const panel1 = result.find((p) => p.id === "panel-1");
-    const panel2 = result.find((p) => p.id === "panel-2");
-    const panel3 = result.find((p) => p.id === "panel-3");
-
-    // panel-1 should be at the requested position
-    expect(panel1).toEqual({ id: "panel-1", x: 0, y: 0, w: 2, h: 2 });
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+      {
+        id: "panel-2",
+        x: 2,
+        y: 1,
+        w: 2,
+        h: 2,
+      },
+      {
+        id: "panel-3",
+        x: 4,
+        y: 2,
+        w: 2,
+        h: 2,
+      },
+    ]);
+    const [panel1, panel2, panel3] = result;
 
     // No panels should overlap
     expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
@@ -444,8 +481,23 @@ describe("rearrangePanels", () => {
     const result = rearrangePanels(resizedPanel, allPanels, 6);
 
     expect(result).toHaveLength(2);
-    const panel1 = result.find((p) => p.id === "panel-1");
-    const panel2 = result.find((p) => p.id === "panel-2");
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 4,
+        h: 2,
+      },
+      {
+        id: "panel-2",
+        x: 4,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ]);
+    const [panel1, panel2] = result;
 
     expect(panel1).toEqual({ id: "panel-1", x: 0, y: 0, w: 4, h: 2 });
 
@@ -463,12 +515,29 @@ describe("rearrangePanels", () => {
       h: 2,
     };
 
-    const allPanels: PanelCoordinate[] = [movingPanel];
+    const allPanels: PanelCoordinate[] = [
+      {
+        id: "panel-1",
+        x: 4,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ];
 
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(1);
-    const panel = result.find((p) => p.id === "panel-1");
+    expect(result).toEqual([
+      {
+        id: "panel-1",
+        x: 4,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ]);
+    const [panel] = result;
 
     // Panel should be constrained to x = 4 (so x + w = 4 + 2 = 6)
     expect(panel).toEqual({ id: "panel-1", x: 4, y: 0, w: 2, h: 2 });
@@ -484,7 +553,15 @@ describe("rearrangePanels", () => {
       h: 2,
     };
 
-    const allPanels: PanelCoordinate[] = [movingPanel];
+    const allPanels: PanelCoordinate[] = [
+      {
+        id: "panel-1",
+        x: 2,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ];
 
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
@@ -505,7 +582,15 @@ describe("rearrangePanels", () => {
       h: 2,
     };
 
-    const allPanels: PanelCoordinate[] = [movingPanel];
+    const allPanels: PanelCoordinate[] = [
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
+    ];
 
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
@@ -526,12 +611,20 @@ describe("rearrangePanels", () => {
       h: 2,
     };
 
-    const allPanels: PanelCoordinate[] = [movingPanel];
+    const allPanels: PanelCoordinate[] = [
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 6,
+        h: 2,
+      },
+    ];
 
     const result = rearrangePanels(movingPanel, allPanels, 6);
 
     expect(result).toHaveLength(1);
-    const panel = result.find((p) => p.id === "panel-1");
+    const [panel] = result;
 
     // Panel should be constrained to x = 0 (so x + w = 0 + 6 = 6)
     expect(panel).toEqual({ id: "panel-1", x: 0, y: 0, w: 6, h: 2 });
@@ -548,7 +641,13 @@ describe("rearrangePanels", () => {
     };
 
     const allPanels: PanelCoordinate[] = [
-      movingPanel,
+      {
+        id: "panel-1",
+        x: 0,
+        y: 0,
+        w: 2,
+        h: 2,
+      },
       {
         id: "panel-2",
         x: 4,
