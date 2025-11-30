@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - TBD
+
+### Added
+- Full React Server Components (RSC) compatibility for Next.js App Router (#58)
+- `"use client"` directive to `PanelGridProvider`, `PanelGridRenderer`, and `usePanel` (#58)
+
+### Changed
+- **BREAKING**: `PanelGridRenderer` now accepts a component type as children instead of a render function (#58)
+  - Before: `<PanelGridRenderer>{(id) => <PanelContent id={id} />}</PanelGridRenderer>`
+  - After: `<PanelGridRenderer>{PanelContent}</PanelGridRenderer>`
+- Updated all examples and documentation to use new component reference API (#58)
+
+### Migration Guide
+For users upgrading from 0.1.4 or earlier:
+
+1. **Simple case** (no extra props):
+   ```tsx
+   // Before
+   <PanelGridRenderer>{(id) => <MyPanel id={id} />}</PanelGridRenderer>
+
+   // After
+   <PanelGridRenderer>{MyPanel}</PanelGridRenderer>
+   ```
+
+2. **With custom props** - create a wrapper component marked with `"use client"`:
+   ```tsx
+   "use client";
+   function CustomPanel({ id }: { id: PanelId }) {
+     return <MyPanel id={id} extraProp="value" />;
+   }
+
+   <PanelGridRenderer>{CustomPanel}</PanelGridRenderer>
+   ```
+
+3. **Ensure your panel components have `"use client"`** if they use hooks or browser APIs
+
 ## [0.1.4] - 2025-11-30
 
 ### Added
