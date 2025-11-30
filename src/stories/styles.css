@@ -17,6 +17,14 @@ h6 {
   padding: 0;
 }
 
+.panelgrid-resize-handle {
+  opacity: 0.4;
+  &:hover {
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+  }
+}
+
 .panel-content {
   position: relative;
   box-sizing: border-box;

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState } from "react";
-import type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction, ResizeHandlePosition } from "./types";
 import { usePanelGrid } from "./usePanelGrid";
 
 type PanelGridState = ReturnType<typeof usePanelGrid>;
@@ -10,6 +10,7 @@ interface PanelGridContextType {
   baseSize: number | null;
   columnCount: number;
   gap: number;
+  resizeHandlePositions: ResizeHandlePosition[];
   ghostPanelRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -29,6 +30,7 @@ interface PanelGridProviderProps {
   panels: PanelCoordinate[];
   columnCount: number;
   gap: number;
+  resizeHandlePositions?: ResizeHandlePosition[];
   children: React.ReactNode;
   /**
    * Optional custom rearrangement function to override default collision resolution logic
@@ -37,11 +39,14 @@ interface PanelGridProviderProps {
   rearrangement?: RearrangementFunction;
 }
 
+const DEFAULT_RESIZE_HANDLE_POSITIONS: ResizeHandlePosition[] = ["se"];
+
 export function PanelGridProvider({
   panels: initialPanels,
   columnCount,
   gap,
   children,
+  resizeHandlePositions,
   rearrangement,
 }: PanelGridProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
@@ -52,11 +57,22 @@ export function PanelGridProvider({
       columnCount,
       baseSize: baseSize || 256,
       gap,
+      resizeHandlePositions: resizeHandlePositions || DEFAULT_RESIZE_HANDLE_POSITIONS,
       rearrangement,
     });
 
   return (
-    <PanelGridStateContext.Provider value={{ panels, panelMap, columnCount, gap, baseSize, ghostPanelRef }}>
+    <PanelGridStateContext.Provider
+      value={{
+        panels,
+        panelMap,
+        columnCount,
+        gap,
+        baseSize,
+        resizeHandlePositions: resizeHandlePositions || DEFAULT_RESIZE_HANDLE_POSITIONS,
+        ghostPanelRef,
+      }}
+    >
       <PanelGridControlsContext.Provider
         value={{ setBaseSize, addPanel, removePanel, lockPanelSize, unlockPanelSize, exportState }}
       >
