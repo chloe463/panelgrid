@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-11-30
+
+### Added
+- Support for configurable resize handle positions in all 8 directions: n, e, s, w, ne, nw, se, sw (#55)
+- `resizeHandles` prop to customize which resize handles are displayed on panels (#55)
+- SVG-based resize handle icons with smooth opacity transitions (#55)
+- Visual feedback on panel hover - resize handles fade in on hover (#55)
+- CustomResizeHandlers.stories.tsx with 10 example configurations (#55)
+
+### Changed
+- Updated ghost panel position calculation during resize from non-southeast corners (#55)
+- Improved resize behavior for north and west side handles with proper delta inversion (#55)
+- Dynamic cursor assignment based on active resize handle position (#55)
+- Moved RESIZE_CURSOR_MAP to module-level constant for better performance (#55)
+
+### Fixed
+- Fixed resize behavior to constrain size changes for edge-only handles (#55)
+- Prevented width changes when using vertical-only resize handles (n, s) (#55)
+- Prevented height changes when using horizontal-only resize handles (e, w) (#55)
+- Corrected resize handle logic with consolidated width/height calculations (#55)
+- Fixed grid calculation order (position before size) for accurate snapping (#55)
+- Fixed transition property to include all animated properties (width, height, top, left) (#55)
+
+### Improved
+- Cleaner, more modern appearance with SVG resize handles replacing background-color styles (#55)
+- Better visual feedback with opacity states (hidden by default, visible on panel hover, full opacity on handle hover) (#55)
+- Enhanced UX with properly centered edge handles and appropriate aspect ratios (#55)
+- Performance optimization by avoiding object creation during high-frequency mouse events (#55)
+
 ## [0.1.3] - 2025-11-24
 
 ### Added
