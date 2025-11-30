@@ -1,3 +1,4 @@
+"use client";
 import { memo } from "react";
 
 import { usePanelGridControls } from "../../index";

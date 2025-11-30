@@ -40,7 +40,7 @@ export const Default: Story = {
         automatically rearrange to avoid collisions.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -54,7 +54,7 @@ export const SixColumnGrid: Story = {
         A standard 6-column grid with various panel sizes. This is the recommended configuration for most use cases.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -79,7 +79,7 @@ export const TwelveColumnGrid: Story = {
           A finer 12-column grid allows for more flexible layouts. Useful for complex dashboards.
         </p>
         <PanelGridProvider panels={panels} columnCount={12} gap={8}>
-          <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+          <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -94,7 +94,7 @@ export const CustomGap: Story = {
         Gap between panels can be customized. This example uses a 16px gap instead of the default 8px.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={16}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -114,7 +114,7 @@ export const MinimalExample: Story = {
           The simplest possible grid with just two panels. Perfect for getting started.
         </p>
         <PanelGridProvider panels={panels} columnCount={4} gap={8}>
-          <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+          <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );

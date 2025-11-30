@@ -1,3 +1,4 @@
+"use client";
 import { usePanelGridState } from "./PanelGridProvider";
 import type { PanelId } from "./types";
 
