@@ -51,7 +51,11 @@ export const DefaultAlgorithm: Story = {
           Try dragging Panel 1 to the right to see Panel 2 and 3 pushed horizontally.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} showRemoveButton={false} />} />
+          <PanelGridRenderer>
+            {function CustomPanel({ id }: { id: number | string }) {
+              return <PanelContent id={id} showRemoveButton={false} />;
+            }}
+          </PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -138,7 +142,11 @@ export const VerticalPriorityAlgorithm: Story = {
 />`}
         </pre>
         <PanelGridProvider panels={panels} columnCount={6} gap={8} rearrangement={customRearrangement}>
-          <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} showRemoveButton={false} />} />
+          <PanelGridRenderer>
+            {function CustomPanel({ id }: { id: number | string }) {
+              return <PanelContent id={id} showRemoveButton={false} />;
+            }}
+          </PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -176,7 +184,11 @@ export const NoRearrangementAlgorithm: Story = {
           Try dragging Panel 1 over Panel 2 - they will overlap.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8} rearrangement={noRearrangement}>
-          <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} showRemoveButton={false} />} />
+          <PanelGridRenderer>
+            {function CustomPanel({ id }: { id: number | string }) {
+              return <PanelContent id={id} showRemoveButton={false} />;
+            }}
+          </PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );

@@ -1,13 +1,15 @@
+"use client";
+import type { ComponentType } from "react";
 import { useLayoutEffect, useRef } from "react";
 import { getGridRowCount } from "./helpers/gridCalculations";
 import { usePanelGridControls, usePanelGridState } from "./PanelGridProvider";
 import type { PanelId } from "./types";
 
 interface PanelGridRendererProps {
-  itemRenderer: React.ComponentType<{ id: PanelId }>;
+  children: ComponentType<{ id: PanelId }>;
 }
 
-export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRendererProps) {
+export function PanelGridRenderer({ children: ItemComponent }: PanelGridRendererProps) {
   const { panels, columnCount, gap, baseSize, resizeHandlePositions, ghostPanelRef } = usePanelGridState();
   const { setBaseSize } = usePanelGridControls();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -70,7 +72,7 @@ export function PanelGridRenderer({ itemRenderer: ItemRenderer }: PanelGridRende
             data-pg-w={w}
             data-pg-h={h}
           >
-            <ItemRenderer id={key} />
+            <ItemComponent id={key} />
             {resizeHandlePositions.map((pos) => {
               return (
                 <span

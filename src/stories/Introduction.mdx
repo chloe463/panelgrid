@@ -33,9 +33,7 @@ pnpm add panelgrid
   columnCount={6}
   gap={8}
 >
-  <PanelGridRenderer
-    itemRenderer={({ id }) => <PanelContent id={id} />}
-  />
+  <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
 </PanelGridProvider>
 ```
 

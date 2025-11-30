@@ -42,12 +42,7 @@ export const PerformantDragAndDrop: Story = {
           manipulation during interactions, avoiding unnecessary re-renders.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer
-            itemRenderer={({ id }) => {
-              const panel = panels.find((p) => p.id === id);
-              return <PanelContent id={id} lockSize={panel?.lockSize} />;
-            }}
-          />
+          <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -74,12 +69,7 @@ export const ComplexGridPerformance: Story = {
           computationally intensive panel content.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer
-            itemRenderer={({ id }) => {
-              const panel = panels.find((p) => p.id === id);
-              return <PanelContent id={id} lockSize={panel?.lockSize} />;
-            }}
-          />
+          <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );

@@ -38,11 +38,11 @@ export const SizeLockedPanels: Story = {
           still be moved by dragging.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer
-            itemRenderer={({ id }) => {
+          <PanelGridRenderer>
+            {function CustomPanel({ id }: { id: number | string }) {
               return <PanelContent id={id} showLockButton />;
             }}
-          />
+          </PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -67,11 +67,11 @@ export const MixedSizeLocking: Story = {
           A grid with both size-locked and unlocked panels. Panels 2, 4, and 6 have locked sizes.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer
-            itemRenderer={({ id }) => {
+          <PanelGridRenderer>
+            {function CustomPanel({ id }: { id: number | string }) {
               return <PanelContent id={id} showLockButton />;
             }}
-          />
+          </PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );

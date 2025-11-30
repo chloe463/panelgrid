@@ -1,3 +1,4 @@
+"use client";
 import { usePanel, usePanelGridControls } from "../index";
 import type { PanelId } from "../types";
 import "./styles.css";

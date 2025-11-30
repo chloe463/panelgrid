@@ -44,7 +44,7 @@ export const AllCornerHandles: Story = {
         gap={8}
         resizeHandlePositions={["nw", "ne", "se", "sw"]}
       >
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -59,7 +59,7 @@ export const AllEdgeHandles: Story = {
         resizing.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["n", "e", "s", "w"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -79,7 +79,7 @@ export const AllHandles: Story = {
         gap={8}
         resizeHandlePositions={["n", "ne", "e", "se", "s", "sw", "w", "nw"]}
       >
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -94,7 +94,7 @@ export const HorizontalResizeOnly: Story = {
         consistent row heights.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["e", "w"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -109,7 +109,7 @@ export const VerticalResizeOnly: Story = {
         consistent column widths.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["n", "s"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -124,7 +124,7 @@ export const BottomRightOnly: Story = {
         intuitive resize pattern.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["se"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -139,7 +139,7 @@ export const DiagonalHandles: Story = {
         handles.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["ne", "sw"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -154,7 +154,7 @@ export const BottomHandles: Story = {
         should only expand downward.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["sw", "s", "se"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -169,7 +169,7 @@ export const RightHandles: Story = {
         where panels should only expand rightward.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["ne", "e", "se"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -184,7 +184,7 @@ export const SingleEdgeHandle: Story = {
         vertical-only expansion downward.
       </p>
       <PanelGridProvider panels={defaultPanels} columnCount={6} gap={8} resizeHandlePositions={["s"]}>
-        <PanelGridRenderer itemRenderer={({ id }) => <PanelContent id={id} />} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),

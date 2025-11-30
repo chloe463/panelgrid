@@ -41,11 +41,7 @@ export const DarkModeExample: Story = {
         Custom dark theme styling for PanelGrid. All styles are applied via CSS classes and can be easily customized.
       </p>
       <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-        <PanelGridRenderer
-          itemRenderer={({ id }) => {
-            return <PanelContent id={id} />;
-          }}
-        />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),
@@ -80,11 +76,7 @@ export const ThemeToggle: Story = {
           seamlessly.
         </p>
         <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-          <PanelGridRenderer
-            itemRenderer={({ id }) => {
-              return <PanelContent id={id} />;
-            }}
-          />
+          <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
         </PanelGridProvider>
       </div>
     );
@@ -100,11 +92,7 @@ export const PrefersDarkMode: Story = {
         theme preference. Change your system theme to see it update!
       </p>
       <PanelGridProvider panels={panels} columnCount={6} gap={8}>
-        <PanelGridRenderer
-          itemRenderer={({ id }) => {
-            return <PanelContent id={id} />;
-          }}
-        />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   ),

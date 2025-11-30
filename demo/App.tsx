@@ -18,7 +18,7 @@ export default function App() {
         gap={8}
       >
         <PanelControls />
-        <PanelGridRenderer itemRenderer={PanelContent} />
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
       </PanelGridProvider>
     </div>
   );
