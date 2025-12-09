@@ -172,29 +172,24 @@ export function rearrangePanels(
   // Queue for processing panels that need to be repositioned
   // 再配置が必要なパネルの処理キュー
   const queue: PanelCoordinate[] = [{ ...constrainedMovingPanel }];
-  const processed = new Set<PanelId>();
 
   // Process panels until no more collisions
   // 衝突がなくなるまでパネルを処理
   while (queue.length > 0) {
     const current = queue.shift()!;
 
-    // Skip if already processed
-    if (processed.has(current.id)) {
-      continue;
-    }
-    processed.add(current.id);
-
     // Detect collisions with current panel position
     // 現在のパネル位置での衝突を検出
     const collidingIds = detectCollisions(current, panelMap);
 
     if (collidingIds.length === 0) {
-      // No collisions, keep current position
-      // 衝突なし、現在の位置を維持
       panelMap.set(current.id, current);
       continue;
     }
+
+    // Track panels pushed in this iteration to detect conflicts among them
+    // この反復で押されたパネルを追跡して相互の衝突を検出
+    const pushedPanels: PanelCoordinate[] = [];
 
     // Resolve collisions by pushing colliding panels
     // 衝突したパネルを押しのけて衝突を解決
@@ -202,22 +197,33 @@ export function rearrangePanels(
       const colliding = panelMap.get(collidingId);
       if (!colliding) continue;
 
-      // Find new position by pushing the colliding panel away
-      // 衝突したパネルを押しのける方向に移動
+      // Calculate new position for the colliding panel
+      // 衝突パネルの新しい位置を計算
       const newPos = findNewPosition(colliding, current, columnCount);
+      let updated = { ...colliding, x: newPos.x, y: newPos.y };
 
-      // Update the panel's position
-      // パネルの位置を更新
-      const updated = { ...colliding, x: newPos.x, y: newPos.y };
+      // Check if this position collides with previously pushed panels
+      // 既に押された他のパネルとの衝突をチェック
+      const collidesWithPushed = pushedPanels.some((p) => rectanglesOverlap(updated, p));
+
+      if (collidesWithPushed) {
+        // Find minimum Y position to avoid all horizontally overlapping pushed panels
+        // 水平方向に重なる全パネルを避ける最小Y位置を計算
+        let minY = current.y + current.h;
+        for (const p of pushedPanels) {
+          const hasHorizontalOverlap = !(colliding.x + colliding.w <= p.x || p.x + p.w <= colliding.x);
+          if (hasHorizontalOverlap) {
+            minY = Math.max(minY, p.y + p.h);
+          }
+        }
+        updated = { ...colliding, x: colliding.x, y: minY };
+      }
+
+      pushedPanels.push(updated);
       panelMap.set(collidingId, updated);
-
-      // Add to queue for further collision checking
-      // 再度衝突チェックのためキューに追加
       queue.push(updated);
     }
 
-    // Confirm current panel's position
-    // 現在のパネルの位置を確定
     panelMap.set(current.id, current);
   }
 

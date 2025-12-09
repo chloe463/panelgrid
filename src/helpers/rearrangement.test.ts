@@ -452,6 +452,37 @@ describe("rearrangePanels", () => {
     expect(rectanglesOverlap(panel2!, panel3!)).toBe(false);
   });
 
+  it("should complexly rearrange multiple panels", () => {
+    const movingPanel: PanelCoordinate = {
+      id: "panel-3",
+      x: 1,
+      y: 0,
+      w: 2,
+      h: 1,
+    };
+
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 2, y: 0, w: 2, h: 2 },
+      { id: "panel-3", x: 4, y: 0, w: 2, h: 1 },
+      { id: "panel-4", x: 0, y: 2, w: 1, h: 1 },
+      { id: "panel-5", x: 1, y: 2, w: 1, h: 1 },
+      { id: "panel-6", x: 2, y: 2, w: 2, h: 1 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(6);
+    expect(result).toEqual([
+      { id: "panel-1", x: 3, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 2, y: 2, w: 2, h: 2 },
+      { id: "panel-3", x: 1, y: 0, w: 2, h: 1 },
+      { id: "panel-4", x: 0, y: 2, w: 1, h: 1 },
+      { id: "panel-5", x: 1, y: 2, w: 1, h: 1 },
+      { id: "panel-6", x: 4, y: 2, w: 2, h: 1 },
+    ]);
+  });
+
   it("should handle resize collisions", () => {
     const resizedPanel: PanelCoordinate = {
       id: "panel-1",
