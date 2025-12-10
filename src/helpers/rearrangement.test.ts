@@ -699,4 +699,30 @@ describe("rearrangePanels", () => {
     // No panels should overlap
     expect(rectanglesOverlap(panel1!, panel2!)).toBe(false);
   });
+
+  it("should handle multiple panel collisions with column size is 12", () => {
+    const movingPanel: PanelCoordinate = { id: "panel-7", x: 0, y: 0, w: 4, h: 1 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 3, h: 2 },
+      { id: "panel-2", x: 3, y: 0, w: 3, h: 2 },
+      { id: "panel-3", x: 6, y: 0, w: 3, h: 2 },
+      { id: "panel-4", x: 9, y: 0, w: 3, h: 2 },
+      { id: "panel-5", x: 0, y: 2, w: 4, h: 1 },
+      { id: "panel-6", x: 4, y: 2, w: 4, h: 1 },
+      { id: "panel-7", x: 8, y: 2, w: 4, h: 1 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 12);
+
+    expect(result).toHaveLength(7);
+    expect(result).toEqual([
+      { id: "panel-1", x: 4, y: 0, w: 3, h: 2 },
+      { id: "panel-2", x: 7, y: 0, w: 3, h: 2 },
+      { id: "panel-3", x: 6, y: 2, w: 3, h: 2 },
+      { id: "panel-4", x: 9, y: 2, w: 3, h: 2 },
+      { id: "panel-5", x: 0, y: 2, w: 4, h: 1 },
+      { id: "panel-6", x: 4, y: 4, w: 4, h: 1 },
+      { id: "panel-7", x: 0, y: 0, w: 4, h: 1 },
+    ]);
+  });
 });
