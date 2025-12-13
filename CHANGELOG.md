@@ -5,7 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.2.0] - TBD
+## [0.3.0] - 2025-12-13
+
+### Fixed
+- Complex collision resolution in chain reaction scenarios (#60)
+  - Fixed bug where collisions weren't fully resolved when multiple panels were pushed simultaneously
+  - Added tracking of panels pushed within the same iteration to prevent conflicts
+  - Implemented two-phase processing for compound panel resizes (both width and height changes)
+  - Algorithm now allows panels to be reprocessed when moved by other panels
+  - Properly calculates vertical positions to avoid all overlapping panels
+
+## [0.2.0] - 2025-11-30
 
 ### Added
 - Full React Server Components (RSC) compatibility for Next.js App Router (#58)
