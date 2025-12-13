@@ -146,8 +146,10 @@ function constrainToGrid(panel: PanelCoordinate, columnCount: number): PanelCoor
 /**
  * Rearrange panels to resolve collisions when a panel is moved or resized
  * Panels are moved horizontally first, then vertically if needed
+ * For compound resizes (both width and height change), uses two-phase processing
  * パネルの移動・リサイズ時に衝突を解決するようにパネルを再配置
  * 横方向を優先し、必要に応じて縦方向に移動
+ * 幅と高さが同時に変更される場合は、二段階処理を使用
  */
 export function rearrangePanels(
   movingPanel: PanelCoordinate,
@@ -158,6 +160,51 @@ export function rearrangePanels(
   // 移動中のパネルをグリッド境界内に制約
   const constrainedMovingPanel = constrainToGrid(movingPanel, columnCount);
 
+  // Check if this is a compound resize (both width and height changed)
+  // 幅と高さの両方が変更されたかチェック
+  const originalPanel = allPanels.find((p) => p.id === movingPanel.id);
+  if (originalPanel) {
+    const widthChanged = originalPanel.w !== constrainedMovingPanel.w;
+    const heightChanged = originalPanel.h !== constrainedMovingPanel.h;
+
+    if (widthChanged && heightChanged) {
+      // Two-phase processing: width first, then height
+      // 二段階処理: 幅を先に、次に高さ
+
+      // Phase 1: Apply width change only
+      // フェーズ1: 幅の変更のみを適用
+      const widthOnlyPanel = {
+        ...constrainedMovingPanel,
+        h: originalPanel.h, // Keep original height
+      };
+      const afterWidthChange = rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount);
+
+      // Phase 2: Apply height change to the result
+      // フェーズ2: 結果に高さの変更を適用
+      const heightChangedPanel = {
+        ...constrainedMovingPanel,
+        // Use the new position if panel-1 was moved during width phase
+        x: afterWidthChange.find((p) => p.id === movingPanel.id)?.x ?? constrainedMovingPanel.x,
+        y: afterWidthChange.find((p) => p.id === movingPanel.id)?.y ?? constrainedMovingPanel.y,
+      };
+      return rearrangePanelsInternal(heightChangedPanel, afterWidthChange, columnCount);
+    }
+  }
+
+  // Single dimension change or move - use normal processing
+  // 単一次元の変更または移動 - 通常の処理を使用
+  return rearrangePanelsInternal(constrainedMovingPanel, allPanels, columnCount);
+}
+
+/**
+ * Internal implementation of panel rearrangement
+ * パネル再配置の内部実装
+ */
+function rearrangePanelsInternal(
+  movingPanel: PanelCoordinate,
+  allPanels: PanelCoordinate[],
+  columnCount: number
+): PanelCoordinate[] {
   // Create a map for fast panel lookup
   // パネルIDから座標への高速マップを作成
   const panelMap = new Map<PanelId, PanelCoordinate>();
@@ -167,11 +214,11 @@ export function rearrangePanels(
 
   // Update the moving panel's position in the map
   // 移動中のパネルの位置をマップに反映
-  panelMap.set(constrainedMovingPanel.id, { ...constrainedMovingPanel });
+  panelMap.set(movingPanel.id, { ...movingPanel });
 
   // Queue for processing panels that need to be repositioned
   // 再配置が必要なパネルの処理キュー
-  const queue: PanelCoordinate[] = [{ ...constrainedMovingPanel }];
+  const queue: PanelCoordinate[] = [{ ...movingPanel }];
 
   // Track processed panels to avoid reprocessing unnecessarily
   // 不要な再処理を避けるため処理済みパネルを追跡

@@ -725,4 +725,31 @@ describe("rearrangePanels", () => {
       { id: "panel-7", x: 0, y: 0, w: 4, h: 1 },
     ]);
   });
+
+  it("should handle compound resize (both width and height)", () => {
+    // Test resizing panel-1 from (0,0,3,2) to (0,0,4,3) - both dimensions change
+    const resizingPanel: PanelCoordinate = { id: "panel-1", x: 0, y: 0, w: 4, h: 3 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 3, h: 2 },
+      { id: "panel-2", x: 3, y: 0, w: 3, h: 2 },
+      { id: "panel-3", x: 6, y: 0, w: 3, h: 2 },
+      { id: "panel-4", x: 9, y: 0, w: 3, h: 2 },
+      { id: "panel-5", x: 0, y: 2, w: 4, h: 1 },
+      { id: "panel-6", x: 4, y: 2, w: 4, h: 1 },
+      { id: "panel-7", x: 8, y: 2, w: 4, h: 1 },
+    ];
+
+    const result = rearrangePanels(resizingPanel, allPanels, 12);
+
+    expect(result).toHaveLength(7);
+    expect(result).toEqual([
+      { id: "panel-1", x: 0, y: 0, w: 4, h: 3 },
+      { id: "panel-2", x: 4, y: 0, w: 3, h: 2 },
+      { id: "panel-3", x: 7, y: 0, w: 3, h: 2 },
+      { id: "panel-4", x: 9, y: 3, w: 3, h: 2 },
+      { id: "panel-5", x: 4, y: 2, w: 4, h: 1 },
+      { id: "panel-6", x: 8, y: 2, w: 4, h: 1 },
+      { id: "panel-7", x: 8, y: 5, w: 4, h: 1 },
+    ]);
+  });
 });
