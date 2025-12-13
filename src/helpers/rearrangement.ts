@@ -146,8 +146,10 @@ function constrainToGrid(panel: PanelCoordinate, columnCount: number): PanelCoor
 /**
  * Rearrange panels to resolve collisions when a panel is moved or resized
  * Panels are moved horizontally first, then vertically if needed
+ * For compound resizes (both width and height change), uses two-phase processing
  * パネルの移動・リサイズ時に衝突を解決するようにパネルを再配置
  * 横方向を優先し、必要に応じて縦方向に移動
+ * 幅と高さが同時に変更される場合は、二段階処理を使用
  */
 export function rearrangePanels(
   movingPanel: PanelCoordinate,
@@ -158,6 +160,51 @@ export function rearrangePanels(
   // 移動中のパネルをグリッド境界内に制約
   const constrainedMovingPanel = constrainToGrid(movingPanel, columnCount);
 
+  // Check if this is a compound resize (both width and height changed)
+  // 幅と高さの両方が変更されたかチェック
+  const originalPanel = allPanels.find((p) => p.id === movingPanel.id);
+  if (originalPanel) {
+    const widthChanged = originalPanel.w !== constrainedMovingPanel.w;
+    const heightChanged = originalPanel.h !== constrainedMovingPanel.h;
+
+    if (widthChanged && heightChanged) {
+      // Two-phase processing: width first, then height
+      // 二段階処理: 幅を先に、次に高さ
+
+      // Phase 1: Apply width change only
+      // フェーズ1: 幅の変更のみを適用
+      const widthOnlyPanel = {
+        ...constrainedMovingPanel,
+        h: originalPanel.h, // Keep original height
+      };
+      const afterWidthChange = rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount);
+
+      // Phase 2: Apply height change to the result
+      // フェーズ2: 結果に高さの変更を適用
+      const heightChangedPanel = {
+        ...constrainedMovingPanel,
+        // Use the new position if panel-1 was moved during width phase
+        x: afterWidthChange.find((p) => p.id === movingPanel.id)?.x ?? constrainedMovingPanel.x,
+        y: afterWidthChange.find((p) => p.id === movingPanel.id)?.y ?? constrainedMovingPanel.y,
+      };
+      return rearrangePanelsInternal(heightChangedPanel, afterWidthChange, columnCount);
+    }
+  }
+
+  // Single dimension change or move - use normal processing
+  // 単一次元の変更または移動 - 通常の処理を使用
+  return rearrangePanelsInternal(constrainedMovingPanel, allPanels, columnCount);
+}
+
+/**
+ * Internal implementation of panel rearrangement
+ * パネル再配置の内部実装
+ */
+function rearrangePanelsInternal(
+  movingPanel: PanelCoordinate,
+  allPanels: PanelCoordinate[],
+  columnCount: number
+): PanelCoordinate[] {
   // Create a map for fast panel lookup
   // パネルIDから座標への高速マップを作成
   const panelMap = new Map<PanelId, PanelCoordinate>();
@@ -167,58 +214,105 @@ export function rearrangePanels(
 
   // Update the moving panel's position in the map
   // 移動中のパネルの位置をマップに反映
-  panelMap.set(constrainedMovingPanel.id, { ...constrainedMovingPanel });
+  panelMap.set(movingPanel.id, { ...movingPanel });
 
   // Queue for processing panels that need to be repositioned
   // 再配置が必要なパネルの処理キュー
-  const queue: PanelCoordinate[] = [{ ...constrainedMovingPanel }];
+  const queue: PanelCoordinate[] = [{ ...movingPanel }];
+
+  // Track processed panels to avoid reprocessing unnecessarily
+  // 不要な再処理を避けるため処理済みパネルを追跡
   const processed = new Set<PanelId>();
+
+  // Track processing count to prevent infinite loops
+  // 無限ループを防ぐため処理回数を追跡
+  const processCount = new Map<PanelId, number>();
+  const MAX_PROCESS_COUNT = 10;
 
   // Process panels until no more collisions
   // 衝突がなくなるまでパネルを処理
   while (queue.length > 0) {
     const current = queue.shift()!;
 
-    // Skip if already processed
+    // Safety check: prevent infinite loops
+    // 安全チェック: 無限ループを防止
+    const count = processCount.get(current.id) || 0;
+    if (count >= MAX_PROCESS_COUNT) continue;
+    processCount.set(current.id, count + 1);
+
+    // Skip if the position in queue doesn't match current position in map (outdated entry)
+    // キューの位置がマップの現在位置と一致しない場合はスキップ（古いエントリ）
+    const currentInMap = panelMap.get(current.id);
+    if (currentInMap && (currentInMap.x !== current.x || currentInMap.y !== current.y)) {
+      continue;
+    }
+
+    // Skip if already processed at this position
+    // この位置で既に処理済みの場合はスキップ
     if (processed.has(current.id)) {
       continue;
     }
-    processed.add(current.id);
 
     // Detect collisions with current panel position
     // 現在のパネル位置での衝突を検出
     const collidingIds = detectCollisions(current, panelMap);
 
     if (collidingIds.length === 0) {
-      // No collisions, keep current position
-      // 衝突なし、現在の位置を維持
       panelMap.set(current.id, current);
+      processed.add(current.id);
       continue;
     }
 
+    // Sort colliding panels by position (top-left to bottom-right) for consistent processing
+    // 一貫した処理のため、衝突パネルを位置順（左上から右下）にソート
+    const sortedCollidingIds = collidingIds.sort((a, b) => {
+      const panelA = panelMap.get(a)!;
+      const panelB = panelMap.get(b)!;
+      if (panelA.y !== panelB.y) return panelA.y - panelB.y;
+      return panelA.x - panelB.x;
+    });
+
+    // Track panels pushed in this iteration to detect secondary collisions
+    // この反復で押されたパネルを追跡し、二次衝突を検出
+    const pushedInIteration = new Set<PanelId>();
+
     // Resolve collisions by pushing colliding panels
     // 衝突したパネルを押しのけて衝突を解決
-    for (const collidingId of collidingIds) {
+    for (const collidingId of sortedCollidingIds) {
       const colliding = panelMap.get(collidingId);
       if (!colliding) continue;
 
-      // Find new position by pushing the colliding panel away
-      // 衝突したパネルを押しのける方向に移動
+      // Calculate new position for the colliding panel
+      // 衝突パネルの新しい位置を計算
       const newPos = findNewPosition(colliding, current, columnCount);
+      const candidate = { ...colliding, x: newPos.x, y: newPos.y };
 
-      // Update the panel's position
-      // パネルの位置を更新
-      const updated = { ...colliding, x: newPos.x, y: newPos.y };
-      panelMap.set(collidingId, updated);
+      // Check if this would collide with a panel we just pushed in this same iteration
+      // 同じ反復内で押したパネルと衝突するかチェック
+      let wouldCollideWithPushed = false;
+      for (const pushedId of pushedInIteration) {
+        const pushedPanel = panelMap.get(pushedId)!;
+        if (rectanglesOverlap(candidate, pushedPanel)) {
+          wouldCollideWithPushed = true;
+          break;
+        }
+      }
 
-      // Add to queue for further collision checking
-      // 再度衝突チェックのためキューに追加
-      queue.push(updated);
+      if (wouldCollideWithPushed) {
+        // Skip pushing this panel to avoid creating secondary collisions
+        // Let the queue handle it in a subsequent iteration
+        continue;
+      }
+
+      // Update panel map and add to queue for further processing
+      // パネルマップを更新し、さらなる処理のためキューに追加
+      panelMap.set(collidingId, candidate);
+      queue.push(candidate);
+      pushedInIteration.add(collidingId);
     }
 
-    // Confirm current panel's position
-    // 現在のパネルの位置を確定
     panelMap.set(current.id, current);
+    processed.add(current.id);
   }
 
   // Return the rearranged panels
