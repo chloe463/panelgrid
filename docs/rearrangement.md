@@ -1,141 +1,141 @@
-<!-- AI 向けのコメント: "AI SKIP" と書かれたセクションは読み飛ばしてください。更新するのも禁止です。 -->
+<!-- AI Note: Please skip sections marked "AI SKIP" and do not update them. -->
 
 # Rearrangement
 
-このドキュメントではドラッグ・アンド・ドロップ、リサイズ時にパネル同士が衝突した際のパネルの再配置の仕様と実装を記述します。
+This document describes the specification and implementation of panel rearrangement when panels collide during drag-and-drop and resize operations.
 
-## 実装済みの仕様
+## Implemented Specifications
 
-### 基本原則
+### Basic Principles
 
-1. **動かしているパネルの位置を優先**
-   - ユーザーが操作しているパネル（ドラッグ中・リサイズ中）の位置を最優先
-   - 衝突した場合は、動かしていないパネルを移動させて衝突を解消
+1. **Prioritize the moving panel's position**
+   - The panel being operated by the user (during drag or resize) takes highest priority
+   - When a collision occurs, non-moving panels are moved to resolve the collision
 
-2. **押しのける挙動**
-   - 衝突したパネルは「飛び越える」のではなく「押しのける」
-   - 最小限の距離だけ移動して衝突を解消
-   - 連鎖的な押しのけにも対応
+2. **Push behavior**
+   - Colliding panels are "pushed" rather than "jumped over"
+   - Panels move the minimum distance necessary to resolve collisions
+   - Supports cascading pushes
 
-3. **移動方向の優先順位**
-   - 優先順位 1: 横方向（右）に押しのける
-   - 優先順位 2: 横方向に入らない場合は縦方向（下）に押しのける
-   - 斜め方向には動かさない
+3. **Movement direction priority**
+   - Priority 1: Push horizontally (to the right)
+   - Priority 2: If horizontal push doesn't fit, push vertically (downward)
+   - No diagonal movement
 
-### 挙動の例
+### Behavior Examples
 
-以下の例において [ ] は 1 つのセルを表します。セル内の文字はそのセル上に存在しているパネルの ID です。
+In the following examples, each `[ ]` represents one cell. The character inside the cell is the ID of the panel occupying that cell.
 
-#### 例 1: 横方向に押しのける
+#### Example 1: Horizontal Push
 
-初期状態:
+Initial state:
 
-- 横方向にセルが 3 つ (columnCount が 3)
-- パネル A が x: 0, y: 0, w: 1, h: 1
-- パネル B が x: 1, y: 0, w: 1, h: 1
+- 3 cells horizontally (columnCount is 3)
+- Panel A at x: 0, y: 0, w: 1, h: 2
+- Panel B at x: 1, y: 0, w: 1, h: 2
 
 ```
-操作前:
+Before operation:
 [A][B][ ]
 [A][B][ ]
 
-Aを右に移動:
-[ ][A][B]  ← Bが右に押しのけられる
-[ ][B][B]
+After moving A to the right:
+[ ][A][B]  ← B is pushed to the right
+[ ][A][B]
 ```
 
-#### 例 2: 縦方向に押しのける（横に入らない場合）
+#### Example 2: Vertical Push (when horizontal doesn't fit)
 
 ```
-操作前:
+Before operation:
 [ ][ ][B][B]
 [A][A][A][ ]
 [A][A][A][ ]
 
-Aを上に移動
-[A][A][A][ ] ← A を (x, y) = (0, 0) に移動
+After moving A upward:
+[A][A][A][ ] ← Move A to (x, y) = (0, 0)
 [A][A][A][ ]
-[ ][ ][B][B] ← B が押しのけられて (x, y) = (2, 2) に移動
+[ ][ ][B][B] ← B is pushed to (x, y) = (2, 2)
 ```
 
-#### 例 3: 連鎖的な押しのけ
+#### Example 3: Cascading Push
 
 ```
-操作前:
+Before operation:
 [ ][ ][B][B]
 [ ][ ][C][C]
 [A][A][A][ ]
 [A][A][A][ ]
 
-Aを上に移動
-[A][A][A][ ] ← A を (x, y) = (0, 0) に移動
+After moving A upward:
+[A][A][A][ ] ← Move A to (x, y) = (0, 0)
 [A][A][A][ ]
-[ ][ ][B][B] ← B が押しのけられて (x, y) = (2, 2) に移動
-[ ][ ][C][C] ← C が連鎖的に押しのけられて (x, y) = (2, 3) に移動
+[ ][ ][B][B] ← B is pushed to (x, y) = (2, 2)
+[ ][ ][C][C] ← C is cascaded and pushed to (x, y) = (2, 3)
 ```
 
-## アルゴリズム設計
+## Algorithm Design
 
-### データ構造
+### Data Structures
 
-実装では以下のデータ構造を使用しています：
+The implementation uses the following data structures:
 
-#### PanelMap (パネルマップ)
+#### PanelMap
 
-パネルIDからパネル座標への高速マッピング。
+Fast mapping from panel ID to panel coordinates.
 
 ```typescript
 type PanelMap = Map<PanelId, PanelCoordinate>;
 ```
 
-- キー: パネルID
-- 値: パネルの座標情報 (x, y, w, h)
-- O(1) でパネルの検索・更新が可能
+- Key: Panel ID
+- Value: Panel coordinate information (x, y, w, h)
+- O(1) panel lookup and updates
 
-### 主要なアルゴリズム
+### Core Algorithms
 
-#### 1. 矩形の重なり判定 (`rectanglesOverlap`)
+#### 1. Rectangle Overlap Detection (`rectanglesOverlap`)
 
-AABB (Axis-Aligned Bounding Box) テストを使用して2つのパネルが重なっているか判定します。
+Uses AABB (Axis-Aligned Bounding Box) testing to determine if two panels overlap.
 
 ```typescript
 function rectanglesOverlap(
   a: { x: number; y: number; w: number; h: number },
   b: { x: number; y: number; w: number; h: number }
 ): boolean;
-// 2つの矩形が重ならない条件（以下のいずれか）:
-// - a が b の左側にある: a.x + a.w <= b.x
-// - b が a の左側にある: b.x + b.w <= a.x
-// - a が b の上側にある: a.y + a.h <= b.y
-// - b が a の上側にある: b.y + b.h <= a.y
-// これらの条件がすべて false なら重なっている
+// Conditions where two rectangles do NOT overlap (any of the following):
+// - a is to the left of b: a.x + a.w <= b.x
+// - b is to the left of a: b.x + b.w <= a.x
+// - a is above b: a.y + a.h <= b.y
+// - b is above a: b.y + b.h <= a.y
+// If all conditions are false, they overlap
 return !(a.x + a.w <= b.x || b.x + b.w <= a.x || a.y + a.h <= b.y || b.y + b.h <= a.y);
 ```
 
-#### 2. 衝突検出 (`detectCollisions`)
+#### 2. Collision Detection (`detectCollisions`)
 
-指定されたパネルと衝突する全てのパネルIDを返します。
+Returns all panel IDs that collide with the specified panel.
 
 ```typescript
 function detectCollisions(
   panel: PanelCoordinate,
   panelMap: Map<PanelId, PanelCoordinate>
 ): PanelId[]
-  1. 衝突したパネルIDを格納する Set を作成
-  2. panelMap 内の全パネルをループ:
+  1. Create a Set to store colliding panel IDs
+  2. Loop through all panels in panelMap:
      for each [id, other] of panelMap:
        if id == panel.id:
-         continue  // 自分自身はスキップ
+         continue  // Skip self
 
        if rectanglesOverlap(panel, other):
-         Set に id を追加
+         Add id to Set
 
-  3. Set を配列に変換して返す
+  3. Convert Set to array and return
 ```
 
-#### 3. 押しのける距離の計算 (`calculatePushDistance`)
+#### 3. Calculate Push Distance (`calculatePushDistance`)
 
-衝突したパネルを押しのけるための最小距離と方向を計算します。
+Calculates the minimum distance and direction to push a colliding panel.
 
 ```typescript
 function calculatePushDistance(
@@ -143,28 +143,28 @@ function calculatePushDistance(
   pushed: PanelCoordinate,
   columnCount: number
 ): { direction: "right" | "down"; distance: number } | null
-  1. 横方向の押し距離を計算:
+  1. Calculate horizontal push distance:
      pushRight = pusher.x + pusher.w - pushed.x
      canPushRight = pushed.x + pushed.w + pushRight <= columnCount
 
-  2. 縦方向の押し距離を計算:
+  2. Calculate vertical push distance:
      pushDown = pusher.y + pusher.h - pushed.y
 
-  3. 優先順位1: 横方向に押せる場合は横を選択
+  3. Priority 1: Choose horizontal if possible
      if canPushRight and pushRight > 0:
        return { direction: "right", distance: pushRight }
 
-  4. 優先順位2: 縦方向に押す
+  4. Priority 2: Push vertically
      if pushDown > 0:
        return { direction: "down", distance: pushDown }
 
-  5. 押す必要がない場合:
+  5. If no push needed:
      return null
 ```
 
-#### 4. 新しい位置の決定 (`findNewPosition`)
+#### 4. Find New Position (`findNewPosition`)
 
-押しのけられるパネルの新しい位置を計算します。
+Calculates the new position for a panel being pushed.
 
 ```typescript
 function findNewPosition(
@@ -174,23 +174,23 @@ function findNewPosition(
 ): { x: number; y: number }
   1. pushInfo = calculatePushDistance(pusher, panel, columnCount)
 
-  2. pushInfo が null の場合（押す必要がない場合のフォールバック）:
+  2. If pushInfo is null (fallback when no push needed):
      return { x: panel.x, y: panel.y + 1 }
 
-  3. 横方向に押す場合:
+  3. If pushing horizontally:
      if pushInfo.direction == "right":
        newX = panel.x + pushInfo.distance
        if newX + panel.w <= columnCount:
          return { x: newX, y: panel.y }
-       // 横方向に入らない場合は次のステップへ
+       // If doesn't fit horizontally, proceed to next step
 
-  4. 縦方向に押す:
+  4. Push vertically:
      return { x: panel.x, y: panel.y + pushInfo.distance }
 ```
 
-#### 5. パネルの再配置 (`rearrangePanels`)
+#### 5. Rearrange Panels (`rearrangePanels`)
 
-パネルの移動・リサイズ時に衝突を解決するようにパネルを再配置します。
+Rearranges panels to resolve collisions during panel movement or resize.
 
 ```typescript
 function rearrangePanels(
@@ -198,18 +198,18 @@ function rearrangePanels(
   allPanels: PanelCoordinate[],
   columnCount: number
 ): PanelCoordinate[]
-  1. パネルIDから座標への高速マップを作成:
+  1. Create fast map from panel ID to coordinates:
      panelMap = new Map<PanelId, PanelCoordinate>()
      for each panel in allPanels:
        panelMap.set(panel.id, {...panel})
 
-  2. 移動中のパネルの位置をマップに反映:
+  2. Reflect moving panel's position in map:
      panelMap.set(movingPanel.id, {...movingPanel})
 
-  3. 処理待ちキュー: queue = [movingPanel]
-     処理済みパネルID: processed = new Set()
+  3. Processing queue: queue = [movingPanel]
+     Processed panel IDs: processed = new Set()
 
-  4. 衝突がなくなるまでパネルを処理:
+  4. Process panels until no collisions remain:
      while queue.length > 0:
        current = queue.shift()
 
@@ -217,46 +217,46 @@ function rearrangePanels(
          continue
        processed.add(current.id)
 
-       // 現在のパネル位置での衝突を検出
+       // Detect collisions at current panel position
        collidingIds = detectCollisions(current, panelMap)
 
-       if collidingIds が空:
-         // 衝突なし、現在の位置を維持
+       if collidingIds is empty:
+         // No collision, maintain current position
          panelMap.set(current.id, current)
          continue
 
-       // 衝突解決: 衝突したパネルを押しのける
+       // Resolve collisions: push colliding panels
        for each collidingId in collidingIds:
          colliding = panelMap.get(collidingId)
          if !colliding: continue
 
-         // 衝突したパネルを押しのける方向に移動
+         // Move colliding panel in push direction
          newPos = findNewPosition(colliding, current, columnCount)
 
-         // パネルの位置を更新
+         // Update panel position
          updated = {...colliding, x: newPos.x, y: newPos.y}
          panelMap.set(collidingId, updated)
 
-         // 再度衝突チェックのためキューに追加
+         // Add to queue for re-checking collisions
          queue.push(updated)
 
-       // 現在のパネルの位置を確定
+       // Confirm current panel's position
        panelMap.set(current.id, current)
 
-  5. 再配置後のパネルを返す:
+  5. Return rearranged panels:
      return Array.from(panelMap.values())
 ```
 
-### アルゴリズムの特徴
+### Algorithm Characteristics
 
-1. **段階的な衝突解決**: キューを使用して、移動によって発生する連鎖的な衝突を順次解決
-2. **押しのける挙動**: `calculatePushDistance` により最小限の距離だけパネルを移動
-3. **横優先の移動**: 横方向に入る場合は横を優先、入らない場合は縦方向に切り替え
+1. **Incremental collision resolution**: Uses a queue to sequentially resolve cascading collisions caused by movement
+2. **Push behavior**: `calculatePushDistance` moves panels the minimum distance necessary
+3. **Horizontal-first movement**: Prioritizes horizontal movement when it fits, switches to vertical otherwise
 
-### 計算量
+### Complexity
 
-- **矩形の重なり判定**: O(1)
-- **衝突検出**: O(N) (全パネルとの判定)
-- **押しのける距離計算**: O(1)
-- **パネル再配置**: O(N²) (最悪ケース: 全パネルが連鎖的に移動)
-- **全体**: O(N²) (パネル数が少ない場合に最適)
+- **Rectangle overlap detection**: O(1)
+- **Collision detection**: O(N) (check against all panels)
+- **Push distance calculation**: O(1)
+- **Panel rearrangement**: O(N²) (worst case: all panels move in cascade)
+- **Overall**: O(N²) (optimal for small number of panels)

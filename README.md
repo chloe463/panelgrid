@@ -133,7 +133,9 @@ export function PanelContent({ id }: { id: PanelId }) {
 
 ### Custom Rearrangement Logic
 
-You can override the default collision resolution logic by providing a custom `rearrangement` function:
+You can override the default collision resolution logic by providing a custom `rearrangement` function.
+
+For advanced use cases, PanelGrid exports [helper functions](./docs/helpers.md) for collision detection, grid calculations, and more. See the [Helper Functions API Reference](./docs/helpers.md) for detailed documentation and examples.
 
 ```tsx
 import { PanelGridProvider, rearrangePanels } from 'panelgrid';
@@ -389,7 +391,24 @@ type RearrangementFunction = (
 
 ### Exported Functions
 
+**Main Export:**
 - `rearrangePanels(movingPanel, allPanels, columnCount)`: Default rearrangement function that can be imported and extended
+
+**Helper Functions:**
+
+PanelGrid exports a comprehensive set of helper functions for building custom rearrangement logic, including collision detection, grid calculations, panel detection, and animation utilities.
+
+See the [Helper Functions API Reference](./docs/helpers.md) for complete documentation.
+
+Quick example:
+```tsx
+import {
+  detectCollisions,
+  hasCollision,
+  snapToGrid,
+  findNewPosition
+} from 'panelgrid/helpers';
+```
 
 ## Development
 
