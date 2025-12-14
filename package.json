@@ -62,7 +62,12 @@
     "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "vitest",
-    "prepublishOnly": "yarn test run && yarn typecheck && yarn lint && yarn build"
+    "prepublishOnly": "yarn test run && yarn typecheck && yarn lint && yarn build",
+    "release": "commit-and-tag-version",
+    "release:patch": "commit-and-tag-version --release-as patch",
+    "release:minor": "commit-and-tag-version --release-as minor",
+    "release:major": "commit-and-tag-version --release-as major",
+    "release:dry-run": "commit-and-tag-version --dry-run"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -86,6 +91,7 @@
     "@types/react": "^19.1.16",
     "@types/react-dom": "^19.1.9",
     "@vitejs/plugin-react-swc": "^4.1.0",
+    "commit-and-tag-version": "^12.6.1",
     "husky": "^9.1.7",
     "jsdom": "^27.0.1",
     "lint-staged": "^16.2.6",
