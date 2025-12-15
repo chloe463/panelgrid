@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-12-14
+
+### Added
+- Public API for helper functions to enable advanced custom rearrangement logic (#63)
+  - New `panelgrid/helpers` export with utility functions for building custom layouts
+  - **Collision detection**: `detectCollisions`, `hasCollision`, `rectanglesOverlap`
+  - **Rearrangement utilities**: `rearrangePanels`, `findNewPosition`
+  - **Grid calculations**: `snapToGrid`, `gridToPixels`, `pixelsToGrid*`
+  - **Panel detection**: `detectAnimatingPanels`
+  - **Animation**: `applySnapAnimation`
+- Comprehensive helper functions documentation in `docs/helpers.md` with 5 advanced examples (#63)
+- English translation of rearrangement algorithm documentation (#63)
+- Japanese version of rearrangement documentation (`docs/rearrangement-jp.md`) (#63)
+
 ## [0.3.0] - 2025-12-13
 
 ### Fixed
