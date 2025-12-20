@@ -752,4 +752,22 @@ describe("rearrangePanels", () => {
       { id: "panel-7", x: 8, y: 5, w: 4, h: 1 },
     ]);
   });
+
+  it("should handle multiple horizontal pushes in a row", () => {
+    const movingPanel: PanelCoordinate = { id: "panel-1", x: 0, y: 0, w: 2, h: 1 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 2, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 0, y: 0, w: 1, h: 1 },
+      { id: "panel-3", x: 1, y: 0, w: 1, h: 1 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    expect(result).toHaveLength(3);
+    expect(result).toEqual([
+      { id: "panel-1", x: 0, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 2, y: 0, w: 1, h: 1 },
+      { id: "panel-3", x: 3, y: 0, w: 1, h: 1 },
+    ]);
+  });
 });

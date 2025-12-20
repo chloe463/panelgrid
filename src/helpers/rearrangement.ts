@@ -287,25 +287,10 @@ function rearrangePanelsInternal(
       const newPos = findNewPosition(colliding, current, columnCount);
       const candidate = { ...colliding, x: newPos.x, y: newPos.y };
 
-      // Check if this would collide with a panel we just pushed in this same iteration
-      // 同じ反復内で押したパネルと衝突するかチェック
-      let wouldCollideWithPushed = false;
-      for (const pushedId of pushedInIteration) {
-        const pushedPanel = panelMap.get(pushedId)!;
-        if (rectanglesOverlap(candidate, pushedPanel)) {
-          wouldCollideWithPushed = true;
-          break;
-        }
-      }
-
-      if (wouldCollideWithPushed) {
-        // Skip pushing this panel to avoid creating secondary collisions
-        // Let the queue handle it in a subsequent iteration
-        continue;
-      }
-
       // Update panel map and add to queue for further processing
+      // Queue processing will resolve any secondary collisions naturally
       // パネルマップを更新し、さらなる処理のためキューに追加
+      // キュー処理が二次衝突を自然に解決します
       panelMap.set(collidingId, candidate);
       queue.push(candidate);
       pushedInIteration.add(collidingId);
