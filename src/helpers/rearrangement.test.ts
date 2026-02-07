@@ -753,6 +753,59 @@ describe("rearrangePanels", () => {
     ]);
   });
 
+  it("should handle multi-overlap adjustment when 3+ panels are pushed to the same position", () => {
+    // 3 panels all get pushed to x=4. The repositioned loop must adjust
+    // each candidate past previously placed panels: 4 → 6 → 8
+    const movingPanel: PanelCoordinate = { id: "panel-4", x: 0, y: 0, w: 4, h: 1 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 2, y: 0, w: 2, h: 1 },
+      { id: "panel-3", x: 3, y: 0, w: 2, h: 1 },
+      { id: "panel-4", x: 8, y: 0, w: 4, h: 1 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 12);
+
+    expect(result).toHaveLength(4);
+    expect(result).toEqual([
+      { id: "panel-1", x: 4, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 6, y: 0, w: 2, h: 1 },
+      { id: "panel-3", x: 8, y: 0, w: 2, h: 1 },
+      { id: "panel-4", x: 0, y: 0, w: 4, h: 1 },
+    ]);
+  });
+
+  it("should fall back to pushing down when repositioned overlap cannot fit horizontally", () => {
+    // 3 panels pushed right. panel-3's candidate overlaps panel-1 and panel-2
+    // but there's no room to push further right, so it falls back to pushing down
+    const movingPanel: PanelCoordinate = { id: "panel-4", x: 0, y: 0, w: 3, h: 1 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 1, y: 0, w: 2, h: 1 },
+      { id: "panel-3", x: 2, y: 0, w: 2, h: 1 },
+      { id: "panel-4", x: 6, y: 0, w: 2, h: 1 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 8);
+
+    expect(result).toHaveLength(4);
+    // panel-1 pushed right to x=3, panel-2 adjusted to x=5 (past panel-1)
+    // panel-3 can't fit right (5+2+2=9 > 8), so pushed down to y=1
+    expect(result).toEqual([
+      { id: "panel-1", x: 3, y: 0, w: 2, h: 1 },
+      { id: "panel-2", x: 5, y: 0, w: 2, h: 1 },
+      { id: "panel-3", x: 2, y: 1, w: 2, h: 1 },
+      { id: "panel-4", x: 0, y: 0, w: 3, h: 1 },
+    ]);
+
+    // No panels should overlap
+    for (let i = 0; i < result.length; i++) {
+      for (let j = i + 1; j < result.length; j++) {
+        expect(rectanglesOverlap(result[i]!, result[j]!)).toBe(false);
+      }
+    }
+  });
+
   it("should handle multiple horizontal pushes in a row", () => {
     const movingPanel: PanelCoordinate = { id: "panel-1", x: 0, y: 0, w: 2, h: 1 };
     const allPanels: PanelCoordinate[] = [

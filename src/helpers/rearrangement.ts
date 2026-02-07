@@ -288,20 +288,29 @@ function rearrangePanelsInternal(
       let candidate = { ...colliding, x: newPos.x, y: newPos.y };
 
       // Check if candidate overlaps with any previously repositioned panel
-      // Try pushing further right past it; fall back to pushing down
+      // Re-validate after each adjustment to catch multi-overlap scenarios
       // 候補位置が既に再配置されたパネルと重なる場合、さらに右に押す。無理なら下に押す
+      // 各調整後に再検証し、複数の重なりシナリオに対応
       let needsPushDown = false;
-      for (const repoId of repositioned) {
-        const repoPanel = panelMap.get(repoId);
-        if (!repoPanel || repoId === collidingId) continue;
-        if (!rectanglesOverlap(candidate, repoPanel)) continue;
+      let adjusted = true;
+      let adjustAttempts = 0;
+      while (adjusted && !needsPushDown && adjustAttempts < repositioned.size + 1) {
+        adjusted = false;
+        adjustAttempts++;
+        for (const repoId of repositioned) {
+          const repoPanel = panelMap.get(repoId);
+          if (!repoPanel || repoId === collidingId) continue;
+          if (!rectanglesOverlap(candidate, repoPanel)) continue;
 
-        const furtherX = repoPanel.x + repoPanel.w;
-        if (furtherX + candidate.w <= columnCount) {
-          candidate = { ...candidate, x: furtherX };
-        } else {
-          needsPushDown = true;
-          break;
+          const furtherX = repoPanel.x + repoPanel.w;
+          if (furtherX + candidate.w <= columnCount) {
+            candidate = { ...candidate, x: furtherX };
+            adjusted = true;
+            break; // Restart loop to re-validate against all repositioned panels
+          } else {
+            needsPushDown = true;
+            break;
+          }
         }
       }
 
