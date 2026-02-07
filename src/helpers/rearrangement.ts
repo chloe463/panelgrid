@@ -224,6 +224,10 @@ function rearrangePanelsInternal(
   // 不要な再処理を避けるため処理済みパネルを追跡
   const processed = new Set<PanelId>();
 
+  // Track all panels that have been repositioned across all queue iterations
+  // 全キュー反復を通じて再配置されたパネルを追跡
+  const repositioned = new Set<PanelId>();
+
   // Track processing count to prevent infinite loops
   // 無限ループを防ぐため処理回数を追跡
   const processCount = new Map<PanelId, number>();
@@ -272,10 +276,6 @@ function rearrangePanelsInternal(
       return panelA.x - panelB.x;
     });
 
-    // Track panels pushed in this iteration to detect secondary collisions
-    // この反復で押されたパネルを追跡し、二次衝突を検出
-    const pushedInIteration = new Set<PanelId>();
-
     // Resolve collisions by pushing colliding panels
     // 衝突したパネルを押しのけて衝突を解決
     for (const collidingId of sortedCollidingIds) {
@@ -285,15 +285,36 @@ function rearrangePanelsInternal(
       // Calculate new position for the colliding panel
       // 衝突パネルの新しい位置を計算
       const newPos = findNewPosition(colliding, current, columnCount);
-      const candidate = { ...colliding, x: newPos.x, y: newPos.y };
+      let candidate = { ...colliding, x: newPos.x, y: newPos.y };
+
+      // Check if candidate overlaps with any previously repositioned panel
+      // Try pushing further right past it; fall back to pushing down
+      // 候補位置が既に再配置されたパネルと重なる場合、さらに右に押す。無理なら下に押す
+      let needsPushDown = false;
+      for (const repoId of repositioned) {
+        const repoPanel = panelMap.get(repoId);
+        if (!repoPanel || repoId === collidingId) continue;
+        if (!rectanglesOverlap(candidate, repoPanel)) continue;
+
+        const furtherX = repoPanel.x + repoPanel.w;
+        if (furtherX + candidate.w <= columnCount) {
+          candidate = { ...candidate, x: furtherX };
+        } else {
+          needsPushDown = true;
+          break;
+        }
+      }
+
+      if (needsPushDown) {
+        const pushDown = current.y + current.h - colliding.y;
+        candidate = { ...candidate, x: colliding.x, y: colliding.y + (pushDown > 0 ? pushDown : 1) };
+      }
 
       // Update panel map and add to queue for further processing
-      // Queue processing will resolve any secondary collisions naturally
       // パネルマップを更新し、さらなる処理のためキューに追加
-      // キュー処理が二次衝突を自然に解決します
       panelMap.set(collidingId, candidate);
       queue.push(candidate);
-      pushedInIteration.add(collidingId);
+      repositioned.add(collidingId);
     }
 
     panelMap.set(current.id, current);
