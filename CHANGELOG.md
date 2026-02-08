@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.2](https://github.com/chloe463/panelgrid/compare/v0.4.1...v0.4.2) (2026-02-08)
+
+
+### Fixed
+
+* hide resize handles on size-locked panels ([#65](https://github.com/chloe463/panelgrid/issues/65)) ([5e8f729](https://github.com/chloe463/panelgrid/commit/5e8f729c9879a0cebc577daac5fea79f04588334))
+
 ## [0.4.1](https://github.com/chloe463/panelgrid/compare/v0.4.0...v0.4.1) (2026-02-07)
 
 
