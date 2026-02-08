@@ -73,16 +73,17 @@ export function PanelGridRenderer({ children: ItemComponent }: PanelGridRenderer
             data-pg-h={h}
           >
             <ItemComponent id={key} />
-            {resizeHandlePositions.map((pos) => {
-              return (
-                <span
-                  key={pos}
-                  className={`panelgrid-resize-handle panelgrid-resize-handle--${pos}`}
-                  {...resizeHandleProps}
-                  data-pg-resize-handle={pos}
-                />
-              );
-            })}
+            {resizeHandleProps &&
+              resizeHandlePositions.map((pos) => {
+                return (
+                  <span
+                    key={pos}
+                    className={`panelgrid-resize-handle panelgrid-resize-handle--${pos}`}
+                    {...resizeHandleProps}
+                    data-pg-resize-handle={pos}
+                  />
+                );
+              })}
           </div>
         );
       })}
