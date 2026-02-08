@@ -47,6 +47,7 @@ export function PanelGridRenderer({ children: ItemComponent }: PanelGridRenderer
       ref={containerRef}
     >
       {Array.from({ length: count }).map((_, i) => {
+        // biome-ignore lint/suspicious/noArrayIndexKey: The order of placeholders will not be changed.
         return <div key={i} className="panelgrid-panel-placeholder" />;
       })}
 
