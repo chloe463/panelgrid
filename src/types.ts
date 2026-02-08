@@ -14,6 +14,7 @@ export interface PanelCoordinate {
   y: number;
   w: number;
   h: number;
+  lockSize?: boolean;
 }
 
 /**
@@ -26,3 +27,5 @@ export type RearrangementFunction = (
   allPanels: PanelCoordinate[],
   columnCount: number
 ) => PanelCoordinate[];
+
+export type ResizeHandlePosition = "n" | "e" | "s" | "w" | "ne" | "nw" | "se" | "sw";

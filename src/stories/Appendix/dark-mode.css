@@ -1,0 +1,146 @@
+/* Dark Mode Container */
+.dark-mode-container {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #1a202c;
+}
+
+/* Dark mode panel grid styles */
+.dark-mode-container .panelgrid-panel-placeholder {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode-container .panelgrid-panel {
+  background-color: #2d3748;
+  border-color: #4a5568;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode-container .panelgrid-panel-ghost {
+  outline-color: #60a5fa;
+  background-color: rgba(96, 165, 250, 0.1);
+}
+
+.dark-mode-container .panelgrid-resize-handle {
+  --panelgrid-handle-color: rgb(250 250 250);
+}
+
+.dark-mode-container .panelgrid-panel--dragging {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.8);
+}
+
+/* Dark mode panel content */
+.dark-mode-container .panel-content {
+  background-color: #2d3748;
+  color: #e2e8f0;
+}
+
+.dark-mode-container .panel-title {
+  color: #f7fafc;
+}
+
+.dark-mode-container .panel-lock-status {
+  color: #cbd5e0;
+}
+
+.dark-mode-container .panel-hint {
+  color: #718096;
+}
+
+/* Light Mode Container */
+.light-mode-container {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f7fafc;
+}
+
+.light-mode-container .panelgrid-panel-placeholder {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.light-mode-container .panelgrid-panel {
+  background-color: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+}
+
+.light-mode-container .panel-content {
+  background-color: #ffffff;
+  color: #1a202c;
+}
+
+/* System Preference Dark Mode */
+.prefers-dark-mode-container {
+  padding: 20px;
+  min-height: 100vh;
+  background-color: #f7fafc;
+  color: #1a202c;
+}
+
+@media (prefers-color-scheme: dark) {
+  .prefers-dark-mode-container {
+    background-color: #1a202c;
+    color: #e2e8f0;
+  }
+
+  .prefers-dark-mode-container h1 {
+    color: #f7fafc;
+  }
+
+  .prefers-dark-mode-container p {
+    color: #cbd5e0;
+  }
+
+  .prefers-dark-mode-container code {
+    background-color: #2d3748;
+    color: #60a5fa;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .prefers-dark-mode-container .panelgrid-panel-placeholder {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+
+  .prefers-dark-mode-container .panelgrid-panel {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .prefers-dark-mode-container .panelgrid-panel-ghost {
+    outline-color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.1);
+  }
+
+  .prefers-dark-mode-container .panelgrid-resize-handle {
+    --panelgrid-handle-color: rgb(250 250 250);
+  }
+
+  .prefers-dark-mode-container .panel-content {
+    background-color: #2d3748;
+    color: #e2e8f0;
+  }
+
+  .prefers-dark-mode-container .panel-title {
+    color: #f7fafc;
+  }
+
+  .prefers-dark-mode-container .panel-lock-status {
+    color: #cbd5e0;
+  }
+
+  .prefers-dark-mode-container .panel-hint {
+    color: #718096;
+  }
+}
+
+/* Light mode specific styles for system preference */
+@media (prefers-color-scheme: light) {
+  .prefers-dark-mode-container code {
+    background-color: #e2e8f0;
+    color: #2d3748;
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+}

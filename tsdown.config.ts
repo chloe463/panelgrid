@@ -1,10 +1,12 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["src/index.ts"],
+  entry: ["src/index.ts", "src/helpers/index.ts"],
   format: ["cjs", "esm"],
+  unbundle: true,
   dts: {
     build: true,
+    resolve: true,
   },
   clean: true,
   outDir: "dist",

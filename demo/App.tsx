@@ -1,31 +1,31 @@
 import "./App.css";
 
 import type { PanelId } from "../src";
-import { PanelistProvider, PanelistRenderer, usePanelistControls } from "../src";
-import "../src/styles.css";
+import { PanelGridProvider, PanelGridRenderer, usePanelGridControls } from "../src";
 
 export default function App() {
   return (
     <div className="App">
-      <PanelistProvider
+      <PanelGridProvider
         panels={[
           { id: 1, x: 0, y: 0, w: 2, h: 2 },
           { id: 2, x: 2, y: 0, w: 2, h: 2 },
           { id: 3, x: 4, y: 0, w: 2, h: 1 },
           { id: 4, x: 0, y: 2, w: 1, h: 1 },
+          { id: 5, x: 1, y: 2, w: 1, h: 1, lockSize: true },
         ]}
         columnCount={6}
         gap={8}
       >
         <PanelControls />
-        <PanelistRenderer itemRenderer={PanelContent} />
-      </PanelistProvider>
+        <PanelGridRenderer>{PanelContent}</PanelGridRenderer>
+      </PanelGridProvider>
     </div>
   );
 }
 
 function PanelControls() {
-  const { addPanel, exportState } = usePanelistControls();
+  const { addPanel, exportState } = usePanelGridControls();
 
   const save = () => {
     const _state = exportState();
@@ -42,13 +42,17 @@ function PanelControls() {
 }
 
 function PanelContent({ id }: { id: PanelId }) {
-  const { removePanel } = usePanelistControls();
+  const { removePanel } = usePanelGridControls();
+  const isLocked = id === 5;
   return (
     <div className="panel-content">
       <button className="panel-remove-button" onClick={() => removePanel(id)}>
         x
       </button>
-      <div className="panel-content-inner">Panel Content {id}</div>
+      <div className="panel-content-inner">
+        Panel Content {id}
+        {isLocked && <span className="locked-badge">🔒 Size Locked</span>}
+      </div>
     </div>
   );
 }

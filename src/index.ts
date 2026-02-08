@@ -1,4 +1,5 @@
 export { rearrangePanels } from "./helpers/rearrangement";
-export { PanelistProvider, usePanelistControls, usePanelistState } from "./PanelistProvider";
-export { PanelistRenderer } from "./PanelistRenderer";
+export { PanelGridProvider, usePanelGridControls, usePanelGridState } from "./PanelGridProvider";
+export { PanelGridRenderer } from "./PanelGridRenderer";
 export type { PanelCoordinate, PanelId, RearrangementFunction } from "./types";
+export { usePanel } from "./usePanel";

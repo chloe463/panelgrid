@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import {
   applySnapAnimation,
   detectAnimatingPanels,
@@ -9,47 +9,115 @@ import {
   rearrangePanels,
 } from "./helpers";
 import { findNewPositionToAddPanel } from "./helpers/rearrangement";
-import type { PanelCoordinate, RearrangementFunction } from "./types";
+import type { PanelCoordinate, PanelId, RearrangementFunction, ResizeHandlePosition } from "./types";
 
-interface PanelistOptions {
+interface PanelGridOptions {
   panels: PanelCoordinate[];
   columnCount: number;
   baseSize: number;
   gap: number;
+  resizeHandlePositions: ResizeHandlePosition[];
   rearrangement?: RearrangementFunction;
 }
 
-interface PanelistState {
+export interface PanelGridState {
   panels: PanelCoordinate[];
 }
 
 interface InternalPanelState {
-  panels: PanelCoordinate[];
-  activePanelId: number | string | null;
-  isDragging: boolean;
-  draggableElements: Record<number | string, HTMLElement | null>;
-  isResizing: boolean;
-  isMoving: boolean;
-  animatingPanels: Set<number | string>;
+  activePanelId: PanelId | null;
+  draggableElements: Record<PanelId, HTMLElement | null>;
+  animatingPanels: Set<PanelId>;
+}
+
+export type PanelGridAction =
+  | { type: "UPDATE_PANELS"; newPanels: PanelCoordinate[] }
+  | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
+  | { type: "REMOVE_PANEL"; panelId: PanelId }
+  | { type: "LOCK_PANEL_SIZE"; panelId: PanelId }
+  | { type: "UNLOCK_PANEL_SIZE"; panelId: PanelId };
+
+export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
+  switch (action.type) {
+    case "UPDATE_PANELS":
+      return {
+        ...state,
+        panels: action.newPanels,
+      };
+    case "ADD_PANEL": {
+      const { newPanel, columnCount } = action;
+      const newPosition = findNewPositionToAddPanel(newPanel, state.panels, columnCount);
+      const newPanelCoordinate: PanelCoordinate = {
+        id: newPanel.id || Math.random().toString(36).substring(2, 15),
+        x: newPosition.x,
+        y: newPosition.y,
+        w: newPanel.w || 1,
+        h: newPanel.h || 1,
+      };
+      return {
+        ...state,
+        panels: [...state.panels, newPanelCoordinate],
+      };
+    }
+    case "REMOVE_PANEL":
+      return {
+        ...state,
+        panels: state.panels.filter((panel) => panel.id !== action.panelId),
+      };
+    case "LOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: true } : panel)),
+      };
+    case "UNLOCK_PANEL_SIZE":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: false } : panel)),
+      };
+    default:
+      return state;
+  }
 }
 
 const ANIMATION_DURATION = 300;
 type TimeoutId = ReturnType<typeof setTimeout>;
 
-export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement }: PanelistOptions) {
-  const [state, setState] = useState<PanelistState>({
+const RESIZE_CURSOR_MAP: Record<string, string> = {
+  nw: "nwse-resize",
+  ne: "nesw-resize",
+  se: "nwse-resize",
+  sw: "nesw-resize",
+  n: "ns-resize",
+  s: "ns-resize",
+  e: "ew-resize",
+  w: "ew-resize",
+};
+
+export function usePanelGrid({
+  panels,
+  columnCount,
+  baseSize,
+  gap,
+  resizeHandlePositions: _resizeHandlePositions,
+  rearrangement,
+}: PanelGridOptions) {
+  const [state, dispatch] = useReducer(panelGridReducer, {
     panels,
   });
   const ghostPanelRef = useRef<HTMLDivElement | null>(null);
   const animationTimeoutsRef = useRef<Set<TimeoutId>>(new Set());
 
+  const panelMap = useMemo(() => {
+    const map = new Map<PanelId, PanelCoordinate>();
+    state.panels.forEach((panel) => {
+      map.set(panel.id, panel);
+    });
+    return map;
+  }, [state.panels]);
+
   const internalState = useRef<InternalPanelState>({
-    panels,
     activePanelId: null,
-    isDragging: false,
-    isMoving: false,
     draggableElements: {},
-    isResizing: false,
     animatingPanels: new Set(),
   }).current;
 
@@ -105,10 +173,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         excludePanelId: updatedPanel.id,
       });
 
-      setState((current) => ({
-        ...current,
-        panels: nextPanels,
-      }));
+      dispatch({ type: "UPDATE_PANELS", newPanels: nextPanels });
 
       // Clear animating panels after animation completes
       const timeoutId = setTimeout(() => {
@@ -127,14 +192,16 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const draggingElement = internalState.draggableElements[panel.id];
       if (!draggingElement) return;
 
-      internalState.isDragging = true;
+      let isDragging = true;
       const initialX = e.clientX;
       const initialY = e.clientY;
       const offsetX = draggingElement.offsetLeft;
       const offsetY = draggingElement.offsetTop;
       const originalTransition = draggingElement.style.transition;
 
-      draggingElement.classList.add("panelist-panel--dragging");
+      document.body.classList.add("panelgrid-dragging");
+
+      draggingElement.classList.add("panelgrid-panel--dragging");
       draggingElement.style.transition = "";
 
       showGhostPanel(offsetX, offsetY, draggingElement.offsetWidth, draggingElement.offsetHeight);
@@ -143,7 +210,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const mouseMoveListenerCtrl = new AbortController();
 
       const onMouseMove = (e: MouseEvent) => {
-        if (!internalState.isDragging) return;
+        if (!isDragging) return;
         if (!draggingElement) return;
 
         const currentX = e.clientX;
@@ -170,8 +237,8 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const onMouseUp = () => {
         if (!draggingElement) return;
 
-        internalState.isDragging = false;
-        draggingElement.classList.remove("panelist-panel--dragging");
+        isDragging = false;
+        draggingElement.classList.remove("panelgrid-panel--dragging");
 
         hideGhostPanel();
 
@@ -196,6 +263,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
 
         updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY }, state.panels);
 
+        document.body.classList.remove("panelgrid-dragging");
         internalState.activePanelId = null;
 
         mouseMoveListenerCtrl.abort();
@@ -226,18 +294,31 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
   const createResizeHandler = useCallback(
     (panel: PanelCoordinate) => (e: React.MouseEvent<HTMLSpanElement>) => {
       e.stopPropagation();
-      internalState.isResizing = true;
+      let isResizing = true;
       internalState.activePanelId = panel.id;
       const draggingElement = internalState.draggableElements[panel.id];
       if (!draggingElement) return;
 
       const startX = e.clientX;
       const startY = e.clientY;
+      const initialTop = draggingElement.offsetTop;
+      const initialLeft = draggingElement.offsetLeft;
       const initialWidth = draggingElement.offsetWidth;
       const initialHeight = draggingElement.offsetHeight;
       const initialZIndex = draggingElement.style.zIndex;
+      const initialCursor = draggingElement.style.cursor;
 
-      draggingElement.style.cursor = "nwse-resize";
+      const resizeHandle = e.currentTarget;
+      const handlePosition = resizeHandle.dataset.pgResizeHandle;
+
+      const northSideResizeEnabled = handlePosition?.includes("n");
+      const westSideResizeEnabled = handlePosition?.includes("w");
+      const isVerticalResizeOnly = handlePosition === "n" || handlePosition === "s";
+      const isHorizontalResizeOnly = handlePosition === "e" || handlePosition === "w";
+
+      document.body.classList.add("panelgrid-resizing");
+
+      draggingElement.style.cursor = RESIZE_CURSOR_MAP[handlePosition || "se"] || "nwse-resize";
       draggingElement.style.transition = "";
 
       showGhostPanel(draggingElement.offsetLeft, draggingElement.offsetTop, initialWidth, initialHeight);
@@ -246,24 +327,53 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       const mouseUpController = new AbortController();
 
       const onMouseMove = (e: MouseEvent) => {
-        if (!internalState.isResizing) return;
+        if (!isResizing) return;
         if (!draggingElement) return;
 
         const deltaX = e.clientX - startX;
         const deltaY = e.clientY - startY;
 
-        draggingElement.style.width = `${initialWidth + deltaX}px`;
-        draggingElement.style.height = `${initialHeight + deltaY}px`;
+        // Calculate dimensions once, accounting for all resize directions
+        const newWidth = westSideResizeEnabled
+          ? Math.max(initialWidth - deltaX, 1)
+          : isVerticalResizeOnly
+            ? initialWidth
+            : initialWidth + deltaX;
+
+        const newHeight = northSideResizeEnabled
+          ? Math.max(initialHeight - deltaY, 1)
+          : isHorizontalResizeOnly
+            ? initialHeight
+            : initialHeight + deltaY;
+
+        draggingElement.style.width = `${newWidth}px`;
+        draggingElement.style.height = `${newHeight}px`;
         draggingElement.style.zIndex = "calc(infinity)";
 
-        // Update ghost panel size to snap to grid
-        const newWidth = initialWidth + deltaX;
-        const newHeight = initialHeight + deltaY;
-        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount, panel.x);
-        const nextGridH = pixelsToGridSize(newHeight, baseSize, gap);
+        // Update position for north/west resizing
+        if (northSideResizeEnabled) {
+          draggingElement.style.top = `${initialTop + deltaY}px`;
+        }
+        if (westSideResizeEnabled) {
+          draggingElement.style.left = `${initialLeft + deltaX}px`;
+        }
+
+        // Calculate current position (needed for grid calculations)
+        const currentLeft = westSideResizeEnabled ? initialLeft + deltaX : initialLeft;
+        const currentTop = northSideResizeEnabled ? initialTop + deltaY : initialTop;
+
+        // Update ghost panel - calculate grid position BEFORE grid size
+        const nextGridX = pixelsToGridPosition(currentLeft, baseSize, gap, columnCount, panel.w);
+        const nextGridY = pixelsToGridPosition(currentTop, baseSize, gap);
+        const nextGridW = pixelsToGridSize(newWidth, baseSize, gap, columnCount, nextGridX);
+        const nextGridH = pixelsToGridSize(newHeight, baseSize, gap, columnCount, nextGridY);
+
         const snappedWidth = gridToPixels(nextGridW, baseSize, gap);
         const snappedHeight = gridToPixels(nextGridH, baseSize, gap);
+        const snappedLeft = gridPositionToPixels(nextGridX, baseSize, gap);
+        const snappedTop = gridPositionToPixels(nextGridY, baseSize, gap);
 
+        updateGhostPanelPosition(snappedLeft, snappedTop);
         updateGhostPanelSize(snappedWidth, snappedHeight);
       };
 
@@ -273,28 +383,40 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
         hideGhostPanel();
 
         const rect = draggingElement.getBoundingClientRect();
-        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount, panel.x);
-        const nextGridH = pixelsToGridSize(rect.height, baseSize, gap);
+        const droppedLeft = parseFloat(draggingElement.style.left) || 0;
+        const droppedTop = parseFloat(draggingElement.style.top) || 0;
 
+        const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap, columnCount, panel.w);
+        const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
+
+        const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount, nextGridX);
+        const nextGridH = pixelsToGridSize(rect.height, baseSize, gap, columnCount, nextGridY);
+
+        const left = gridPositionToPixels(nextGridX, baseSize, gap);
+        const top = gridPositionToPixels(nextGridY, baseSize, gap);
         const width = gridToPixels(nextGridW, baseSize, gap);
         const height = gridToPixels(nextGridH, baseSize, gap);
 
         draggingElement.style.width = `${rect.width}px`;
         draggingElement.style.height = `${rect.height}px`;
-        draggingElement.style.cursor = "default";
+        draggingElement.style.cursor = initialCursor;
         draggingElement.style.transition = "";
 
         window.requestAnimationFrame(() => {
+          draggingElement.style.top = `${top}px`;
+          draggingElement.style.left = `${left}px`;
           draggingElement.style.width = `${width}px`;
           draggingElement.style.height = `${height}px`;
           draggingElement.style.zIndex = initialZIndex;
-          draggingElement.style.transition = "width 0.1s ease-out, height 0.1s ease-out";
+          draggingElement.style.transition =
+            "width 0.1s ease-out, height 0.1s ease-out, top 0.1s ease-out, left 0.1s ease-out";
         });
 
-        updatePanelsWithAnimation({ ...panel, w: nextGridW, h: nextGridH }, state.panels);
+        updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY, w: nextGridW, h: nextGridH }, state.panels);
 
-        internalState.isResizing = false;
+        isResizing = false;
         internalState.activePanelId = null;
+        document.body.classList.remove("panelgrid-resizing");
 
         mouseMoveController.abort();
         mouseUpController.abort();
@@ -314,6 +436,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       state.panels,
       updatePanelsWithAnimation,
       showGhostPanel,
+      updateGhostPanelPosition,
       updateGhostPanelSize,
       hideGhostPanel,
       columnCount,
@@ -322,7 +445,7 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
 
   // Create ref callback for panel elements
   const createRefCallback = useCallback(
-    (panelId: number | string) => (element: HTMLElement | null) => {
+    (panelId: PanelId) => (element: HTMLElement | null) => {
       if (!element) return;
       if (!internalState.draggableElements[panelId]) {
         internalState.draggableElements[panelId] = element;
@@ -340,10 +463,13 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
       return {
         panelProps: {
           key: panel.id,
-          x: panel.x,
-          y: panel.y,
-          w: panel.w,
-          h: panel.h,
+          lockSize: panel.lockSize,
+          positionData: {
+            x: panel.x,
+            y: panel.y,
+            w: panel.w,
+            h: panel.h,
+          },
           style: {
             top: gridPositionToPixels(panel.y, baseSize, gap),
             left: gridPositionToPixels(panel.x, baseSize, gap),
@@ -357,9 +483,11 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
           ref: createRefCallback(panel.id),
           onMouseDown: createDragHandler(panel),
         },
-        resizeHandleProps: {
-          onMouseDown: createResizeHandler(panel),
-        },
+        resizeHandleProps: panel.lockSize
+          ? undefined
+          : {
+              onMouseDown: createResizeHandler(panel),
+            },
       };
     });
   }, [
@@ -375,29 +503,28 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
 
   const addPanel = useCallback(
     (panel: Partial<PanelCoordinate>) => {
-      setState((current) => {
-        const newPosition = findNewPositionToAddPanel(panel, current.panels, columnCount);
-        const newPanel: PanelCoordinate = {
+      dispatch({
+        type: "ADD_PANEL",
+        newPanel: {
+          ...panel,
           id: panel.id || Math.random().toString(36).substring(2, 15),
-          x: newPosition.x,
-          y: newPosition.y,
-          w: panel.w || 1,
-          h: panel.h || 1,
-        };
-        return {
-          ...current,
-          panels: [...current.panels, newPanel],
-        };
+        },
+        columnCount,
       });
     },
     [columnCount]
   );
 
-  const removePanel = useCallback((id: number | string) => {
-    setState((current) => ({
-      ...current,
-      panels: current.panels.filter((panel) => panel.id !== id),
-    }));
+  const removePanel = useCallback((id: PanelId) => {
+    dispatch({ type: "REMOVE_PANEL", panelId: id });
+  }, []);
+
+  const lockPanelSize = useCallback((id: PanelId) => {
+    dispatch({ type: "LOCK_PANEL_SIZE", panelId: id });
+  }, []);
+
+  const unlockPanelSize = useCallback((id: PanelId) => {
+    dispatch({ type: "UNLOCK_PANEL_SIZE", panelId: id });
   }, []);
 
   const exportState = useCallback(() => {
@@ -406,9 +533,12 @@ export function usePanelist({ panels, columnCount, baseSize, gap, rearrangement 
 
   return {
     panels: panelsWithProps,
+    panelMap,
     ghostPanelRef,
     addPanel,
     removePanel,
+    lockPanelSize,
+    unlockPanelSize,
     exportState,
   };
 }

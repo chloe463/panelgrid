@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Panelist is a React grid layout library with drag-and-drop and resize capabilities. It's built as a publishable npm package with both ESM and CJS outputs, TypeScript support, and comprehensive test coverage.
+PanelGrid is a React grid layout library with drag-and-drop and resize capabilities. It's built as a publishable npm package with both ESM and CJS outputs, TypeScript support, and comprehensive test coverage.
 
 ## Development Commands
 
@@ -29,19 +29,19 @@ Panelist is a React grid layout library with drag-and-drop and resize capabiliti
 
 ### Core Components
 
-1. **PanelistProvider** (src/PanelistProvider.tsx)
+1. **PanelGridProvider** (src/PanelGridProvider.tsx)
    - Context provider that manages panel state
-   - Splits state and controls into separate contexts (`PanelistStateContext` and `PanelistControlsContext`)
+   - Splits state and controls into separate contexts (`PanelGridStateContext` and `PanelGridControlsContext`)
    - Accepts optional `rearrangement` prop to override collision resolution logic
-   - Wraps the `usePanelist` hook
+   - Wraps the `usePanelGrid` hook
 
-2. **PanelistRenderer** (src/PanelistRenderer.tsx)
+2. **PanelGridRenderer** (src/PanelGridRenderer.tsx)
    - Renders the grid layout, panels, and ghost panel
    - Uses ResizeObserver to calculate `baseSize` (grid cell width) dynamically
    - Renders placeholder divs for grid visualization
    - Handles panel rendering via `itemRenderer` prop
 
-3. **usePanelist** (src/usePanelist.ts)
+3. **usePanelGrid** (src/usePanelGrid.ts)
    - Core hook containing all drag/drop/resize logic
    - Uses **direct DOM manipulation** (not React state) during drag/resize for performance
    - Maintains `internalState` ref for high-frequency state that doesn't need React re-renders
@@ -51,18 +51,18 @@ Panelist is a React grid layout library with drag-and-drop and resize capabiliti
 ### Key Architectural Patterns
 
 #### Direct DOM Manipulation for Performance
-The library intentionally uses direct DOM manipulation during drag and resize operations to avoid React re-renders during high-frequency mousemove events. See usePanelist.ts:64-92 for ghost panel helpers.
+The library intentionally uses direct DOM manipulation during drag and resize operations to avoid React re-renders during high-frequency mousemove events. See usePanelGrid.ts:64-92 for ghost panel helpers.
 
 #### Collision Resolution System
 - **Default algorithm** (src/helpers/rearrangement.ts:152): Pushes colliding panels horizontally first (right), then vertically (down)
 - Uses BFS-style queue processing to handle cascading collisions
-- **Custom rearrangement**: Users can override by passing `rearrangement` prop to PanelistProvider
+- **Custom rearrangement**: Users can override by passing `rearrangement` prop to PanelGridProvider
 - The `RearrangementFunction` type signature: `(movingPanel, allPanels, columnCount) => PanelCoordinate[]`
 
 #### Animation System
-- Panels being pushed by collisions get `isAnimating` flag and CSS transitions (src/usePanelist.ts:351-355)
+- Panels being pushed by collisions get `isAnimating` flag and CSS transitions (src/usePanelGrid.ts:351-355)
 - Snap-back animations use requestAnimationFrame (src/helpers/animation.ts)
-- Animation timeouts tracked in ref and cleaned up on unmount (src/usePanelist.ts:56-62)
+- Animation timeouts tracked in ref and cleaned up on unmount (src/usePanelGrid.ts:56-62)
 
 ### Helper Modules (src/helpers/)
 
@@ -99,7 +99,7 @@ Tests are colocated with implementation files (e.g., `rearrangement.test.ts` nex
 ## Common Patterns
 
 ### Adding Panel Controls
-Use `usePanelistControls()` hook to get `addPanel`, `removePanel`, `exportState` functions.
+Use `usePanelGridControls()` hook to get `addPanel`, `removePanel`, `exportState` functions.
 
 ### Custom Rearrangement
 Export and wrap the default `rearrangePanels` function, or implement completely custom logic. See README.md "Custom Rearrangement Logic" section for examples.

@@ -1,4 +1,4 @@
-.panelist-renderer {
+.panelgrid-renderer {
   position: relative;
   display: grid;
   grid-template-columns: repeat(var(--column-count, 6), 1fr);
@@ -6,38 +6,55 @@
   gap: var(--gap, 8px);
 }
 
-.panelist-panel-placeholder {
+.panelgrid-panel-placeholder {
   display: block;
   width: 100%;
   aspect-ratio: 1 / 1;
   background-color: rgb(0 0 0 / 0.03);
 }
 
-.panelist-panel-ghost {
+.panelgrid-panel-ghost {
+  display: none;
   position: absolute;
-  pointer-events: none;
   border-radius: 4px;
   outline: 1px dashed rgba(0, 0, 0, 0.2);
-  outline-offset: 2px;
-  z-index: -1;
+  outline-offset: 1px;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.panelist-panel {
+.panelgrid-panel {
   position: absolute;
   box-sizing: border-box;
   aspect-ratio: 1 / 1;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 4px;
+  cursor: grab;
+  overflow: auto;
+
+  & .panelgrid-resize-handle {
+    opacity: 0;
+  }
+
+  &:hover .panelgrid-resize-handle {
+    opacity: 0.4;
+    transition: opacity 0.2s ease-in;
+  }
+
+  &:hover .panelgrid-resize-handle:hover {
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+  }
 }
 
-.panelist-panel--dragging {
+.panelgrid-panel--dragging {
   cursor: grabbing;
   box-shadow: 0px 11px 30px 0px #0000001f;
   z-index: calc(infinity);
 }
 
-.panelist-panel--with-transition {
+.panelgrid-panel--with-transition {
   transition:
     top 0.15s ease-out,
     left 0.15s ease-out,
@@ -45,23 +62,103 @@
     height 0.1s ease-out;
 }
 
-.panelist-resize-handle {
+.panelgrid-resize-handle {
   position: absolute;
-  right: 0;
-  bottom: 0;
   display: inline-block;
   width: 24px;
   aspect-ratio: 1 / 1;
-  background-color: rgba(0, 0, 0, 0.12);
-  clip-path: polygon(0 100%, 100% 100%, 100% 0);
+  background-color: var(--panelgrid-handle-color, #000);
+  -webkit-mask-image: url('data:image/svg+xml,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M21 15L15 21M21 8L8 21" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+  mask-image: url('data:image/svg+xml,%3Csvg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M21 15L15 21M21 8L8 21" stroke="%23000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/%3E%3C/svg%3E');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
 
+  &:hover {
+    opacity: 1;
+    transition: opacity 0.2s ease-in;
+  }
+}
+
+.panelgrid-resize-handle--nw {
+  top: 0;
+  left: 0;
+  right: auto;
+  bottom: auto;
+  transform: rotate(180deg);
   &:hover {
     cursor: nwse-resize;
   }
 }
 
-.panelist-panel-ghost {
-  display: none;
-  position: absolute;
-  pointer-events: none;
+.panelgrid-resize-handle--ne {
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: auto;
+  transform: rotate(-90deg);
+  &:hover {
+    cursor: nesw-resize;
+  }
+}
+
+.panelgrid-resize-handle--se {
+  right: 0;
+  bottom: 0;
+  &:hover {
+    cursor: nwse-resize;
+  }
+}
+
+.panelgrid-resize-handle--sw {
+  left: 0;
+  bottom: 0;
+  transform: rotate(90deg);
+  &:hover {
+    cursor: nesw-resize;
+  }
+}
+
+.panelgrid-resize-handle--n {
+  top: 0;
+  left: 50%;
+  transform: translate3D(-50%, -50%, 0) rotate(45deg);
+  &:hover {
+    cursor: ns-resize;
+  }
+}
+
+.panelgrid-resize-handle--s {
+  bottom: 0;
+  left: 50%;
+  transform: translate3D(-50%, 50%, 0) rotate(225deg);
+  &:hover {
+    cursor: ns-resize;
+  }
+}
+
+.panelgrid-resize-handle--e {
+  top: 50%;
+  right: 0;
+  transform: translate3D(50%, -50%, 0) rotate(135deg);
+  &:hover {
+    cursor: ew-resize;
+  }
+}
+
+.panelgrid-resize-handle--w {
+  top: 50%;
+  left: 0;
+  transform: translate3D(-50%, -50%, 0) rotate(-45deg);
+  &:hover {
+    cursor: ew-resize;
+  }
+}
+
+.panelgrid-resizing,
+.panelgrid-dragging {
+  user-select: none;
 }
