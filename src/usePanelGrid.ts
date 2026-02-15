@@ -35,7 +35,9 @@ export type PanelGridAction =
   | { type: "ADD_PANEL"; newPanel: Partial<PanelCoordinate>; columnCount: number }
   | { type: "REMOVE_PANEL"; panelId: PanelId }
   | { type: "LOCK_PANEL_SIZE"; panelId: PanelId }
-  | { type: "UNLOCK_PANEL_SIZE"; panelId: PanelId };
+  | { type: "UNLOCK_PANEL_SIZE"; panelId: PanelId }
+  | { type: "LOCK_PANEL_POSITION"; panelId: PanelId }
+  | { type: "UNLOCK_PANEL_POSITION"; panelId: PanelId };
 
 export function panelGridReducer(state: PanelGridState, action: PanelGridAction): PanelGridState {
   switch (action.type) {
@@ -73,6 +75,16 @@ export function panelGridReducer(state: PanelGridState, action: PanelGridAction)
       return {
         ...state,
         panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockSize: false } : panel)),
+      };
+    case "LOCK_PANEL_POSITION":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockPosition: true } : panel)),
+      };
+    case "UNLOCK_PANEL_POSITION":
+      return {
+        ...state,
+        panels: state.panels.map((panel) => (panel.id === action.panelId ? { ...panel, lockPosition: false } : panel)),
       };
     default:
       return state;
@@ -160,8 +172,9 @@ export function usePanelGrid({
   }, []);
 
   // Callback to update panels and trigger animations
+  // Returns the rearranged panels so callers can inspect the actual result position
   const updatePanelsWithAnimation = useCallback(
-    (updatedPanel: PanelCoordinate, currentPanels: PanelCoordinate[]) => {
+    (updatedPanel: PanelCoordinate, currentPanels: PanelCoordinate[]): PanelCoordinate[] => {
       // Use custom rearrangement function if provided, otherwise use default
       const rearrange = rearrangement || rearrangePanels;
       const nextPanels = rearrange(updatedPanel, currentPanels, columnCount);
@@ -181,6 +194,8 @@ export function usePanelGrid({
         animationTimeoutsRef.current.delete(timeoutId);
       }, ANIMATION_DURATION);
       animationTimeoutsRef.current.add(timeoutId);
+
+      return nextPanels;
     },
     [columnCount, internalState, rearrangement]
   );
@@ -188,6 +203,7 @@ export function usePanelGrid({
   // Create drag handler for a specific panel
   const createDragHandler = useCallback(
     (panel: PanelCoordinate) => (e: React.MouseEvent<HTMLDivElement>) => {
+      if (panel.lockPosition) return;
       internalState.activePanelId = panel.id;
       const draggingElement = internalState.draggableElements[panel.id];
       if (!draggingElement) return;
@@ -248,10 +264,19 @@ export function usePanelGrid({
         const nextGridX = pixelsToGridPosition(droppedLeft, baseSize, gap, columnCount, panel.w);
         const nextGridY = pixelsToGridPosition(droppedTop, baseSize, gap);
 
-        const nextLeft = gridPositionToPixels(nextGridX, baseSize, gap);
-        const nextTop = gridPositionToPixels(nextGridY, baseSize, gap);
+        // Rearrange first so we know the actual result position.
+        // On rollback (e.g. collision with a locked panel), the panel ends up at its original
+        // position rather than the dropped position. applySnapAnimation must target the actual
+        // result — otherwise the DOM is left at the dropped position while React's cached style
+        // (same reference, no useMemo invalidation) never corrects it.
+        const nextPanels = updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY }, state.panels);
+        const resultPanel = nextPanels.find((p) => p.id === panel.id);
+        const actualGridX = resultPanel?.x ?? nextGridX;
+        const actualGridY = resultPanel?.y ?? nextGridY;
 
-        // Apply snap-back animation
+        const nextLeft = gridPositionToPixels(actualGridX, baseSize, gap);
+        const nextTop = gridPositionToPixels(actualGridY, baseSize, gap);
+
         applySnapAnimation({
           element: draggingElement,
           droppedLeft,
@@ -260,8 +285,6 @@ export function usePanelGrid({
           nextTop,
           originalTransition,
         });
-
-        updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY }, state.panels);
 
         document.body.classList.remove("panelgrid-dragging");
         internalState.activePanelId = null;
@@ -392,10 +415,23 @@ export function usePanelGrid({
         const nextGridW = pixelsToGridSize(rect.width, baseSize, gap, columnCount, nextGridX);
         const nextGridH = pixelsToGridSize(rect.height, baseSize, gap, columnCount, nextGridY);
 
-        const left = gridPositionToPixels(nextGridX, baseSize, gap);
-        const top = gridPositionToPixels(nextGridY, baseSize, gap);
-        const width = gridToPixels(nextGridW, baseSize, gap);
-        const height = gridToPixels(nextGridH, baseSize, gap);
+        // Rearrange first to get the actual result position/size.
+        // On rollback the panel may end up at its original position; the RAF must target
+        // that actual position so the DOM stays in sync with React state.
+        const nextPanels = updatePanelsWithAnimation(
+          { ...panel, x: nextGridX, y: nextGridY, w: nextGridW, h: nextGridH },
+          state.panels
+        );
+        const resultPanel = nextPanels.find((p) => p.id === panel.id);
+        const actualX = resultPanel?.x ?? nextGridX;
+        const actualY = resultPanel?.y ?? nextGridY;
+        const actualW = resultPanel?.w ?? nextGridW;
+        const actualH = resultPanel?.h ?? nextGridH;
+
+        const left = gridPositionToPixels(actualX, baseSize, gap);
+        const top = gridPositionToPixels(actualY, baseSize, gap);
+        const width = gridToPixels(actualW, baseSize, gap);
+        const height = gridToPixels(actualH, baseSize, gap);
 
         draggingElement.style.width = `${rect.width}px`;
         draggingElement.style.height = `${rect.height}px`;
@@ -411,8 +447,6 @@ export function usePanelGrid({
           draggingElement.style.transition =
             "width 0.1s ease-out, height 0.1s ease-out, top 0.1s ease-out, left 0.1s ease-out";
         });
-
-        updatePanelsWithAnimation({ ...panel, x: nextGridX, y: nextGridY, w: nextGridW, h: nextGridH }, state.panels);
 
         isResizing = false;
         internalState.activePanelId = null;
@@ -464,6 +498,7 @@ export function usePanelGrid({
         panelProps: {
           key: panel.id,
           lockSize: panel.lockSize,
+          lockPosition: panel.lockPosition,
           positionData: {
             x: panel.x,
             y: panel.y,
@@ -527,6 +562,14 @@ export function usePanelGrid({
     dispatch({ type: "UNLOCK_PANEL_SIZE", panelId: id });
   }, []);
 
+  const lockPanelPosition = useCallback((id: PanelId) => {
+    dispatch({ type: "LOCK_PANEL_POSITION", panelId: id });
+  }, []);
+
+  const unlockPanelPosition = useCallback((id: PanelId) => {
+    dispatch({ type: "UNLOCK_PANEL_POSITION", panelId: id });
+  }, []);
+
   const exportState = useCallback(() => {
     return state.panels;
   }, [state.panels]);
@@ -539,6 +582,8 @@ export function usePanelGrid({
     removePanel,
     lockPanelSize,
     unlockPanelSize,
+    lockPanelPosition,
+    unlockPanelPosition,
     exportState,
   };
 }

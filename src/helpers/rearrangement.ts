@@ -177,7 +177,13 @@ export function rearrangePanels(
         ...constrainedMovingPanel,
         h: originalPanel.h, // Keep original height
       };
-      const afterWidthChange = rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount);
+      const afterWidthChange = resolveWithLockRollback(
+        rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount),
+        allPanels
+      );
+      // If phase 1 already triggered a rollback, propagate it immediately
+      // フェーズ1でロールバックが発生した場合は即座に返す
+      if (afterWidthChange === allPanels) return allPanels;
 
       // Phase 2: Apply height change to the result
       // フェーズ2: 結果に高さの変更を適用
@@ -187,13 +193,43 @@ export function rearrangePanels(
         x: afterWidthChange.find((p) => p.id === movingPanel.id)?.x ?? constrainedMovingPanel.x,
         y: afterWidthChange.find((p) => p.id === movingPanel.id)?.y ?? constrainedMovingPanel.y,
       };
-      return rearrangePanelsInternal(heightChangedPanel, afterWidthChange, columnCount);
+      return resolveWithLockRollback(
+        rearrangePanelsInternal(heightChangedPanel, afterWidthChange, columnCount),
+        allPanels
+      );
     }
   }
 
   // Single dimension change or move - use normal processing
   // 単一次元の変更または移動 - 通常の処理を使用
-  return rearrangePanelsInternal(constrainedMovingPanel, allPanels, columnCount);
+  return resolveWithLockRollback(rearrangePanelsInternal(constrainedMovingPanel, allPanels, columnCount), allPanels);
+}
+
+/**
+ * Check if any non-locked panel in the result overlaps with a locked panel.
+ * If so, return the original positions (rollback).
+ *
+ * Exported so custom RearrangementFunction implementations can compose with it:
+ *   return resolveWithLockRollback(myCustomResult, allPanels);
+ *
+ * ロックされたパネルに重なりが生じた場合、元の位置に戻す（ロールバック）
+ */
+export function resolveWithLockRollback(result: PanelCoordinate[], original: PanelCoordinate[]): PanelCoordinate[] {
+  const lockedPanels = result.filter((p) => p.lockPosition);
+  if (lockedPanels.length === 0) return result;
+
+  for (const locked of lockedPanels) {
+    for (const panel of result) {
+      if (panel.id === locked.id) continue;
+      if (rectanglesOverlap(locked, panel)) {
+        // A non-locked panel overlaps a locked panel — rollback everything
+        // ロックされたパネルに重なりが発生 — 全てをロールバック
+        return original;
+      }
+    }
+  }
+
+  return result;
 }
 
 /**
@@ -281,6 +317,10 @@ function rearrangePanelsInternal(
     for (const collidingId of sortedCollidingIds) {
       const colliding = panelMap.get(collidingId);
       if (!colliding) continue;
+
+      // Skip locked panels — they cannot be pushed
+      // 位置がロックされたパネルはスキップ — 押しのけられない
+      if (colliding.lockPosition) continue;
 
       // Calculate new position for the colliding panel
       // 衝突パネルの新しい位置を計算

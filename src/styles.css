@@ -54,6 +54,10 @@
   z-index: calc(infinity);
 }
 
+.panelgrid-panel--position-locked {
+  cursor: default;
+}
+
 .panelgrid-panel--with-transition {
   transition:
     top 0.15s ease-out,

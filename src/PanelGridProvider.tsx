@@ -21,6 +21,8 @@ interface PanelGridControlsContextType {
   removePanel: (id: PanelId) => void;
   lockPanelSize: (id: PanelId) => void;
   unlockPanelSize: (id: PanelId) => void;
+  lockPanelPosition: (id: PanelId) => void;
+  unlockPanelPosition: (id: PanelId) => void;
   exportState: () => PanelCoordinate[];
 }
 
@@ -52,15 +54,25 @@ export function PanelGridProvider({
 }: PanelGridProviderProps) {
   const [baseSize, setBaseSize] = useState<number | null>(null);
 
-  const { panels, panelMap, addPanel, removePanel, lockPanelSize, unlockPanelSize, exportState, ghostPanelRef } =
-    usePanelGrid({
-      panels: initialPanels,
-      columnCount,
-      baseSize: baseSize || 256,
-      gap,
-      resizeHandlePositions: resizeHandlePositions || DEFAULT_RESIZE_HANDLE_POSITIONS,
-      rearrangement,
-    });
+  const {
+    panels,
+    panelMap,
+    addPanel,
+    removePanel,
+    lockPanelSize,
+    unlockPanelSize,
+    lockPanelPosition,
+    unlockPanelPosition,
+    exportState,
+    ghostPanelRef,
+  } = usePanelGrid({
+    panels: initialPanels,
+    columnCount,
+    baseSize: baseSize || 256,
+    gap,
+    resizeHandlePositions: resizeHandlePositions || DEFAULT_RESIZE_HANDLE_POSITIONS,
+    rearrangement,
+  });
 
   return (
     <PanelGridStateContext.Provider
@@ -75,7 +87,16 @@ export function PanelGridProvider({
       }}
     >
       <PanelGridControlsContext.Provider
-        value={{ setBaseSize, addPanel, removePanel, lockPanelSize, unlockPanelSize, exportState }}
+        value={{
+          setBaseSize,
+          addPanel,
+          removePanel,
+          lockPanelSize,
+          unlockPanelSize,
+          lockPanelPosition,
+          unlockPanelPosition,
+          exportState,
+        }}
       >
         {children}
       </PanelGridControlsContext.Provider>
