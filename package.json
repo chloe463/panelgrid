@@ -1,6 +1,6 @@
 {
   "name": "panelgrid",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "A flexible and performant React grid layout library with drag-and-drop and resize capabilities",
   "type": "module",
   "main": "./dist/index.cjs",

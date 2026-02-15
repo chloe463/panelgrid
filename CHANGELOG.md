@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.3](https://github.com/chloe463/panelgrid/compare/v0.4.2...v0.4.3) (2026-02-15)
+
+
+### Added
+
+* add lockPosition prop to prevent panels from being moved or pushed ([#66](https://github.com/chloe463/panelgrid/issues/66)) ([7831367](https://github.com/chloe463/panelgrid/commit/783136766e7e38584c1acb2c31a06ede0dae4285))
+
 ## [0.4.2](https://github.com/chloe463/panelgrid/compare/v0.4.1...v0.4.2) (2026-02-08)
 
 
