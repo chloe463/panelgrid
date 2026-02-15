@@ -499,6 +499,7 @@ export function usePanelGrid({
           key: panel.id,
           lockSize: panel.lockSize,
           lockPosition: panel.lockPosition,
+          isAnimating: isAnimating && !isActive,
           positionData: {
             x: panel.x,
             y: panel.y,
@@ -510,10 +511,6 @@ export function usePanelGrid({
             left: gridPositionToPixels(panel.x, baseSize, gap),
             width: gridToPixels(panel.w, baseSize, gap),
             height: gridToPixels(panel.h, baseSize, gap),
-            transition:
-              isAnimating && !isActive
-                ? "top 0.3s ease-out, left 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out"
-                : undefined,
           },
           ref: createRefCallback(panel.id),
           onMouseDown: createDragHandler(panel),

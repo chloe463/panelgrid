@@ -54,6 +54,9 @@
   z-index: calc(infinity);
 }
 
+.panelgrid-panel--size-locked {
+}
+
 .panelgrid-panel--position-locked {
   cursor: default;
 }
