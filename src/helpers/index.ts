@@ -7,4 +7,11 @@ export {
   snapToGrid,
 } from "./gridCalculations";
 export { detectAnimatingPanels } from "./panelDetection";
-export { detectCollisions, findNewPosition, hasCollision, rearrangePanels, rectanglesOverlap } from "./rearrangement";
+export {
+  detectCollisions,
+  findNewPosition,
+  hasCollision,
+  rearrangePanels,
+  rectanglesOverlap,
+  resolveWithLockRollback,
+} from "./rearrangement";

@@ -864,8 +864,8 @@ describe("lockPosition", () => {
     expect(panel2.y).toBe(0);
   });
 
-  it("should rollback when a cascade pushes a panel into a locked panel", () => {
-    // panel-1 moves to (0,0) and pushes panel-2, which would then collide with locked panel-3
+  it("should rollback when the moving panel directly collides with a locked panel", () => {
+    // panel-1 moves from x:0 to x:1 — a 2-wide panel at x:1 overlaps locked panel-2 at x:2
     const movingPanel: PanelCoordinate = { id: "panel-1", x: 1, y: 0, w: 2, h: 2 };
     const allPanels: PanelCoordinate[] = [
       { id: "panel-1", x: 0, y: 0, w: 2, h: 2 },

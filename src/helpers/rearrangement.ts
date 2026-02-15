@@ -177,7 +177,13 @@ export function rearrangePanels(
         ...constrainedMovingPanel,
         h: originalPanel.h, // Keep original height
       };
-      const afterWidthChange = rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount);
+      const afterWidthChange = resolveWithLockRollback(
+        rearrangePanelsInternal(widthOnlyPanel, allPanels, columnCount),
+        allPanels
+      );
+      // If phase 1 already triggered a rollback, propagate it immediately
+      // フェーズ1でロールバックが発生した場合は即座に返す
+      if (afterWidthChange === allPanels) return allPanels;
 
       // Phase 2: Apply height change to the result
       // フェーズ2: 結果に高さの変更を適用
@@ -202,9 +208,13 @@ export function rearrangePanels(
 /**
  * Check if any non-locked panel in the result overlaps with a locked panel.
  * If so, return the original positions (rollback).
+ *
+ * Exported so custom RearrangementFunction implementations can compose with it:
+ *   return resolveWithLockRollback(myCustomResult, allPanels);
+ *
  * ロックされたパネルに重なりが生じた場合、元の位置に戻す（ロールバック）
  */
-function resolveWithLockRollback(result: PanelCoordinate[], original: PanelCoordinate[]): PanelCoordinate[] {
+export function resolveWithLockRollback(result: PanelCoordinate[], original: PanelCoordinate[]): PanelCoordinate[] {
   const lockedPanels = result.filter((p) => p.lockPosition);
   if (lockedPanels.length === 0) return result;
 
