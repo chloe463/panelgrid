@@ -55,12 +55,13 @@ export function PanelGridRenderer({ children: ItemComponent }: PanelGridRenderer
 
       {panels.map((panel) => {
         const { panelProps, resizeHandleProps } = panel;
-        const { key, lockSize, lockPosition, style, positionData, ref, onMouseDown } = panelProps;
+        const { key, lockSize, lockPosition, isAnimating, style, positionData, ref, onMouseDown } = panelProps;
 
         const className = [
           "panelgrid-panel",
           lockSize ? "panelgrid-panel--size-locked" : "",
           lockPosition ? "panelgrid-panel--position-locked" : "",
+          isAnimating ? "panelgrid-panel--with-transition" : "",
         ]
           .filter(Boolean)
           .join(" ");
