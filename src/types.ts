@@ -15,6 +15,7 @@ export interface PanelCoordinate {
   w: number;
   h: number;
   lockSize?: boolean;
+  lockPosition?: boolean;
 }
 
 /**

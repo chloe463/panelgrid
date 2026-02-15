@@ -824,3 +824,82 @@ describe("rearrangePanels", () => {
     ]);
   });
 });
+
+describe("lockPosition", () => {
+  it("should not push a position-locked panel when another panel collides with it", () => {
+    // panel-1 moves to (0,0) and would push panel-2 (locked) — panel-2 stays put
+    // Because it collides with a locked panel, rollback: both panels stay at original positions
+    const movingPanel: PanelCoordinate = { id: "panel-1", x: 0, y: 0, w: 2, h: 2 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 2, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 0, y: 0, w: 2, h: 2, lockPosition: true },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    // Rollback: panel-1 stays at x:2, panel-2 stays at x:0
+    const panel1 = result.find((p) => p.id === "panel-1")!;
+    const panel2 = result.find((p) => p.id === "panel-2")!;
+    expect(panel1.x).toBe(2);
+    expect(panel1.y).toBe(0);
+    expect(panel2.x).toBe(0);
+    expect(panel2.y).toBe(0);
+  });
+
+  it("should allow a move that does not collide with any locked panel", () => {
+    // panel-1 moves to (4,0) — no collision with locked panel-2 at (0,0)
+    const movingPanel: PanelCoordinate = { id: "panel-1", x: 4, y: 0, w: 2, h: 2 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 2, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 0, y: 0, w: 2, h: 2, lockPosition: true },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    const panel1 = result.find((p) => p.id === "panel-1")!;
+    const panel2 = result.find((p) => p.id === "panel-2")!;
+    expect(panel1.x).toBe(4);
+    expect(panel1.y).toBe(0);
+    expect(panel2.x).toBe(0);
+    expect(panel2.y).toBe(0);
+  });
+
+  it("should rollback when a cascade pushes a panel into a locked panel", () => {
+    // panel-1 moves to (0,0) and pushes panel-2, which would then collide with locked panel-3
+    const movingPanel: PanelCoordinate = { id: "panel-1", x: 1, y: 0, w: 2, h: 2 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 0, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 2, y: 0, w: 2, h: 2, lockPosition: true },
+      { id: "panel-3", x: 4, y: 0, w: 2, h: 2 },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    // Rollback: all panels at original positions
+    const panel1 = result.find((p) => p.id === "panel-1")!;
+    const panel2 = result.find((p) => p.id === "panel-2")!;
+    const panel3 = result.find((p) => p.id === "panel-3")!;
+    expect(panel1.x).toBe(0);
+    expect(panel2.x).toBe(2);
+    expect(panel3.x).toBe(4);
+  });
+
+  it("should not rollback when locked panel has no overlap after rearrangement", () => {
+    // panel-1 moves to (2,0) pushing panel-2 to (4,0), locked panel-3 is at (0,0) — no overlap
+    const movingPanel: PanelCoordinate = { id: "panel-1", x: 2, y: 0, w: 2, h: 2 };
+    const allPanels: PanelCoordinate[] = [
+      { id: "panel-1", x: 4, y: 0, w: 2, h: 2 },
+      { id: "panel-2", x: 2, y: 0, w: 2, h: 2 },
+      { id: "panel-3", x: 0, y: 0, w: 2, h: 2, lockPosition: true },
+    ];
+
+    const result = rearrangePanels(movingPanel, allPanels, 6);
+
+    const panel1 = result.find((p) => p.id === "panel-1")!;
+    const panel2 = result.find((p) => p.id === "panel-2")!;
+    const panel3 = result.find((p) => p.id === "panel-3")!;
+    expect(panel1.x).toBe(2);
+    expect(panel2.x).toBe(4);
+    expect(panel3.x).toBe(0);
+  });
+});
