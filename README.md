@@ -227,7 +227,12 @@ PanelGrid uses non-scoped CSS classes with the `panelgrid-` prefix, allowing you
 - `.panelgrid-panel-ghost` - Ghost panel shown during drag/resize operations
 - `.panelgrid-panel--dragging` - Applied to a panel while it's being dragged
 - `.panelgrid-panel--with-transition` - Applied to panels that are animating to new positions
-- `.panelgrid-resize-handle` - Resize handle in the bottom-right corner of panels
+- `.panelgrid-panel--size-locked` - Applied to panels with `lockSize: true`
+- `.panelgrid-panel--position-locked` - Applied to panels with `lockPosition: true`
+- `.panelgrid-resize-handle` - Resize handle element
+- `.panelgrid-resize-handle--{position}` - Position-specific resize handle (e.g. `--se`, `--nw`); see `ResizeHandlePosition` type for all values
+- `.panelgrid-resizing` - Applied to `<body>` while a resize is in progress
+- `.panelgrid-dragging` - Applied to `<body>` while a drag is in progress
 
 #### Example: Custom Panel Styling
 
@@ -305,6 +310,7 @@ The renderer uses CSS custom properties that you can use in your custom styles:
 
 - `--column-count` - Number of grid columns (set automatically)
 - `--gap` - Gap between panels in pixels
+- `--panelgrid-handle-color` - Color of the resize handle icon (default: `#000`)
 
 ```css
 /* Example: Use custom properties in your styles */
@@ -325,6 +331,7 @@ The main provider component that manages panel state.
 - `panels`: `PanelCoordinate[]` - Array of panel configurations
 - `columnCount`: `number` - Number of columns in the grid
 - `gap`: `number` - Gap between panels in pixels
+- `resizeHandlePositions?`: `ResizeHandlePosition[]` - Positions to render resize handles (default: `["se"]`)
 - `rearrangement?`: `RearrangementFunction` - Optional custom rearrangement logic (see [Custom Rearrangement Logic](#custom-rearrangement-logic))
 
 ### `<PanelGridRenderer>`
@@ -366,6 +373,10 @@ Hook to access panel control functions.
 
 - `addPanel(panel: Partial<PanelCoordinate>)`: Add a new panel
 - `removePanel(id: PanelId)`: Remove a panel by ID
+- `lockPanelSize(id: PanelId)`: Prevent a panel from being resized
+- `unlockPanelSize(id: PanelId)`: Allow a panel to be resized again
+- `lockPanelPosition(id: PanelId)`: Prevent a panel from being moved or pushed by other panels
+- `unlockPanelPosition(id: PanelId)`: Allow a panel to be moved again
 - `exportState()`: Export current panel state
 
 ### Types
@@ -375,12 +386,15 @@ type PanelId = number | string;
 
 interface PanelCoordinate {
   id: PanelId;
-  x: number;      // Column position (0-indexed)
-  y: number;      // Row position (0-indexed)
-  w: number;      // Width in columns
-  h: number;      // Height in rows
-  lockSize?: boolean; // If true, prevents panel from being resized
+  x: number;           // Column position (0-indexed)
+  y: number;           // Row position (0-indexed)
+  w: number;           // Width in columns
+  h: number;           // Height in rows
+  lockSize?: boolean;  // If true, prevents panel from being resized
+  lockPosition?: boolean; // If true, prevents panel from being moved or pushed
 }
+
+type ResizeHandlePosition = "n" | "e" | "s" | "w" | "ne" | "nw" | "se" | "sw";
 
 type RearrangementFunction = (
   movingPanel: PanelCoordinate,
